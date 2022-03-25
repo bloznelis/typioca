@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"log"
+	"math"
 	"os"
 
 	babble "github.com/Beartime234/babble"
@@ -28,9 +30,11 @@ func initialModel() model {
 	inputModel := input.NewModel()
 	inputModel.Focus()
 	inputModel.CursorStyle.Blink(true)
-	// inputModel.CursorStyle = inputModel.CursorStyle.Copy().Blink(true)
+	inputModel.SetCursorMode(input.CursorBlink)
+	inputModel.SetValue(textToEnter[:1])
+	inputModel.SetCursor(inputModel.Cursor() - 1)
 	inputModel.Prompt = "  " // Try adding some padding instead
-	// inputModel.Placeholder = babbler.Babble()
+	// inputModel.Placeholder = textToEnter
 
 	return model{
 		// Our shopping list is a grocery list
@@ -63,30 +67,44 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		// Cool, what was the actual key pressed?
 		switch msg.String() {
 
-		// case "enter":
-		// 	words := m.babbler.Babble()
-		// 	m.wordsToEnter = words
-
 		// These keys should exit the program.
 		case "ctrl+c", "esc":
 			return m, tea.Quit
 
-		// The "up" and "k" keys move the cursor up
-		case "up", "k":
-			if m.cursor > 0 {
-				m.cursor--
-			}
-
-		// The "down" and "j" keys move the cursor down
-		case "down", "j":
-			if m.cursor < len(m.choices)-1 {
-				m.cursor++
-			}
-
 		default:
 			m.textInput, cmd = m.textInput.Update(msg)
+			currentInput := m.textInput.Value()
+			letterToInput := currentInput[int64(math.Max(0, float64(len(currentInput)-1))):]
+			inputLetter := currentInput[len(currentInput)-2:]
+			inputLetter = inputLetter[:1]
+
+			log.Println("current input", currentInput)
+			fmt.Println("letter to input", letterToInput)
+			fmt.Println("input letter", inputLetter)
+
+			//todo maybe this would work?
+			// having letter to input as the last one
+			// and checking whether it matches or not.
+			//We should never allow to put cursor on that "letter to input"
+
+			// if letterToInput == inputLetter {
+			// 	bareInput := m.textInput.Value()[:1]
+			// 	nextLetter := m.wordsToEnter[int64(math.Max(0, float64(len(currentInput)-1))):]
+			// 	inputWithNext := fmt.Sprintf("%s%s", bareInput, nextLetter)
+
+			// 	m.textInput.SetValue(inputWithNext)
+			// } else {
+			// 	bareInput := m.textInput.Value()[:1]
+			// 	inputWithWrong := fmt.Sprintf("%s%s", bareInput, "X")
+
+			// 	m.textInput.SetValue(inputWithWrong)
+			// }
 		}
+
 	}
+
+	// Remaining key strokes and blink messages passed here
+	// m.textInput, cmd = m.textInput.Update(msg)
 
 	// Return the updated model to the Bubble Tea runtime for processing.
 	return m, cmd
@@ -94,22 +112,27 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m model) View() string {
 
-	s := "\n"
+	s := m.wordsToEnter
+	s += "\n"
 	// s += "\n\n"
 
-	remainingWordsToEnter := m.wordsToEnter[len(m.textInput.Value())+1:]
+	remainingWordsToEnter := m.wordsToEnter[len(m.textInput.Value()):]
 
+	// s += m.textInput.View()
 	s += m.textInput.View()
 	s += remainingWordsToEnter
 	s += "\n\n"
 
 	// Send the UI for rendering
-	return s
+	return ""
 }
 
 func main() {
 
-	// fmt.Println("abcd"[:2])
+	// first := "abcd"[2:]
+	// second := first[:1]
+
+	// fmt.Println(second)
 
 	p := tea.NewProgram(initialModel())
 	if err := p.Start(); err != nil {
