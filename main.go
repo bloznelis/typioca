@@ -27,6 +27,8 @@ func initialModel() model {
 
 	textToEnter := babbler.Babble()
 
+	log.Println("text to enter", textToEnter)
+
 	inputModel := input.NewModel()
 	inputModel.Focus()
 	inputModel.CursorStyle.Blink(true)
@@ -56,6 +58,18 @@ func (m model) Init() tea.Cmd {
 	return input.Blink //???
 }
 
+func floor(value int) int32 {
+	return int32(math.Max(0, float64(value)))
+}
+
+func dropLast(value string) string {
+	return dropLastN(1, value)
+}
+
+func dropLastN(n int, value string) string {
+	return value[:len(value)-n]
+}
+
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 
@@ -71,34 +85,42 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "ctrl+c", "esc":
 			return m, tea.Quit
 
+		case "backspace":
+
 		default:
 			m.textInput, cmd = m.textInput.Update(msg)
 			currentInput := m.textInput.Value()
-			letterToInput := currentInput[int64(math.Max(0, float64(len(currentInput)-1))):]
-			inputLetter := currentInput[len(currentInput)-2:]
-			inputLetter = inputLetter[:1]
+			letterToInput := currentInput[floor(len(currentInput)-1):]
+			inputLetter := currentInput[floor(len(currentInput)-2):floor(len(currentInput)-1)]
+			nextLetter := m.wordsToEnter[floor(len(currentInput)-1):len(currentInput)]
 
-			log.Println("current input", currentInput)
-			fmt.Println("letter to input", letterToInput)
-			fmt.Println("input letter", inputLetter)
+			// log.Println("current input key", msg.String())
+
+			// log.Println("current input", currentInput)
+			// fmt.Println("letter to input", letterToInput)
+			// fmt.Println("input letter", inputLetter)
 
 			//todo maybe this would work?
 			// having letter to input as the last one
 			// and checking whether it matches or not.
 			//We should never allow to put cursor on that "letter to input"
 
-			// if letterToInput == inputLetter {
-			// 	bareInput := m.textInput.Value()[:1]
-			// 	nextLetter := m.wordsToEnter[int64(math.Max(0, float64(len(currentInput)-1))):]
-			// 	inputWithNext := fmt.Sprintf("%s%s", bareInput, nextLetter)
+			// hello mom
+			// hell
+			//     o mom
+			//     o
 
-			// 	m.textInput.SetValue(inputWithNext)
-			// } else {
-			// 	bareInput := m.textInput.Value()[:1]
-			// 	inputWithWrong := fmt.Sprintf("%s%s", bareInput, "X")
+			if letterToInput == inputLetter {
+				bareInput := dropLast(currentInput)
+				inputWithNext := fmt.Sprintf("%s%s", bareInput, nextLetter)
 
-			// 	m.textInput.SetValue(inputWithWrong)
-			// }
+				m.textInput.SetValue(inputWithNext)
+			} else {
+				bareInput := dropLastN(2, currentInput) // Drop last 2, because we replace wrong input with X
+				inputWithWrongAndNext := fmt.Sprintf("%s%s%s", bareInput, "X", nextLetter)
+
+				m.textInput.SetValue(inputWithWrongAndNext)
+			}
 		}
 
 	}
@@ -118,13 +140,12 @@ func (m model) View() string {
 
 	remainingWordsToEnter := m.wordsToEnter[len(m.textInput.Value()):]
 
-	// s += m.textInput.View()
 	s += m.textInput.View()
 	s += remainingWordsToEnter
 	s += "\n\n"
 
 	// Send the UI for rendering
-	return ""
+	return s
 }
 
 func main() {
