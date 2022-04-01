@@ -105,19 +105,6 @@ func calculateWpm(m model) int {
 	correctWords := getCorrectWords(m)
 	testDuration := m.timer.duration
 
-	// 5 words
-	// 0.1 minutes
-
-	// 5 - 0.1
-	// x - 1
-
-	// 5 = 0.1x
-
-	// 5 / 0.1 = x
-
-	// fmt.Println("elapsed time:")
-	// fmt.Println(testDuration)
-
 	return int(float64(len(correctWords)) / testDuration.Minutes())
 }
 
@@ -145,7 +132,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "ctrl+c", "esc":
 			return m, tea.Quit
 
-		case "enter", "tab":
+		case "enter", "tab	":
 
 		case "backspace":
 			// XXX: If we catch backspace here, it does not ge propagated to be handled by input field
@@ -183,12 +170,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				letterToInput := currentInput[floor(len(currentInput)-1):]
 				inputLetter := currentInput[floor(len(currentInput)-2):floor(len(currentInput)-1)]
 				nextLetter := m.wordsToEnter[floor(len(currentInput)-1):len(currentInput)]
-
-				// log.Println("current input key", msg.String())
-
-				// log.Println("current input", currentInput)
-				// fmt.Println("letter to input", letterToInput)
-				// fmt.Println("input letter", inputLetter)
 
 				if !m.timer.isRunning {
 					commands = append(commands, m.timer.timer.Init())
