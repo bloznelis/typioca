@@ -12,6 +12,7 @@ import (
 	input "github.com/charmbracelet/bubbles/textinput"
 	"github.com/charmbracelet/bubbles/timer"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/muesli/termenv"
 )
 
 type myTimer struct {
@@ -23,9 +24,12 @@ type myTimer struct {
 
 type model struct {
 	timer        myTimer
+	colorProfile termenv.Profile
 	wordsToEnter string
-	textInput    input.Model
+	inputBuffer  []rune
+	mistakesAt   map[int]bool
 	completed    bool
+	cursor       int
 }
 
 func initialModel() model {
@@ -37,14 +41,6 @@ func initialModel() model {
 
 	textToEnter := babbler.Babble()
 
-	inputModel := input.NewModel()
-	inputModel.Focus()
-	inputModel.CursorStyle.Blink(true)
-	inputModel.SetCursorMode(input.CursorBlink)
-	inputModel.SetValue(textToEnter[:1])
-	inputModel.SetCursor(inputModel.Cursor() - 1)
-	inputModel.Prompt = "  " // Try adding some padding instead
-
 	return model{
 		timer: myTimer{
 			timer:     timer.NewWithInterval(testDuration, time.Second),
@@ -52,9 +48,12 @@ func initialModel() model {
 			isRunning: false,
 			timedout:  false,
 		},
+		colorProfile: termenv.ColorProfile(),
 		wordsToEnter: textToEnter,
-		textInput:    inputModel,
+		inputBuffer:  make([]rune, 0),
+		mistakesAt:   make(map[int]bool, 0),
 		completed:    false,
+		cursor:       0,
 	}
 }
 
@@ -85,9 +84,18 @@ func dropLastN(n int, value string) string {
 	return value[:len(value)-n]
 }
 
+func dropLastRune(runes []rune) []rune {
+	le := len(runes)
+	if le != 0 {
+		return runes[:le-1]
+	} else {
+		return runes
+	}
+}
+
 func getCorrectWords(m model) []string {
 	wordsToEnter := strings.Split(m.wordsToEnter, " ")
-	enteredWords := strings.Split(m.textInput.Value(), " ")
+	enteredWords := strings.Split(string(m.inputBuffer), " ")
 
 	var correctWords []string
 
@@ -135,57 +143,43 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "enter", "tab	":
 
 		case "backspace":
-			// XXX: If we catch backspace here, it does not ge propagated to be handled by input field
-			if len(m.textInput.Value()) > 1 {
-				textInputUpdate, cmdUpdate := m.textInput.Update(msg)
-				m.textInput = textInputUpdate
-				commands = append(commands, cmdUpdate)
-
-				currentInput := m.textInput.Value()
-				bareInput := dropLast(currentInput)
-				nextLetter := m.wordsToEnter[floor(len(currentInput)-1):len(currentInput)]
-				inputWithNext := fmt.Sprintf("%s%s", bareInput, nextLetter)
-				m.textInput.SetValue(inputWithNext)
-			}
-
-			return m, tea.Batch(commands...)
+			m.inputBuffer = dropLastRune(m.inputBuffer)
 
 		default:
 
 			if !m.completed {
-				textInputUpdate, cmdUpdate := m.textInput.Update(msg)
-				m.textInput = textInputUpdate
-				commands = append(commands, cmdUpdate)
+				m.inputBuffer = append(m.inputBuffer, msg.Runes...)
 			} else {
 				break
 			}
 
-			currentInput := m.textInput.Value()
+			if !m.timer.isRunning {
+				commands = append(commands, m.timer.timer.Init())
+				m.timer.isRunning = true
+			}
+
+			if len(m.inputBuffer) == len(m.wordsToEnter) {
+				m.completed = true
+			}
+
+			currentInput := string(m.inputBuffer)
 
 			if len(currentInput)-1 == len(m.wordsToEnter) {
 				m.completed = true
 			} else {
-				// Having letter to input as the last one
-				// and checking whether it matches or not.
-				letterToInput := currentInput[floor(len(currentInput)-1):]
-				inputLetter := currentInput[floor(len(currentInput)-2):floor(len(currentInput)-1)]
-				nextLetter := m.wordsToEnter[floor(len(currentInput)-1):len(currentInput)]
 
-				if !m.timer.isRunning {
-					commands = append(commands, m.timer.timer.Init())
-					m.timer.isRunning = true
-				}
+				// abc lukas acc
+				// abc z
 
-				if letterToInput == inputLetter {
-					bareInput := dropLast(currentInput)
-					inputWithNext := fmt.Sprintf("%s%s", bareInput, nextLetter)
+				letterToInput := m.wordsToEnter[len(m.inputBuffer)-1 : len(m.inputBuffer)]
+				inputLetter := currentInput[floor(len(currentInput)-1):]
+				// nextLetter := m.wordsToEnter[floor(len(currentInput)-1):len(currentInput)]
 
-					m.textInput.SetValue(inputWithNext)
-				} else {
-					bareInput := dropLastN(2, currentInput) // Drop last 2, because we replace wrong input with X
-					inputWithWrongAndNext := fmt.Sprintf("%s%s%s", bareInput, "X", nextLetter)
+				// println("letter to input ", letterToInput)
+				// println("input letter ", inputLetter)
 
-					m.textInput.SetValue(inputWithWrongAndNext)
+				if letterToInput != inputLetter {
+					m.mistakesAt[len(m.inputBuffer)-1] = true
 				}
 
 			}
@@ -195,11 +189,11 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 
 	// Remaining key strokes and blink messages passed here
-	if !m.completed {
-		textInputUpdate, cmdUpdate := m.textInput.Update(msg)
-		m.textInput = textInputUpdate
-		commands = append(commands, cmdUpdate)
-	}
+	// if !m.completed {
+	// 	textInputUpdate, cmdUpdate := m.textInput.Update(msg)
+	// 	m.textInput = textInputUpdate
+	// 	commands = append(commands, cmdUpdate)
+	// }
 
 	// Return the updated model to the Bubble Tea runtime for processing.
 	return m, tea.Batch(commands...)
@@ -223,11 +217,15 @@ func (m model) View() string {
 	} else {
 		s += m.timer.timer.View()
 		s += "\n\n"
+		s += fmt.Sprintln(m.mistakesAt)
+		s += "\n\n"
 
-		remainingWordsToEnter := m.wordsToEnter[len(m.textInput.Value()):]
+		remainingWordsToEnterWithoutCursorLetter := m.wordsToEnter[len(m.inputBuffer)+1:]
+		cursorLetter := m.wordsToEnter[len(m.inputBuffer) : len(m.inputBuffer)+1]
 
-		s += m.textInput.View()
-		s += remainingWordsToEnter
+		s += termenv.String(string(m.inputBuffer)).Foreground(m.colorProfile.Color("3")).String()
+		s += termenv.String(cursorLetter).Underline().String()
+		s += remainingWordsToEnterWithoutCursorLetter
 		s += "\n\n"
 	}
 
@@ -236,6 +234,19 @@ func (m model) View() string {
 }
 
 func main() {
+
+	// runes := make([]rune, 0)
+	// runes = append(runes, 'a')
+	// runes = append(runes, 'b')
+	// runes = append(runes, 'c')
+
+	// println(string(runes))
+
+	str := "abefcd"
+	stri := "abe"
+	println(str[len(stri)-1 : len(stri)])
+
+	termenv.ShowCursor()
 
 	p := tea.NewProgram(initialModel())
 	if err := p.Start(); err != nil {
