@@ -13,8 +13,11 @@ import (
 	input "github.com/charmbracelet/bubbles/textinput"
 	"github.com/charmbracelet/bubbles/timer"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
 	"github.com/muesli/termenv"
+	"golang.org/x/term"
+
+	"github.com/muesli/reflow/indent"
+	"github.com/muesli/reflow/wordwrap"
 )
 
 type myTimer struct {
@@ -27,9 +30,9 @@ type myTimer struct {
 type StringStyle func(string) termenv.Style
 
 type styles struct {
-	mistakes StringStyle
 	correct  StringStyle
 	toEnter  StringStyle
+	mistakes StringStyle
 }
 
 type model struct {
@@ -47,7 +50,7 @@ func initialModel() model {
 	babbler.Separator = " "
 	babbler.Count = 20
 
-	testDuration := time.Second * 120
+	testDuration := time.Second * 15
 
 	textToEnter := babbler.Babble()
 
@@ -55,14 +58,14 @@ func initialModel() model {
 
 	return model{
 		styles: styles{
-			mistakes: func(str string) termenv.Style {
-				return termenv.String(str).Foreground(profile.Color("1"))
-			},
 			correct: func(str string) termenv.Style {
-				return termenv.String(str).Foreground(profile.Color("10"))
+				return termenv.String(str).Foreground(profile.Color("2"))
 			},
 			toEnter: func(str string) termenv.Style {
-				return termenv.String(str).Foreground(profile.Color("2"))
+				return termenv.String(str).Foreground(profile.Color("5"))
+			},
+			mistakes: func(str string) termenv.Style {
+				return termenv.String(str).Foreground(profile.Color("1")).Underline()
 			},
 		},
 		timer: myTimer{
@@ -253,8 +256,8 @@ func (m model) View() string {
 	} else {
 		s += m.timer.timer.View()
 		s += "\n\n"
-		s += fmt.Sprintln(m.mistakesAt)
-		s += "\n\n"
+		// s += fmt.Sprintln(m.mistakesAt)
+		// s += "\n\n"
 
 		mistakes := toKeysSlice(m.mistakesAt)
 		sort.Ints(mistakes)
@@ -289,10 +292,33 @@ func (m model) View() string {
 		cursorLetter := m.wordsToEnter[len(m.inputBuffer) : len(m.inputBuffer)+1]
 
 		paragraph += coloredInput
-		paragraph += termenv.String(cursorLetter).Underline().String()
+
+		if cursorLetter == " " {
+			paragraph += termenv.String(string('·')).Underline().Bold().String()
+		} else {
+			paragraph += termenv.String(cursorLetter).Underline().Bold().String()
+		}
+
+		// paragraph += styleAllRunes([]rune(remainingWordsToEnterWithoutCursorLetter), m.styles.toEnter)
 		paragraph += remainingWordsToEnterWithoutCursorLetter
 
-		return lipgloss.NewStyle().Width(80).Padding(10).Align(lipgloss.Center).Render(paragraph)
+		// return lipgloss.NewStyle().Width(30).Margin(2).UnderlineSpaces(false).Align(lipgloss.Center).Render(paragraph)
+
+		var lineLength int = 50
+
+		f := wordwrap.NewWriter(lineLength)
+		f.Breakpoints = []rune{' ', '·'}
+		f.Write([]byte(paragraph))
+
+		// wrappedParagraph := f.String()
+
+		// return lipgloss.NewStyle().Align(lipgloss.Center).Render(wrappedParagraph)
+		// return lipgloss.Place(30, 80, lipgloss.Right, lipgloss.Bottom, fancyStyledParagraph)
+
+		termenv.ClearScreen() // if we want to be super reactive
+		termWidth, _, _ := term.GetSize(0)
+
+		s += indent.String(f.String(), uint(termWidth/2)-(uint(lineLength)/2)) // this crashes on small windows
 	}
 
 	// Send the UI for rendering
@@ -301,9 +327,13 @@ func (m model) View() string {
 
 func main() {
 	termenv.ClearScreen()
+	termenv.SetWindowTitle("typioca")
+
+	termenv.MoveCursor(10, 10)
 	p := tea.NewProgram(initialModel())
 	if err := p.Start(); err != nil {
 		fmt.Printf("Alas, there's been an error: %v", err)
 		os.Exit(1)
 	}
+	println("helo")
 }
