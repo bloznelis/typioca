@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math"
 	"os"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -22,9 +23,17 @@ type myTimer struct {
 	timedout  bool
 }
 
+type StringStyle func(string) termenv.Style
+
+type styles struct {
+	mistakes StringStyle
+	correct  StringStyle
+	toEnter  StringStyle
+}
+
 type model struct {
+	styles       styles
 	timer        myTimer
-	colorProfile termenv.Profile
 	wordsToEnter string
 	inputBuffer  []rune
 	mistakesAt   map[int]bool
@@ -37,18 +46,30 @@ func initialModel() model {
 	babbler.Separator = " "
 	babbler.Count = 100
 
-	testDuration := time.Second * 30
+	testDuration := time.Second * 120
 
 	textToEnter := babbler.Babble()
 
+	profile := termenv.ColorProfile()
+
 	return model{
+		styles: styles{
+			mistakes: func(str string) termenv.Style {
+				return termenv.String(str).Foreground(profile.Color("1"))
+			},
+			correct: func(str string) termenv.Style {
+				return termenv.String(str).Foreground(profile.Color("10"))
+			},
+			toEnter: func(str string) termenv.Style {
+				return termenv.String(str).Foreground(profile.Color("2"))
+			},
+		},
 		timer: myTimer{
 			timer:     timer.NewWithInterval(testDuration, time.Second),
 			duration:  testDuration,
 			isRunning: false,
 			timedout:  false,
 		},
-		colorProfile: termenv.ColorProfile(),
 		wordsToEnter: textToEnter,
 		inputBuffer:  make([]rune, 0),
 		mistakesAt:   make(map[int]bool, 0),
@@ -91,6 +112,14 @@ func dropLastRune(runes []rune) []rune {
 	} else {
 		return runes
 	}
+}
+
+func toKeysSlice(mp map[int]bool) []int {
+	acc := []int{}
+	for key := range mp {
+		acc = append(acc, key)
+	}
+	return acc
 }
 
 func getCorrectWords(m model) []string {
@@ -144,6 +173,12 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		case "backspace":
 			m.inputBuffer = dropLastRune(m.inputBuffer)
+
+			//Delete mistakes
+			_, ok := m.mistakesAt[len(m.inputBuffer)]
+			if ok {
+				delete(m.mistakesAt, len(m.inputBuffer))
+			}
 
 		default:
 
@@ -199,6 +234,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, tea.Batch(commands...)
 }
 
+func style(str string, style StringStyle) string {
+	return style(str).String()
+}
+
 func (m model) View() string {
 	s := ""
 
@@ -220,10 +259,39 @@ func (m model) View() string {
 		s += fmt.Sprintln(m.mistakesAt)
 		s += "\n\n"
 
+		mistakes := toKeysSlice(m.mistakesAt)
+		sort.Ints(mistakes)
+
+		coloredInput := ""
+
+		if len(mistakes) == 0 {
+
+			coloredInput += style(string(m.inputBuffer), m.styles.correct)
+
+		} else {
+
+			// remainingInput := m.inputBuffer
+			previousMistake := -1
+
+			for _, mistakeAt := range mistakes {
+				sliceUntilMistake := m.inputBuffer[previousMistake+1 : mistakeAt]
+				mistakeSlice := m.wordsToEnter[mistakeAt : mistakeAt+1]
+
+				coloredInput += style(string(sliceUntilMistake), m.styles.correct)
+				coloredInput += style(string(mistakeSlice), m.styles.mistakes)
+
+				previousMistake = mistakeAt
+				// remainingInput = remainingInput[mistakeAt+1:]
+			}
+
+			inputAfterLastMistake := m.inputBuffer[previousMistake+1:]
+			coloredInput += style(string(inputAfterLastMistake), m.styles.correct)
+		}
+
 		remainingWordsToEnterWithoutCursorLetter := m.wordsToEnter[len(m.inputBuffer)+1:]
 		cursorLetter := m.wordsToEnter[len(m.inputBuffer) : len(m.inputBuffer)+1]
 
-		s += termenv.String(string(m.inputBuffer)).Foreground(m.colorProfile.Color("3")).String()
+		s += coloredInput
 		s += termenv.String(cursorLetter).Underline().String()
 		s += remainingWordsToEnterWithoutCursorLetter
 		s += "\n\n"
@@ -242,11 +310,20 @@ func main() {
 
 	// println(string(runes))
 
-	str := "abefcd"
-	stri := "abe"
-	println(str[len(stri)-1 : len(stri)])
+	// str := "abefcd"
+	// stri := "abx"
+	// println(str[3:])
+	// var mis int
+	// arr := []int{10, 2, 3, 5, 7, 11}
+	// // println()
+	// sort.Ints(arr)
+	// fmt.Println(arr)
 
-	termenv.ShowCursor()
+	// ints := []int{7, 2, 4}
+	// sort.Ints(ints)
+	// fmt.Println("Ints:   ", ints)
+
+	// // termenv.ShowCursor()
 
 	p := tea.NewProgram(initialModel())
 	if err := p.Start(); err != nil {
