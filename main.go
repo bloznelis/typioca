@@ -13,6 +13,7 @@ import (
 	input "github.com/charmbracelet/bubbles/textinput"
 	"github.com/charmbracelet/bubbles/timer"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 	"github.com/muesli/termenv"
 )
 
@@ -44,7 +45,7 @@ type model struct {
 func initialModel() model {
 	babbler := babble.NewBabbler()
 	babbler.Separator = " "
-	babbler.Count = 100
+	babbler.Count = 20
 
 	testDuration := time.Second * 120
 
@@ -203,15 +204,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.completed = true
 			} else {
 
-				// abc lukas acc
-				// abc z
-
 				letterToInput := m.wordsToEnter[len(m.inputBuffer)-1 : len(m.inputBuffer)]
 				inputLetter := currentInput[floor(len(currentInput)-1):]
-				// nextLetter := m.wordsToEnter[floor(len(currentInput)-1):len(currentInput)]
-
-				// println("letter to input ", letterToInput)
-				// println("input letter ", inputLetter)
 
 				if letterToInput != inputLetter {
 					m.mistakesAt[len(m.inputBuffer)-1] = true
@@ -223,19 +217,22 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 	}
 
-	// Remaining key strokes and blink messages passed here
-	// if !m.completed {
-	// 	textInputUpdate, cmdUpdate := m.textInput.Update(msg)
-	// 	m.textInput = textInputUpdate
-	// 	commands = append(commands, cmdUpdate)
-	// }
-
 	// Return the updated model to the Bubble Tea runtime for processing.
 	return m, tea.Batch(commands...)
 }
 
 func style(str string, style StringStyle) string {
 	return style(str).String()
+}
+
+func styleAllRunes(runes []rune, style StringStyle) string {
+	acc := ""
+
+	for _, char := range runes {
+		acc += style(string(char)).String()
+	}
+
+	return acc
 }
 
 func (m model) View() string {
@@ -262,39 +259,40 @@ func (m model) View() string {
 		mistakes := toKeysSlice(m.mistakesAt)
 		sort.Ints(mistakes)
 
+		paragraph := ""
+
 		coloredInput := ""
 
 		if len(mistakes) == 0 {
 
-			coloredInput += style(string(m.inputBuffer), m.styles.correct)
+			coloredInput += styleAllRunes(m.inputBuffer, m.styles.correct)
 
 		} else {
 
-			// remainingInput := m.inputBuffer
 			previousMistake := -1
 
 			for _, mistakeAt := range mistakes {
 				sliceUntilMistake := m.inputBuffer[previousMistake+1 : mistakeAt]
 				mistakeSlice := m.wordsToEnter[mistakeAt : mistakeAt+1]
 
-				coloredInput += style(string(sliceUntilMistake), m.styles.correct)
-				coloredInput += style(string(mistakeSlice), m.styles.mistakes)
+				coloredInput += styleAllRunes(sliceUntilMistake, m.styles.correct)
+				coloredInput += style(mistakeSlice, m.styles.mistakes)
 
 				previousMistake = mistakeAt
-				// remainingInput = remainingInput[mistakeAt+1:]
 			}
 
 			inputAfterLastMistake := m.inputBuffer[previousMistake+1:]
-			coloredInput += style(string(inputAfterLastMistake), m.styles.correct)
+			coloredInput += styleAllRunes(inputAfterLastMistake, m.styles.correct)
 		}
 
 		remainingWordsToEnterWithoutCursorLetter := m.wordsToEnter[len(m.inputBuffer)+1:]
 		cursorLetter := m.wordsToEnter[len(m.inputBuffer) : len(m.inputBuffer)+1]
 
-		s += coloredInput
-		s += termenv.String(cursorLetter).Underline().String()
-		s += remainingWordsToEnterWithoutCursorLetter
-		s += "\n\n"
+		paragraph += coloredInput
+		paragraph += termenv.String(cursorLetter).Underline().String()
+		paragraph += remainingWordsToEnterWithoutCursorLetter
+
+		return lipgloss.NewStyle().Width(80).Padding(10).Align(lipgloss.Center).Render(paragraph)
 	}
 
 	// Send the UI for rendering
@@ -302,29 +300,7 @@ func (m model) View() string {
 }
 
 func main() {
-
-	// runes := make([]rune, 0)
-	// runes = append(runes, 'a')
-	// runes = append(runes, 'b')
-	// runes = append(runes, 'c')
-
-	// println(string(runes))
-
-	// str := "abefcd"
-	// stri := "abx"
-	// println(str[3:])
-	// var mis int
-	// arr := []int{10, 2, 3, 5, 7, 11}
-	// // println()
-	// sort.Ints(arr)
-	// fmt.Println(arr)
-
-	// ints := []int{7, 2, 4}
-	// sort.Ints(ints)
-	// fmt.Println("Ints:   ", ints)
-
-	// // termenv.ShowCursor()
-
+	termenv.ClearScreen()
 	p := tea.NewProgram(initialModel())
 	if err := p.Start(); err != nil {
 		fmt.Printf("Alas, there's been an error: %v", err)
