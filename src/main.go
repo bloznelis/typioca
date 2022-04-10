@@ -9,7 +9,6 @@ import (
 	"strings"
 	"time"
 
-	babble "github.com/Beartime234/babble"
 	input "github.com/charmbracelet/bubbles/textinput"
 	"github.com/charmbracelet/bubbles/timer"
 	tea "github.com/charmbracelet/bubbletea"
@@ -30,9 +29,12 @@ type myTimer struct {
 type StringStyle func(string) termenv.Style
 
 type styles struct {
-	correct  StringStyle
-	toEnter  StringStyle
-	mistakes StringStyle
+	correct      StringStyle
+	toEnter      StringStyle
+	mistakes     StringStyle
+	cursor       StringStyle
+	runningTimer StringStyle
+	stoppedTimer StringStyle
 }
 
 type model struct {
@@ -46,26 +48,36 @@ type model struct {
 }
 
 func initialModel() model {
-	babbler := babble.NewBabbler()
-	babbler.Separator = " "
-	babbler.Count = 20
+	generator := NewGenerator()
+	generator.Count = 50
 
-	testDuration := time.Second * 15
+	testDuration := time.Second * 30
 
-	textToEnter := babbler.Babble()
+	textToEnter := generator.Generate()
 
 	profile := termenv.ColorProfile()
+
+	fore := termenv.ForegroundColor()
 
 	return model{
 		styles: styles{
 			correct: func(str string) termenv.Style {
-				return termenv.String(str).Foreground(profile.Color("2"))
+				return termenv.String(str).Foreground(fore)
 			},
 			toEnter: func(str string) termenv.Style {
-				return termenv.String(str).Foreground(profile.Color("5"))
+				return termenv.String(str).Foreground(fore).Faint()
 			},
 			mistakes: func(str string) termenv.Style {
 				return termenv.String(str).Foreground(profile.Color("1")).Underline()
+			},
+			cursor: func(str string) termenv.Style {
+				return termenv.String(str).Reverse().Bold()
+			},
+			runningTimer: func(str string) termenv.Style {
+				return termenv.String(str).Foreground(profile.Color("2"))
+			},
+			stoppedTimer: func(str string) termenv.Style {
+				return termenv.String(str).Foreground(profile.Color("2")).Faint()
 			},
 		},
 		timer: myTimer{
@@ -134,9 +146,9 @@ func getCorrectWords(m model) []string {
 
 	for _, enteredWord := range enteredWords {
 		if contains(wordsToEnter, enteredWord) {
+			//XXX: this is not ideal, as it would count identical words as correct
 			correctWords = append(correctWords, enteredWord)
 		}
-
 	}
 
 	return correctWords
@@ -179,9 +191,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.inputBuffer = dropLastRune(m.inputBuffer)
 
 			//Delete mistakes
-			_, ok := m.mistakesAt[len(m.inputBuffer)]
+			inputLength := len(m.inputBuffer)
+			_, ok := m.mistakesAt[inputLength]
 			if ok {
-				delete(m.mistakesAt, len(m.inputBuffer))
+				delete(m.mistakesAt, inputLength)
 			}
 
 		default:
@@ -247,93 +260,124 @@ func (m model) View() string {
 		s += "WPM: "
 		s += strconv.Itoa(calculateWpm(m))
 		s += "\n\n"
-		// s += m.wordsToEnter
-		// s += "\n\n"
-		// s += m.textInput.Value()
 
 	} else if m.completed {
 		s += "Out of words lol"
 	} else {
-		s += m.timer.timer.View()
-		s += "\n\n"
-		// s += fmt.Sprintln(m.mistakesAt)
-		// s += "\n\n"
+		var lineLimit int = 40 // todo: calculate out of model. Have max lineLimit and lower taking term size in consideration
 
-		mistakes := toKeysSlice(m.mistakesAt)
-		sort.Ints(mistakes)
-
-		paragraph := ""
-
-		coloredInput := ""
-
-		if len(mistakes) == 0 {
-
-			coloredInput += styleAllRunes(m.inputBuffer, m.styles.correct)
-
+		var coloredTimer string
+		if m.timer.isRunning {
+			coloredTimer = style(m.timer.timer.View(), m.styles.runningTimer)
 		} else {
-
-			previousMistake := -1
-
-			for _, mistakeAt := range mistakes {
-				sliceUntilMistake := m.inputBuffer[previousMistake+1 : mistakeAt]
-				mistakeSlice := m.wordsToEnter[mistakeAt : mistakeAt+1]
-
-				coloredInput += styleAllRunes(sliceUntilMistake, m.styles.correct)
-				coloredInput += style(mistakeSlice, m.styles.mistakes)
-
-				previousMistake = mistakeAt
-			}
-
-			inputAfterLastMistake := m.inputBuffer[previousMistake+1:]
-			coloredInput += styleAllRunes(inputAfterLastMistake, m.styles.correct)
+			coloredTimer = style(m.timer.timer.View(), m.styles.stoppedTimer)
 		}
 
-		remainingWordsToEnterWithoutCursorLetter := m.wordsToEnter[len(m.inputBuffer)+1:]
-		cursorLetter := m.wordsToEnter[len(m.inputBuffer) : len(m.inputBuffer)+1]
-
-		paragraph += coloredInput
-
-		if cursorLetter == " " {
-			paragraph += termenv.String(string('·')).Underline().Bold().String()
-		} else {
-			paragraph += termenv.String(cursorLetter).Underline().Bold().String()
-		}
-
-		// paragraph += styleAllRunes([]rune(remainingWordsToEnterWithoutCursorLetter), m.styles.toEnter)
-		paragraph += remainingWordsToEnterWithoutCursorLetter
-
-		// return lipgloss.NewStyle().Width(30).Margin(2).UnderlineSpaces(false).Align(lipgloss.Center).Render(paragraph)
-
-		var lineLength int = 50
-
-		f := wordwrap.NewWriter(lineLength)
-		f.Breakpoints = []rune{' ', '·'}
-		f.Write([]byte(paragraph))
-
-		// wrappedParagraph := f.String()
-
-		// return lipgloss.NewStyle().Align(lipgloss.Center).Render(wrappedParagraph)
-		// return lipgloss.Place(30, 80, lipgloss.Right, lipgloss.Bottom, fancyStyledParagraph)
-
-		termenv.ClearScreen() // if we want to be super reactive
-		termWidth, _, _ := term.GetSize(0)
-
-		s += indent.String(f.String(), uint(termWidth/2)-(uint(lineLength)/2)) // this crashes on small windows
+		s += m.indent(coloredTimer, lineLimit) + "\n\n" + m.indent(m.paragraphView(lineLimit), lineLimit)
 	}
 
 	// Send the UI for rendering
 	return s
 }
 
+func (m model) indent(block string, lineLimit int) string {
+
+	termWidth, _, _ := term.GetSize(0)
+	indentBy := uint(termWidth/2) - (uint(lineLimit) / 2) - 5
+
+	indentedBlock := indent.String(block, indentBy) // this crashes on small windows
+
+	return indentedBlock
+}
+
+func (m model) paragraphView(lineLimit int) string {
+	paragraph := m.colorInput()
+	paragraph += m.colorCursor()
+	paragraph += m.colorWordsToEnter()
+
+	wrapped := wrapStyledParagraph(paragraph, lineLimit)
+
+	return wrapped
+}
+
+func (m model) colorInput() string {
+	mistakes := toKeysSlice(m.mistakesAt)
+	sort.Ints(mistakes)
+
+	coloredInput := ""
+
+	if len(mistakes) == 0 {
+
+		coloredInput += styleAllRunes(m.inputBuffer, m.styles.correct)
+
+	} else {
+
+		previousMistake := -1
+
+		for _, mistakeAt := range mistakes {
+			sliceUntilMistake := m.inputBuffer[previousMistake+1 : mistakeAt]
+			mistakeSlice := m.wordsToEnter[mistakeAt : mistakeAt+1]
+
+			coloredInput += styleAllRunes(sliceUntilMistake, m.styles.correct)
+			coloredInput += style(mistakeSlice, m.styles.mistakes)
+
+			previousMistake = mistakeAt
+		}
+
+		inputAfterLastMistake := m.inputBuffer[previousMistake+1:]
+		coloredInput += styleAllRunes(inputAfterLastMistake, m.styles.correct)
+	}
+
+	return coloredInput
+}
+
+func (m model) colorCursor() string {
+	cursorLetter := m.wordsToEnter[len(m.inputBuffer) : len(m.inputBuffer)+1]
+
+	return style(cursorLetter, m.styles.cursor)
+}
+
+func (m model) colorWordsToEnter() string {
+	wordsToEnter := m.wordsToEnter[len(m.inputBuffer)+1:] // without cursor
+
+	return style(wordsToEnter, m.styles.toEnter)
+}
+
+func wrapStyledParagraph(paragraph string, lineLimit int) string {
+
+	// XXX: Replace spaces, because wordwrap trims them out at the ends
+	paragraph = strings.Replace(paragraph, " ", "·", -1)
+
+	f := wordwrap.NewWriter(lineLimit)
+	f.Breakpoints = []rune{'·'}
+	f.KeepNewlines = false
+	f.Write([]byte(paragraph))
+
+	paragraph = strings.Replace(f.String(), "·", " ", -1)
+
+	return paragraph
+}
+
+func longestStringLen(arr []string) int {
+	longest := 0
+	for _, str := range arr {
+		le := len(str)
+		if le > longest {
+			longest = le
+		}
+	}
+	return longest
+}
+
 func main() {
+
 	termenv.ClearScreen()
 	termenv.SetWindowTitle("typioca")
 
-	termenv.MoveCursor(10, 10)
 	p := tea.NewProgram(initialModel())
 	if err := p.Start(); err != nil {
 		fmt.Printf("Alas, there's been an error: %v", err)
 		os.Exit(1)
 	}
-	println("helo")
+	println("bye!")
 }
