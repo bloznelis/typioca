@@ -12,4 +12,5 @@
        (spit output-file)))
 
 (run *command-line-args*)
+
 (println "Done!")
