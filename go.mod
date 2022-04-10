@@ -1,4 +1,4 @@
-module github.com/bloznelis/type-speed-test
+module github.com/bloznelis/typioca
 
 go 1.18
 
