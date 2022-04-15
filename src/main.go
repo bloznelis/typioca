@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math"
 	"os"
+	"regexp"
 	"sort"
 	"strconv"
 	"strings"
@@ -49,9 +50,9 @@ type model struct {
 
 func initialModel() model {
 	generator := NewGenerator()
-	generator.Count = 50
+	generator.Count = 200
 
-	testDuration := time.Second * 30
+	testDuration := time.Second * 120
 
 	textToEnter := generator.Generate()
 
@@ -264,7 +265,7 @@ func (m model) View() string {
 	} else if m.completed {
 		s += "Out of words lol"
 	} else {
-		var lineLimit int = 40 // todo: calculate out of model. Have max lineLimit and lower taking term size in consideration
+		var lineLenLimit int = 40 // todo: calculate out of model. Have max lineLimit and lower taking term size in consideration
 
 		var coloredTimer string
 		if m.timer.isRunning {
@@ -273,11 +274,40 @@ func (m model) View() string {
 			coloredTimer = style(m.timer.timer.View(), m.styles.stoppedTimer)
 		}
 
-		s += m.indent(coloredTimer, lineLimit) + "\n\n" + m.indent(m.paragraphView(lineLimit), lineLimit)
+		m.cursor = len(m.inputBuffer)
+
+		lines := strings.Split(m.paragraphView(lineLenLimit), "\n")
+		cursorLine := findCursorLine(strings.Split(m.paragraphView(lineLenLimit), "\n"), m.cursor)
+
+		linesAroundCursor := strings.Join(getLinesAroundCursor(lines, cursorLine), "\n")
+
+		s += m.indent(coloredTimer, lineLenLimit) + "\n\n" + m.indent(linesAroundCursor, lineLenLimit)
 	}
 
 	// Send the UI for rendering
 	return s
+}
+
+func getLinesAroundCursor(lines []string, cursorLine int) []string {
+	cursor := cursorLine
+
+	// 3 lines to show
+	if cursorLine == 0 {
+		cursor += 3
+	} else {
+		cursor += 2
+	}
+
+	low := int(math.Max(0, float64(cursorLine-1)))
+	high := int(math.Min(float64(len(lines)), float64(cursor)))
+
+	return lines[low:high]
+}
+
+func dropAnsiCodes(colored string) string {
+	m := regexp.MustCompile("\x1b\\[[0-9;]*m")
+
+	return m.ReplaceAllString(colored, "")
 }
 
 func (m model) indent(block string, lineLimit int) string {
@@ -369,8 +399,26 @@ func longestStringLen(arr []string) int {
 	return longest
 }
 
-func main() {
+func findCursorLine(lines []string, cursorAt int) int {
 
+	lenAcc := 0
+	cursorLine := 0
+	for _, line := range lines {
+		lineLen := len(dropAnsiCodes(line))
+
+		lenAcc += lineLen
+
+		if cursorAt <= lenAcc-1 {
+			return cursorLine
+		} else {
+			cursorLine += 1
+		}
+	}
+
+	return cursorLine
+}
+
+func main() {
 	termenv.ClearScreen()
 	termenv.SetWindowTitle("typioca")
 
