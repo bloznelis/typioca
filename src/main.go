@@ -307,12 +307,6 @@ func (m model) View() string {
 
 		s += lipgloss.Place(termWidth, termHeight, lipgloss.Center, lipgloss.Center, style.Render(content))
 
-		// s += "Timer timedout!"
-		// s += "\n\n"
-		// s += "WPM: "
-		// s += strconv.Itoa(calculateWpm(m))
-		// s += "\n\n"
-
 	} else if m.completed {
 		s += "Out of words lol"
 	} else {
