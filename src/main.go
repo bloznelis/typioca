@@ -13,6 +13,7 @@ import (
 	input "github.com/charmbracelet/bubbles/textinput"
 	"github.com/charmbracelet/bubbles/timer"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 	"github.com/muesli/termenv"
 	"golang.org/x/term"
 
@@ -36,6 +37,7 @@ type styles struct {
 	cursor       StringStyle
 	runningTimer StringStyle
 	stoppedTimer StringStyle
+	greener      StringStyle
 }
 
 type model struct {
@@ -52,7 +54,7 @@ func initialModel() model {
 	generator := NewGenerator()
 	generator.Count = 200
 
-	testDuration := time.Second * 120
+	testDuration := time.Second * 10
 
 	textToEnter := generator.Generate()
 
@@ -79,6 +81,9 @@ func initialModel() model {
 			},
 			stoppedTimer: func(str string) termenv.Style {
 				return termenv.String(str).Foreground(profile.Color("2")).Faint()
+			},
+			greener: func(str string) termenv.Style {
+				return termenv.String(str).Foreground(profile.Color("6")).Faint()
 			},
 		},
 		timer: myTimer{
@@ -155,11 +160,33 @@ func getCorrectWords(m model) []string {
 	return correctWords
 }
 
+func calculateAccuracy(m model) float64 {
+	mistakesCnt := float64(len(m.mistakesAt))
+	enteredChars := float64(len(m.inputBuffer))
+
+	// enteredChars -> 100
+	// mistakesCnt -> mistakesPercentage
+
+	// mistakesPercentage = (100 * mistakesCnt) / enteredChars
+	// accuracy = 100 - mistakesPercentage
+
+	accuracy := 100 - (mistakesCnt*100)/enteredChars
+	return accuracy
+}
+
 func calculateWpm(m model) int {
 	correctWords := getCorrectWords(m)
 	testDuration := m.timer.duration
 
 	return int(float64(len(correctWords)) / testDuration.Minutes())
+}
+
+func calculateCpm(m model) int {
+	correctWords := getCorrectWords(m)
+	correctChars := strings.Join(correctWords, "")
+	testDuration := m.timer.duration
+
+	return int(float64(len(correctChars)) / testDuration.Minutes())
 }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -256,11 +283,35 @@ func (m model) View() string {
 	s := ""
 
 	if m.timer.timedout {
-		s += "Timer timedout!"
-		s += "\n\n"
-		s += "WPM: "
-		s += strconv.Itoa(calculateWpm(m))
-		s += "\n\n"
+		correctWords := getCorrectWords(m)
+		correctWordsCount := len(correctWords)
+
+		correctWordsShow := "words: " + style(strconv.Itoa(correctWordsCount), m.styles.greener)
+		cpm := "cpm: " + style(strconv.Itoa(calculateCpm(m)), m.styles.greener)
+		wpm := "wpm: " + style(strconv.Itoa(calculateWpm(m)), m.styles.runningTimer)
+		givenTime := "time: " + style(m.timer.duration.String(), m.styles.greener)
+		accuracy := "accuracy: " + style(fmt.Sprintf("%.1f", calculateAccuracy(m)), m.styles.greener)
+
+		content := wpm + "\n\n" + accuracy + " " + cpm + " " + correctWordsShow + "\n" + givenTime
+
+		var style = lipgloss.NewStyle().
+			Align(lipgloss.Center).
+			PaddingTop(1).
+			PaddingBottom(1).
+			PaddingLeft(5).
+			PaddingRight(5).
+			BorderStyle(lipgloss.DoubleBorder()).
+			BorderForeground(lipgloss.Color("2"))
+
+		termWidth, termHeight, _ := term.GetSize(0)
+
+		s += lipgloss.Place(termWidth, termHeight, lipgloss.Center, lipgloss.Center, style.Render(content))
+
+		// s += "Timer timedout!"
+		// s += "\n\n"
+		// s += "WPM: "
+		// s += strconv.Itoa(calculateWpm(m))
+		// s += "\n\n"
 
 	} else if m.completed {
 		s += "Out of words lol"
