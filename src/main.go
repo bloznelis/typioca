@@ -100,7 +100,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		// Cool, what was the actual key pressed?
 		switch msg.String() {
 
-		case "enter":
+		case "enter", "ctrl+r":
 			m.state = initialTimerBasedTest()
 			return m, nil
 
