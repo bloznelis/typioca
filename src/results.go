@@ -2,6 +2,16 @@ package main
 
 import "strings"
 
+func (m model) calculateResults() Results {
+	return Results{
+		wpm:      calculateNormalizedWpm(m),
+		accuracy: calculateAccuracy(m),
+		rawWpm:   calculateRawWpm(m),
+		cpm:      calculateCpm(m),
+		time:     m.timer.duration,
+	}
+}
+
 func calculateNormalizedWpm(m model) int {
 	return calculateWpm(m, len(m.inputBuffer)/5)
 }

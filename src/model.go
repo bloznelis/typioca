@@ -32,6 +32,7 @@ type styles struct {
 }
 
 type model struct {
+	state        StateType
 	styles       styles
 	timer        myTimer
 	wordsToEnter string
@@ -40,4 +41,18 @@ type model struct {
 	mistakes     mistakes
 	completed    bool
 	cursor       int
+}
+
+type Results struct {
+	wpm      int
+	accuracy float64
+	rawWpm   int
+	cpm      int
+	time     time.Duration
+}
+
+type StateType interface{}
+type TimerBasedTest struct{}
+type TimerBasedTestResults struct {
+	results Results
 }

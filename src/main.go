@@ -37,6 +37,7 @@ func initialModel() model {
 	fore := termenv.ForegroundColor()
 
 	return model{
+		state: TimerBasedTest{},
 		styles: styles{
 			correct: func(str string) termenv.Style {
 				return termenv.String(str).Foreground(fore)
@@ -80,7 +81,7 @@ func initialModel() model {
 
 func (m model) Init() tea.Cmd {
 	return tea.Batch(
-		input.Blink,
+		input.Blink, //we probably don't need this anymore
 	)
 }
 
@@ -94,6 +95,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.timer.timer = timerUpdate
 		commands = append(commands, cmdUpdate)
 		if m.timer.timer.Timedout() {
+			m.state = TimerBasedTestResults{results: m.calculateResults()}
 			m.timer.timedout = true
 			m.completed = true
 		}

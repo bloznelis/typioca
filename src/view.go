@@ -16,17 +16,17 @@ import (
 )
 
 func (m model) View() string {
-	s := ""
+	var s string
 
-	if m.timer.timedout {
+	switch state := m.state.(type) {
+	case TimerBasedTestResults:
 		termenv.Reset()
-		rawWpm := calculateRawWpm(m)
 
-		rawWpmShow := "raw: " + style(strconv.Itoa(rawWpm), m.styles.greener)
-		cpm := "cpm: " + style(strconv.Itoa(calculateCpm(m)), m.styles.greener)
-		wpm := "wpm: " + style(strconv.Itoa(calculateNormalizedWpm(m)), m.styles.runningTimer)
-		givenTime := "time: " + style(m.timer.duration.String(), m.styles.greener)
-		accuracy := "accuracy: " + style(fmt.Sprintf("%.1f", calculateAccuracy(m)), m.styles.greener)
+		rawWpmShow := "raw: " + style(strconv.Itoa(state.results.rawWpm), m.styles.greener)
+		cpm := "cpm: " + style(strconv.Itoa(state.results.cpm), m.styles.greener)
+		wpm := "wpm: " + style(strconv.Itoa(state.results.wpm), m.styles.runningTimer)
+		givenTime := "time: " + style(state.results.time.String(), m.styles.greener)
+		accuracy := "accuracy: " + style(fmt.Sprintf("%.1f", state.results.accuracy), m.styles.greener)
 
 		content := wpm + "\n\n" + accuracy + " " + rawWpmShow + " " + cpm + "\n" + givenTime
 
@@ -41,11 +41,9 @@ func (m model) View() string {
 
 		termWidth, termHeight, _ := term.GetSize(0)
 
-		s += lipgloss.Place(termWidth, termHeight, lipgloss.Center, lipgloss.Center, style.Render(content))
+		s = lipgloss.Place(termWidth, termHeight, lipgloss.Center, lipgloss.Center, style.Render(content))
 
-	} else if m.completed {
-		s += "Out of words lol"
-	} else {
+	case TimerBasedTest:
 		var lineLenLimit int = 40 // todo: calculate out of model. Have max lineLimit and lower taking term size in consideration
 
 		var coloredTimer string
@@ -72,10 +70,9 @@ func (m model) View() string {
 		avgLineLen := averageStringLen(lines[:len(lines)-1])
 		indentBy := uint(termWidth/2) - (uint(avgLineLen) / 2)
 
-		s += m.indent(coloredTimer, indentBy) + "\n\n" + m.indent(linesAroundCursor, indentBy)
+		s = m.indent(coloredTimer, indentBy) + "\n\n" + m.indent(linesAroundCursor, indentBy)
 	}
 
-	// Send the UI for rendering
 	return s
 }
 
