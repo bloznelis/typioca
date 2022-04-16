@@ -28,6 +28,11 @@ type myTimer struct {
 	timedout  bool
 }
 
+type mistakes struct {
+	mistakesAt     map[int]bool
+	rawMistakesCnt int // Should never be reduced
+}
+
 type StringStyle func(string) termenv.Style
 
 type styles struct {
@@ -45,7 +50,8 @@ type model struct {
 	timer        myTimer
 	wordsToEnter string
 	inputBuffer  []rune
-	mistakesAt   map[int]bool
+	rawInputCnt  int // Should not be reduced
+	mistakes     mistakes
 	completed    bool
 	cursor       int
 }
@@ -54,7 +60,7 @@ func initialModel() model {
 	generator := NewGenerator()
 	generator.Count = 200
 
-	testDuration := time.Second * 10
+	testDuration := time.Second * 15
 
 	textToEnter := generator.Generate()
 
@@ -94,9 +100,13 @@ func initialModel() model {
 		},
 		wordsToEnter: textToEnter,
 		inputBuffer:  make([]rune, 0),
-		mistakesAt:   make(map[int]bool, 0),
-		completed:    false,
-		cursor:       0,
+		rawInputCnt:  0,
+		mistakes: mistakes{
+			mistakesAt:     make(map[int]bool, 0),
+			rawMistakesCnt: 0,
+		},
+		completed: false,
+		cursor:    0,
 	}
 }
 
@@ -144,49 +154,29 @@ func toKeysSlice(mp map[int]bool) []int {
 	return acc
 }
 
-func getCorrectWords(m model) []string {
-	wordsToEnter := strings.Split(m.wordsToEnter, " ")
-	enteredWords := strings.Split(string(m.inputBuffer), " ")
-
-	var correctWords []string
-
-	for _, enteredWord := range enteredWords {
-		if contains(wordsToEnter, enteredWord) {
-			//XXX: this is not ideal, as it would count identical words as correct
-			correctWords = append(correctWords, enteredWord)
-		}
-	}
-
-	return correctWords
+func calculateNormalizedWpm(m model) int {
+	return calculateWpm(m, len(m.inputBuffer)/5)
 }
 
-func calculateAccuracy(m model) float64 {
-	mistakesCnt := float64(len(m.mistakesAt))
-	enteredChars := float64(len(m.inputBuffer))
-
-	// enteredChars -> 100
-	// mistakesCnt -> mistakesPercentage
-
-	// mistakesPercentage = (100 * mistakesCnt) / enteredChars
-	// accuracy = 100 - mistakesPercentage
-
-	accuracy := 100 - (mistakesCnt*100)/enteredChars
-	return accuracy
+func calculateRawWpm(m model) int {
+	return calculateWpm(m, len(strings.Split(string(m.inputBuffer), " ")))
 }
 
-func calculateWpm(m model) int {
-	correctWords := getCorrectWords(m)
-	testDuration := m.timer.duration
+func calculateWpm(m model, wordCnt int) int {
+	grossWpm := float64(wordCnt) / m.timer.duration.Minutes()
+	netWpm := grossWpm - (float64(len(m.mistakes.mistakesAt)) / m.timer.duration.Minutes())
 
-	return int(float64(len(correctWords)) / testDuration.Minutes())
+	return int(netWpm)
 }
 
 func calculateCpm(m model) int {
-	correctWords := getCorrectWords(m)
-	correctChars := strings.Join(correctWords, "")
-	testDuration := m.timer.duration
+	return int(float64(m.rawInputCnt) / m.timer.duration.Minutes())
+}
 
-	return int(float64(len(correctChars)) / testDuration.Minutes())
+func calculateAccuracy(m model) float64 {
+	mistakesRate := float64(m.mistakes.rawMistakesCnt*100) / float64(m.rawInputCnt)
+	accuracy := 100 - mistakesRate
+	return accuracy
 }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -220,15 +210,16 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 			//Delete mistakes
 			inputLength := len(m.inputBuffer)
-			_, ok := m.mistakesAt[inputLength]
+			_, ok := m.mistakes.mistakesAt[inputLength]
 			if ok {
-				delete(m.mistakesAt, inputLength)
+				delete(m.mistakes.mistakesAt, inputLength)
 			}
 
 		default:
 
 			if !m.completed {
 				m.inputBuffer = append(m.inputBuffer, msg.Runes...)
+				m.rawInputCnt += len(msg.Runes)
 			} else {
 				break
 			}
@@ -252,7 +243,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				inputLetter := currentInput[floor(len(currentInput)-1):]
 
 				if letterToInput != inputLetter {
-					m.mistakesAt[len(m.inputBuffer)-1] = true
+					m.mistakes.mistakesAt[len(m.inputBuffer)-1] = true
+					m.mistakes.rawMistakesCnt = m.mistakes.rawMistakesCnt + 1
 				}
 
 			}
@@ -283,16 +275,15 @@ func (m model) View() string {
 	s := ""
 
 	if m.timer.timedout {
-		correctWords := getCorrectWords(m)
-		correctWordsCount := len(correctWords)
+		rawWpm := calculateRawWpm(m)
 
-		correctWordsShow := "words: " + style(strconv.Itoa(correctWordsCount), m.styles.greener)
+		rawWpmShow := "raw: " + style(strconv.Itoa(rawWpm), m.styles.greener)
 		cpm := "cpm: " + style(strconv.Itoa(calculateCpm(m)), m.styles.greener)
-		wpm := "wpm: " + style(strconv.Itoa(calculateWpm(m)), m.styles.runningTimer)
+		wpm := "wpm: " + style(strconv.Itoa(calculateNormalizedWpm(m)), m.styles.runningTimer)
 		givenTime := "time: " + style(m.timer.duration.String(), m.styles.greener)
 		accuracy := "accuracy: " + style(fmt.Sprintf("%.1f", calculateAccuracy(m)), m.styles.greener)
 
-		content := wpm + "\n\n" + accuracy + " " + cpm + " " + correctWordsShow + "\n" + givenTime
+		content := wpm + "\n\n" + accuracy + " " + rawWpmShow + " " + cpm + "\n" + givenTime
 
 		var style = lipgloss.NewStyle().
 			Align(lipgloss.Center).
@@ -376,7 +367,7 @@ func (m model) paragraphView(lineLimit int) string {
 }
 
 func (m model) colorInput() string {
-	mistakes := toKeysSlice(m.mistakesAt)
+	mistakes := toKeysSlice(m.mistakes.mistakesAt)
 	sort.Ints(mistakes)
 
 	coloredInput := ""
