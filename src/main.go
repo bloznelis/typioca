@@ -24,36 +24,39 @@ func main() {
 	println("bye!")
 }
 
-func initialModel() model {
+func initialTimerBasedTest() TimerBasedTest {
 	generator := NewGenerator()
 	generator.Count = 200
 
-	testDuration := time.Second * 15
+	testDuration := time.Second * 30
 
 	textToEnter := generator.Generate()
 
-	profile := termenv.ColorProfile()
+	return TimerBasedTest{
+		timer: myTimer{
+			timer:     timer.NewWithInterval(testDuration, time.Second),
+			duration:  testDuration,
+			isRunning: false,
+			timedout:  false,
+		},
+		wordsToEnter: textToEnter,
+		inputBuffer:  make([]rune, 0),
+		rawInputCnt:  0,
+		mistakes: mistakes{
+			mistakesAt:     make(map[int]bool, 0),
+			rawMistakesCnt: 0,
+		},
+		completed: false,
+		cursor:    0,
+	}
+}
 
+func initialModel() model {
+	profile := termenv.ColorProfile()
 	fore := termenv.ForegroundColor()
 
 	return model{
-		state: TimerBasedTest{
-			timer: myTimer{
-				timer:     timer.NewWithInterval(testDuration, time.Second),
-				duration:  testDuration,
-				isRunning: false,
-				timedout:  false,
-			},
-			wordsToEnter: textToEnter,
-			inputBuffer:  make([]rune, 0),
-			rawInputCnt:  0,
-			mistakes: mistakes{
-				mistakesAt:     make(map[int]bool, 0),
-				rawMistakesCnt: 0,
-			},
-			completed: false,
-			cursor:    0,
-		},
+		state: initialTimerBasedTest(),
 		styles: styles{
 			correct: func(str string) termenv.Style {
 				return termenv.String(str).Foreground(fore)
@@ -97,6 +100,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		// Cool, what was the actual key pressed?
 		switch msg.String() {
 
+		case "enter":
+			m.state = initialTimerBasedTest()
+			return m, nil
+
 		// These keys should exit the program.
 		case "ctrl+c", "esc":
 			return m, tea.Quit
@@ -127,8 +134,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 			switch msg.String() {
 
-			case "enter", "tab	":
-
 			case "backspace":
 				state.inputBuffer = dropLastRune(state.inputBuffer)
 
@@ -140,6 +145,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				}
 
 				m.state = state
+
+			case "tab":
+				m.state = TimerBasedTestResults{results: state.calculateResults()}
 
 			default:
 				state.inputBuffer = append(state.inputBuffer, msg.Runes...)

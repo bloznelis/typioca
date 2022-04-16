@@ -36,7 +36,7 @@ func (m model) View() string {
 			PaddingBottom(1).
 			PaddingLeft(5).
 			PaddingRight(5).
-			BorderStyle(lipgloss.DoubleBorder()).
+			BorderStyle(lipgloss.HiddenBorder()).
 			BorderForeground(lipgloss.Color("2"))
 
 		termWidth, termHeight, _ := term.GetSize(0)
@@ -71,7 +71,7 @@ func (m model) View() string {
 		avgLineLen := averageStringLen(lines[:len(lines)-1])
 		indentBy := uint(termWidth/2) - (uint(avgLineLen) / 2)
 
-		s = m.indent(coloredTimer, indentBy) + "\n\n" + m.indent(linesAroundCursor, indentBy)
+		s += m.indent(coloredTimer, indentBy) + "\n\n" + m.indent(linesAroundCursor, indentBy)
 	}
 
 	return s
