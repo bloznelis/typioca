@@ -229,6 +229,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.timer.isRunning = true
 			}
 
+			//todo this should be moved to non-time gamemode
 			if len(m.inputBuffer) == len(m.wordsToEnter) {
 				m.completed = true
 			}
@@ -317,11 +318,34 @@ func (m model) View() string {
 
 		linesAroundCursor := strings.Join(getLinesAroundCursor(lines, cursorLine), "\n")
 
-		s += m.indent(coloredTimer, lineLenLimit) + "\n\n" + m.indent(linesAroundCursor, lineLenLimit)
+		termWidth, termHeight, _ := term.GetSize(0)
+
+		// Vertical positioning
+		for i := 0; i < termHeight/2-3; i++ {
+			s += "\n"
+		}
+
+		avgLineLen := averageStringLen(lines[:len(lines)-1])
+		indentBy := uint(termWidth/2) - (uint(avgLineLen) / 2)
+
+		s += m.indent(coloredTimer, indentBy) + "\n\n" + m.indent(linesAroundCursor, indentBy)
 	}
 
 	// Send the UI for rendering
 	return s
+}
+
+func averageStringLen(strings []string) int {
+	var totalLen int = 0
+	var cnt int = 0
+
+	for _, str := range strings {
+		currentLen := len(dropAnsiCodes(str))
+		totalLen += currentLen
+		cnt += 1
+	}
+
+	return totalLen / cnt
 }
 
 func getLinesAroundCursor(lines []string, cursorLine int) []string {
@@ -346,11 +370,7 @@ func dropAnsiCodes(colored string) string {
 	return m.ReplaceAllString(colored, "")
 }
 
-func (m model) indent(block string, lineLimit int) string {
-
-	termWidth, _, _ := term.GetSize(0)
-	indentBy := uint(termWidth/2) - (uint(lineLimit) / 2) - 5
-
+func (m model) indent(block string, indentBy uint) string {
 	indentedBlock := indent.String(block, indentBy) // this crashes on small windows
 
 	return indentedBlock
@@ -422,17 +442,6 @@ func wrapStyledParagraph(paragraph string, lineLimit int) string {
 	paragraph = strings.Replace(f.String(), "·", " ", -1)
 
 	return paragraph
-}
-
-func longestStringLen(arr []string) int {
-	longest := 0
-	for _, str := range arr {
-		le := len(str)
-		if le > longest {
-			longest = le
-		}
-	}
-	return longest
 }
 
 func findCursorLine(lines []string, cursorAt int) int {
