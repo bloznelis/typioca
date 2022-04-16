@@ -37,7 +37,23 @@ func initialModel() model {
 	fore := termenv.ForegroundColor()
 
 	return model{
-		state: TimerBasedTest{},
+		state: TimerBasedTest{
+			timer: myTimer{
+				timer:     timer.NewWithInterval(testDuration, time.Second),
+				duration:  testDuration,
+				isRunning: false,
+				timedout:  false,
+			},
+			wordsToEnter: textToEnter,
+			inputBuffer:  make([]rune, 0),
+			rawInputCnt:  0,
+			mistakes: mistakes{
+				mistakesAt:     make(map[int]bool, 0),
+				rawMistakesCnt: 0,
+			},
+			completed: false,
+			cursor:    0,
+		},
 		styles: styles{
 			correct: func(str string) termenv.Style {
 				return termenv.String(str).Foreground(fore)
@@ -61,21 +77,6 @@ func initialModel() model {
 				return termenv.String(str).Foreground(profile.Color("6")).Faint()
 			},
 		},
-		timer: myTimer{
-			timer:     timer.NewWithInterval(testDuration, time.Second),
-			duration:  testDuration,
-			isRunning: false,
-			timedout:  false,
-		},
-		wordsToEnter: textToEnter,
-		inputBuffer:  make([]rune, 0),
-		rawInputCnt:  0,
-		mistakes: mistakes{
-			mistakesAt:     make(map[int]bool, 0),
-			rawMistakesCnt: 0,
-		},
-		completed: false,
-		cursor:    0,
 	}
 }
 
@@ -90,16 +91,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	switch msg := msg.(type) {
 
-	case timer.TickMsg:
-		timerUpdate, cmdUpdate := m.timer.timer.Update(msg)
-		m.timer.timer = timerUpdate
-		commands = append(commands, cmdUpdate)
-		if m.timer.timer.Timedout() {
-			m.state = TimerBasedTestResults{results: m.calculateResults()}
-			m.timer.timedout = true
-			m.completed = true
-		}
-
 	// Is it a key press?
 	case tea.KeyMsg:
 
@@ -110,54 +101,71 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "ctrl+c", "esc":
 			return m, tea.Quit
 
-		case "enter", "tab	":
+		}
+	}
 
-		case "backspace":
-			m.inputBuffer = dropLastRune(m.inputBuffer)
+	switch state := m.state.(type) {
 
-			//Delete mistakes
-			inputLength := len(m.inputBuffer)
-			_, ok := m.mistakes.mistakesAt[inputLength]
-			if ok {
-				delete(m.mistakes.mistakesAt, inputLength)
+	case TimerBasedTestResults:
+		break
+
+	case TimerBasedTest:
+		switch msg := msg.(type) {
+
+		case timer.TickMsg:
+			timerUpdate, cmdUpdate := state.timer.timer.Update(msg)
+			state.timer.timer = timerUpdate
+			commands = append(commands, cmdUpdate)
+
+			m.state = state
+			if state.timer.timer.Timedout() {
+				state.timer.timedout = true
+				m.state = TimerBasedTestResults{results: state.calculateResults()}
 			}
 
-		default:
+		case tea.KeyMsg:
 
-			if !m.completed {
-				m.inputBuffer = append(m.inputBuffer, msg.Runes...)
-				m.rawInputCnt += len(msg.Runes)
-			} else {
-				break
-			}
+			switch msg.String() {
 
-			if !m.timer.isRunning {
-				commands = append(commands, m.timer.timer.Init())
-				m.timer.isRunning = true
-			}
+			case "enter", "tab	":
 
-			//todo this should be moved to non-time gamemode
-			if len(m.inputBuffer) == len(m.wordsToEnter) {
-				m.completed = true
-			}
+			case "backspace":
+				state.inputBuffer = dropLastRune(state.inputBuffer)
 
-			currentInput := string(m.inputBuffer)
-
-			if len(currentInput)-1 == len(m.wordsToEnter) {
-				m.completed = true
-			} else {
-
-				letterToInput := m.wordsToEnter[len(m.inputBuffer)-1 : len(m.inputBuffer)]
-				inputLetter := currentInput[floor(len(currentInput)-1):]
-
-				if letterToInput != inputLetter {
-					m.mistakes.mistakesAt[len(m.inputBuffer)-1] = true
-					m.mistakes.rawMistakesCnt = m.mistakes.rawMistakesCnt + 1
+				//Delete mistakes
+				inputLength := len(state.inputBuffer)
+				_, ok := state.mistakes.mistakesAt[inputLength]
+				if ok {
+					delete(state.mistakes.mistakesAt, inputLength)
 				}
 
-			}
+				m.state = state
 
-			return m, tea.Batch(commands...)
+			default:
+				state.inputBuffer = append(state.inputBuffer, msg.Runes...)
+				state.rawInputCnt += len(msg.Runes)
+
+				if !state.timer.isRunning {
+					commands = append(commands, state.timer.timer.Init())
+					state.timer.isRunning = true
+				}
+
+				inputLen := len(state.inputBuffer)
+				inputLenDec := inputLen - 1
+
+				letterToInput := state.wordsToEnter[inputLenDec:inputLen]
+				inputLetter := string(state.inputBuffer[inputLenDec:])
+
+				if letterToInput != inputLetter {
+					state.mistakes.mistakesAt[inputLenDec] = true
+					state.mistakes.rawMistakesCnt = state.mistakes.rawMistakesCnt + 1
+				}
+
+				//Set cursor
+				state.cursor = inputLen
+
+				m.state = state
+			}
 		}
 	}
 

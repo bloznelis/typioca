@@ -32,15 +32,8 @@ type styles struct {
 }
 
 type model struct {
-	state        StateType
-	styles       styles
-	timer        myTimer
-	wordsToEnter string
-	inputBuffer  []rune
-	rawInputCnt  int // Should not be reduced
-	mistakes     mistakes
-	completed    bool
-	cursor       int
+	state  State
+	styles styles
 }
 
 type Results struct {
@@ -51,8 +44,18 @@ type Results struct {
 	time     time.Duration
 }
 
-type StateType interface{}
-type TimerBasedTest struct{}
+type State interface{}
+
+type TimerBasedTest struct {
+	timer        myTimer
+	wordsToEnter string
+	inputBuffer  []rune
+	rawInputCnt  int // Should not be reduced
+	mistakes     mistakes
+	completed    bool
+	cursor       int
+}
+
 type TimerBasedTestResults struct {
 	results Results
 }

@@ -44,19 +44,20 @@ func (m model) View() string {
 		s = lipgloss.Place(termWidth, termHeight, lipgloss.Center, lipgloss.Center, style.Render(content))
 
 	case TimerBasedTest:
+		// fmt.Println(state)
+		// break
 		var lineLenLimit int = 40 // todo: calculate out of model. Have max lineLimit and lower taking term size in consideration
 
 		var coloredTimer string
-		if m.timer.isRunning {
-			coloredTimer = style(m.timer.timer.View(), m.styles.runningTimer)
+		if state.timer.isRunning {
+			coloredTimer = style(state.timer.timer.View(), m.styles.runningTimer)
 		} else {
-			coloredTimer = style(m.timer.timer.View(), m.styles.stoppedTimer)
+			coloredTimer = style(state.timer.timer.View(), m.styles.stoppedTimer)
 		}
 
-		m.cursor = len(m.inputBuffer)
-
-		lines := strings.Split(m.paragraphView(lineLenLimit), "\n")
-		cursorLine := findCursorLine(strings.Split(m.paragraphView(lineLenLimit), "\n"), m.cursor)
+		paragraphView := m.paragraphView(lineLenLimit, state)
+		lines := strings.Split(paragraphView, "\n")
+		cursorLine := findCursorLine(strings.Split(paragraphView, "\n"), state.cursor)
 
 		linesAroundCursor := strings.Join(getLinesAroundCursor(lines, cursorLine), "\n")
 
@@ -104,33 +105,33 @@ func (m model) indent(block string, indentBy uint) string {
 	return indentedBlock
 }
 
-func (m model) paragraphView(lineLimit int) string {
-	paragraph := m.colorInput()
-	paragraph += m.colorCursor()
-	paragraph += m.colorWordsToEnter()
+func (m model) paragraphView(lineLimit int, test TimerBasedTest) string {
+	paragraph := m.colorInput(test)
+	paragraph += m.colorCursor(test)
+	paragraph += m.colorWordsToEnter(test)
 
 	wrapped := wrapStyledParagraph(paragraph, lineLimit)
 
 	return wrapped
 }
 
-func (m model) colorInput() string {
-	mistakes := toKeysSlice(m.mistakes.mistakesAt)
+func (m model) colorInput(test TimerBasedTest) string {
+	mistakes := toKeysSlice(test.mistakes.mistakesAt)
 	sort.Ints(mistakes)
 
 	coloredInput := ""
 
 	if len(mistakes) == 0 {
 
-		coloredInput += styleAllRunes(m.inputBuffer, m.styles.correct)
+		coloredInput += styleAllRunes(test.inputBuffer, m.styles.correct)
 
 	} else {
 
 		previousMistake := -1
 
 		for _, mistakeAt := range mistakes {
-			sliceUntilMistake := m.inputBuffer[previousMistake+1 : mistakeAt]
-			mistakeSlice := m.wordsToEnter[mistakeAt : mistakeAt+1]
+			sliceUntilMistake := test.inputBuffer[previousMistake+1 : mistakeAt]
+			mistakeSlice := test.wordsToEnter[mistakeAt : mistakeAt+1]
 
 			coloredInput += styleAllRunes(sliceUntilMistake, m.styles.correct)
 			coloredInput += style(mistakeSlice, m.styles.mistakes)
@@ -138,21 +139,21 @@ func (m model) colorInput() string {
 			previousMistake = mistakeAt
 		}
 
-		inputAfterLastMistake := m.inputBuffer[previousMistake+1:]
+		inputAfterLastMistake := test.inputBuffer[previousMistake+1:]
 		coloredInput += styleAllRunes(inputAfterLastMistake, m.styles.correct)
 	}
 
 	return coloredInput
 }
 
-func (m model) colorCursor() string {
-	cursorLetter := m.wordsToEnter[len(m.inputBuffer) : len(m.inputBuffer)+1]
+func (m model) colorCursor(test TimerBasedTest) string {
+	cursorLetter := test.wordsToEnter[len(test.inputBuffer) : len(test.inputBuffer)+1]
 
 	return style(cursorLetter, m.styles.cursor)
 }
 
-func (m model) colorWordsToEnter() string {
-	wordsToEnter := m.wordsToEnter[len(m.inputBuffer)+1:] // without cursor
+func (m model) colorWordsToEnter(test TimerBasedTest) string {
+	wordsToEnter := test.wordsToEnter[len(test.inputBuffer)+1:] // without cursor
 
 	return style(wordsToEnter, m.styles.toEnter)
 }
