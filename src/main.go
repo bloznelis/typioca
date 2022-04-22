@@ -24,9 +24,17 @@ func main() {
 	println("bye!")
 }
 
+func dropUntilWsIdx(input []rune, wsIdx int) []rune {
+	if wsIdx == 0 {
+		return make([]rune, 0)
+	} else {
+		return input[:wsIdx+1]
+	}
+}
+
 func initialTimerBasedTest() TimerBasedTest {
 	generator := NewGenerator()
-	generator.Count = 200
+	generator.Count = 300
 
 	testDuration := time.Second * 30
 
@@ -100,7 +108,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		// Cool, what was the actual key pressed?
 		switch msg.String() {
 
-		case "enter":
+		case "enter", "ctrl+r":
 			m.state = initialTimerBasedTest()
 			return m, nil
 
@@ -146,6 +154,22 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 				m.state = state
 
+			case "ctrl+w":
+				state.inputBuffer = dropUntilWsIdx(state.inputBuffer, state.findLatestWsIndex())
+				bufferLen := len(state.inputBuffer)
+				state.cursor = bufferLen
+
+				//Delete mistakes
+				var newMistakes map[int]bool = make(map[int]bool, 0)
+				for at := range state.mistakes.mistakesAt {
+					if at < bufferLen {
+						newMistakes[at] = true
+					}
+				}
+				state.mistakes.mistakesAt = newMistakes
+
+				m.state = state
+
 			case "tab":
 				m.state = TimerBasedTestResults{results: state.calculateResults()}
 
@@ -179,4 +203,23 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	// Return the updated model to the Bubble Tea runtime for processing.
 	return m, tea.Batch(commands...)
+}
+
+func (state TimerBasedTest) findLatestWsIndex() int {
+	return findLatestWsIndex(state.wordsToEnter, state.cursor)
+}
+
+func findLatestWsIndex(wordsToInput string, cursorAt int) int {
+	trimmedWordsToInput := wordsToInput[:cursorAt]
+	reversed := reverse([]rune(trimmedWordsToInput))
+
+	var wsIdx int = 0
+	for idx, value := range reversed {
+		if value == ' ' && idx != 0 {
+			wsIdx = len(reversed) - 1 - idx
+			break
+		}
+	}
+
+	return int(floor(wsIdx))
 }
