@@ -26,7 +26,7 @@ func main() {
 
 func initialTimerBasedTest() TimerBasedTest {
 	generator := NewGenerator()
-	generator.Count = 300
+	generator.Pools = []string{commonEnglish}
 
 	testDuration := time.Second * 30
 

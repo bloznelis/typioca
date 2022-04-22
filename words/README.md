@@ -1,4 +1,15 @@
-`bb generate-word-list.clj "[book-uri]" [output]`
+# Word processing
+
+## Common words
+`bb common-word-list.clj [words-uri] [output]`
+
+---
+
+* **Common English 1000** - https://raw.githubusercontent.com/powerlanguage/word-lists/master/1000-most-common-words.txt
+
+
+## Words from books
+`bb book-word-list.clj [book-uri] [output]`
 
 ---
 

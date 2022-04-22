@@ -7,6 +7,9 @@ import (
 	"time"
 )
 
+//go:embed embedables/words/common-english.txt
+var commonEnglish string
+
 //go:embed embedables/words/dorian-gray.txt
 var dorianGray string
 
@@ -38,15 +41,9 @@ func makePool(content string) []string {
 	return words
 }
 
-func randomWordsPool() []string {
-	pools := []string{dorianGray, frankenstein, prideAndPrejudice}
-	randomIndex := rand.Intn(len(pools))
-	return makePool(pools[randomIndex])
-}
-
 func NewGenerator() (g WordsGenerator) {
 	g.Count = 300
-	g.Pools = []string{dorianGray, frankenstein, prideAndPrejudice}
+	g.Pools = []string{commonEnglish, dorianGray, frankenstein, prideAndPrejudice}
 	return g
 }
 

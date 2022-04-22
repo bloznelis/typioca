@@ -88,6 +88,8 @@ func (state TimerBasedTest) handleBackspace() TimerBasedTest {
 		delete(state.mistakes.mistakesAt, inputLength)
 	}
 
+	state.cursor = inputLength
+
 	return state
 }
 
