@@ -1,11 +1,20 @@
 package main
 
 import (
+	_ "embed"
 	"math/rand"
-	"os"
 	"strings"
 	"time"
 )
+
+//go:embed embedables/words/dorian-gray.txt
+var dorianGray string
+
+//go:embed embedables/words/frankenstein.txt
+var frankenstein string
+
+//go:embed embedables/words/pride-and-prejudice.txt
+var prideAndPrejudice string
 
 func init() {
 	seed := time.Now().UnixNano()
@@ -14,7 +23,7 @@ func init() {
 
 type WordsGenerator struct {
 	Count int
-	Pool  []string
+	Pools []string
 }
 
 func check(e error) {
@@ -23,30 +32,31 @@ func check(e error) {
 	}
 }
 
-func makePool(file string) []string {
-	data, err := os.ReadFile(file)
-	check(err)
-
-	words := strings.Split(string(data), "\n")
+func makePool(content string) []string {
+	words := strings.Split(content, "\n")
 
 	return words
 }
 
 func randomWordsPool() []string {
-	return makePool("words/lists/dorian-gray.txt")
+	pools := []string{dorianGray, frankenstein, prideAndPrejudice}
+	randomIndex := rand.Intn(len(pools))
+	return makePool(pools[randomIndex])
 }
 
 func NewGenerator() (g WordsGenerator) {
-	g.Count = 30
-	g.Pool = randomWordsPool()
+	g.Count = 300
+	g.Pools = []string{dorianGray, frankenstein, prideAndPrejudice}
 	return g
 }
 
 func (this WordsGenerator) Generate() string {
+	randomIndex := rand.Intn(len(this.Pools))
+	pool := makePool(this.Pools[randomIndex])
 	acc := []string{}
-	poolLength := len(this.Pool)
+	poolLength := len(pool)
 	for i := 0; i < this.Count; i++ {
-		acc = append(acc, this.Pool[rand.Int()%poolLength])
+		acc = append(acc, pool[rand.Int()%poolLength])
 	}
 
 	return strings.Join(acc, " ")
