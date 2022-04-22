@@ -1,6 +1,5 @@
-
+;; Expects text file which words are separated by new lines
 (defn run [[list-uri output-file]]
-  "Expects text file which words are separated by new lines"
   (->>
    (clojure.string/split (slurp list-uri) #"\n")
    (map clojure.string/lower-case)
