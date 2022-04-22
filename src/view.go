@@ -44,8 +44,6 @@ func (m model) View() string {
 		s = lipgloss.Place(termWidth, termHeight, lipgloss.Center, lipgloss.Center, style.Render(content))
 
 	case TimerBasedTest:
-		// fmt.Println(state)
-		// break
 		var lineLenLimit int = 40 // todo: calculate out of model. Have max lineLimit and lower taking term size in consideration
 
 		var coloredTimer string
@@ -174,9 +172,9 @@ func wrapStyledParagraph(paragraph string, lineLimit int) string {
 }
 
 func findCursorLine(lines []string, cursorAt int) int {
-
 	lenAcc := 0
 	cursorLine := 0
+
 	for _, line := range lines {
 		lineLen := len(dropAnsiCodes(line))
 
