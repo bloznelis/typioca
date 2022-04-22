@@ -173,36 +173,84 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			case "tab":
 				m.state = TimerBasedTestResults{results: state.calculateResults()}
 
+			case " ":
+				m.state = state.handleSpace()
+
 			default:
-				state.inputBuffer = append(state.inputBuffer, msg.Runes...)
-				state.rawInputCnt += len(msg.Runes)
-
-				if !state.timer.isRunning {
-					commands = append(commands, state.timer.timer.Init())
-					state.timer.isRunning = true
-				}
-
-				inputLen := len(state.inputBuffer)
-				inputLenDec := inputLen - 1
-
-				letterToInput := state.wordsToEnter[inputLenDec:inputLen]
-				inputLetter := string(state.inputBuffer[inputLenDec:])
-
-				if letterToInput != inputLetter {
-					state.mistakes.mistakesAt[inputLenDec] = true
-					state.mistakes.rawMistakesCnt = state.mistakes.rawMistakesCnt + 1
-				}
-
-				//Set cursor
-				state.cursor = inputLen
-
-				m.state = state
+				m.state = state.handleRunes(msg, &commands)
 			}
 		}
 	}
 
 	// Return the updated model to the Bubble Tea runtime for processing.
 	return m, tea.Batch(commands...)
+}
+
+func (state TimerBasedTest) handleRunes(msg tea.KeyMsg, commands *[]tea.Cmd) TimerBasedTest {
+	state.inputBuffer = append(state.inputBuffer, msg.Runes...)
+	state.rawInputCnt += len(msg.Runes)
+
+	if !state.timer.isRunning {
+		*commands = append(*commands, state.timer.timer.Init())
+		state.timer.isRunning = true
+	}
+
+	inputLen := len(state.inputBuffer)
+	inputLenDec := inputLen - 1
+
+	letterToInput := state.wordsToEnter[inputLenDec:inputLen]
+	inputLetter := string(state.inputBuffer[inputLenDec:])
+
+	if letterToInput != inputLetter {
+		state.mistakes.mistakesAt[inputLenDec] = true
+		state.mistakes.rawMistakesCnt = state.mistakes.rawMistakesCnt + 1
+	}
+
+	//Set cursor
+	state.cursor = inputLen
+
+	return state
+}
+
+func (state TimerBasedTest) handleSpace() TimerBasedTest {
+	if len(state.inputBuffer) > 0 && state.wordsToEnter[state.cursor-1] != ' ' {
+		nextSpaceIdx := findNextSpaceIndex(state.wordsToEnter, state.cursor)
+		spacesToEnterCnt := (nextSpaceIdx - state.cursor) + 1
+		spaces := make([]rune, spacesToEnterCnt)
+		for i := range spaces {
+			spaces[i] = ' '
+		}
+
+		if spacesToEnterCnt > 1 {
+			//Mark mistakes
+			for i := state.cursor; i < nextSpaceIdx; i++ {
+				state.mistakes.mistakesAt[i] = true
+			}
+
+			state.mistakes.rawMistakesCnt = state.mistakes.rawMistakesCnt + 1
+		}
+
+		state.inputBuffer = append(state.inputBuffer, spaces...)
+		state.cursor = len(state.inputBuffer)
+		state.rawInputCnt += 1
+	}
+
+	return state
+}
+
+func findNextSpaceIndex(wordsToInput string, cursorAt int) int {
+	trimmedWordsToInput := wordsToInput[cursorAt:]
+	words := []rune(trimmedWordsToInput)
+
+	var wsIdx int = 0
+	for idx, value := range words {
+		if value == ' ' {
+			wsIdx = idx
+			break
+		}
+	}
+
+	return wsIdx + cursorAt
 }
 
 func (state TimerBasedTest) findLatestWsIndex() int {
