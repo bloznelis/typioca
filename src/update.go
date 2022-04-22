@@ -16,10 +16,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		// Cool, what was the actual key pressed?
 		switch msg.String() {
 
-		case "enter", "ctrl+r":
-			m.state = initialTimerBasedTest()
-			return m, nil
-
 		// These keys should exit the program.
 		case "ctrl+c", "esc":
 			return m, tea.Quit
@@ -30,7 +26,14 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch state := m.state.(type) {
 
 	case TimerBasedTestResults:
-		break
+		switch msg := msg.(type) {
+		case tea.KeyMsg:
+			switch msg.String() {
+			case "enter", "ctrl+r":
+				m.state = initialTimerBasedTest()
+				return m, nil
+			}
+		}
 
 	case TimerBasedTest:
 		switch msg := msg.(type) {
@@ -41,6 +44,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			commands = append(commands, cmdUpdate)
 
 			m.state = state
+
 			if state.timer.timer.Timedout() {
 				state.timer.timedout = true
 				m.state = TimerBasedTestResults{results: state.calculateResults()}
@@ -49,24 +53,17 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case tea.KeyMsg:
 
 			switch msg.String() {
+			case "enter":
+
+			case "ctrl+r":
+				m.state = initialTimerBasedTest()
+				return m, nil
 
 			case "backspace":
-				state.inputBuffer = dropLastRune(state.inputBuffer)
-
-				//Delete mistakes
-				inputLength := len(state.inputBuffer)
-				_, ok := state.mistakes.mistakesAt[inputLength]
-				if ok {
-					delete(state.mistakes.mistakesAt, inputLength)
-				}
-
-				m.state = state
+				m.state = state.handleBackspace()
 
 			case "ctrl+w":
 				m.state = state.handleCtrlW()
-
-			case "tab":
-				m.state = TimerBasedTestResults{results: state.calculateResults()}
 
 			case " ":
 				m.state = state.handleSpace()
@@ -79,6 +76,19 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	// Return the updated model to the Bubble Tea runtime for processing.
 	return m, tea.Batch(commands...)
+}
+
+func (state TimerBasedTest) handleBackspace() TimerBasedTest {
+	state.inputBuffer = dropLastRune(state.inputBuffer)
+
+	//Delete mistakes
+	inputLength := len(state.inputBuffer)
+	_, ok := state.mistakes.mistakesAt[inputLength]
+	if ok {
+		delete(state.mistakes.mistakesAt, inputLength)
+	}
+
+	return state
 }
 
 func (state TimerBasedTest) handleCtrlW() TimerBasedTest {
