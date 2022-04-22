@@ -44,7 +44,14 @@ func (m model) View() string {
 		s = lipgloss.Place(termWidth, termHeight, lipgloss.Center, lipgloss.Center, style.Render(content))
 
 	case TimerBasedTest:
-		var lineLenLimit int = 40 // todo: calculate out of model. Have max lineLimit and lower taking term size in consideration
+		termWidth, termHeight, _ := term.GetSize(0)
+
+		var lineLenLimit int = 40
+
+		reactiveLimit := (termWidth / 10) * 6
+		if reactiveLimit < lineLenLimit {
+			lineLenLimit = reactiveLimit
+		}
 
 		var coloredTimer string
 		if state.timer.isRunning {
@@ -58,8 +65,6 @@ func (m model) View() string {
 		cursorLine := findCursorLine(strings.Split(paragraphView, "\n"), state.cursor)
 
 		linesAroundCursor := strings.Join(getLinesAroundCursor(lines, cursorLine), "\n")
-
-		termWidth, termHeight, _ := term.GetSize(0)
 
 		// Vertical positioning
 		for i := 0; i < termHeight/2-3; i++ {
