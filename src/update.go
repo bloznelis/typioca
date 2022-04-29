@@ -23,14 +23,136 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 	}
 
+	// todo: move key handling into separate functions
 	switch state := m.state.(type) {
+	case MainMenu:
+		choice := state.choices[state.cursor]
+		cursorToSave := state.cursor
+		switch choice := choice.(type) {
+		case TimerBasedTestSettings:
+			switch msg := msg.(type) {
+			case tea.KeyMsg:
+				switch msg.String() {
+				case "enter":
+					m.state = initTimerBasedTest(choice)
+					return m, nil
+				case "left", "h":
+					if choice.cursor > 0 {
+						choice.cursor--
+					}
+				case "right", "l", "tab":
+					if choice.cursor < 2 {
+						choice.cursor++
+					} else {
+						choice.cursor = 0
+					}
+				case "up", "k":
+					switch choice.cursor {
+					case 0:
+						if state.cursor > 0 {
+							state.cursor--
+						}
+					case 1:
+						if choice.timeCursor > 0 {
+							choice.timeCursor--
+						} else {
+							choice.timeCursor = len(choice.timeSelections) - 1
+						}
+					case 2:
+						if choice.wordListCursor > 0 {
+							choice.wordListCursor--
+						} else {
+							choice.wordListCursor = len(choice.wordListSelections) - 1
+						}
+					}
+				case "down", "j":
+					switch choice.cursor {
+					case 0:
+						if state.cursor < len(state.choices)-1 {
+							state.cursor++
+						}
+					case 1:
+						if choice.timeCursor < len(choice.timeSelections)-1 {
+							choice.timeCursor++
+						} else {
+							choice.timeCursor = 0
+						}
+					case 2:
+						if choice.wordListCursor < len(choice.wordListSelections)-1 {
+							choice.wordListCursor++
+						} else {
+							choice.wordListCursor = 0
+						}
+					}
+				}
+				state.choices[cursorToSave] = choice
+				m.state = state
+			}
+		case WordCountBasedTestSettings:
+			switch msg := msg.(type) {
+			case tea.KeyMsg:
+				switch msg.String() {
+				case "left", "h":
+					if choice.cursor > 0 {
+						choice.cursor--
+					}
+				case "right", "l", "tab":
+					if choice.cursor < 2 {
+						choice.cursor++
+					} else {
+						choice.cursor = 0
+					}
+				case "up", "k":
+					switch choice.cursor {
+					case 0:
+						if state.cursor > 0 {
+							state.cursor--
+						}
+					case 1:
+						if choice.wordCountCursor > 0 {
+							choice.wordCountCursor--
+						} else {
+							choice.wordCountCursor = len(choice.wordCountSelections) - 1
+						}
+					case 2:
+						if choice.wordListCursor > 0 {
+							choice.wordListCursor--
+						} else {
+							choice.wordListCursor = len(choice.wordListSelections) - 1
+						}
+					}
+				case "down", "j":
+					switch choice.cursor {
+					case 0:
+						if state.cursor < len(state.choices)-1 {
+							state.cursor++
+						}
+					case 1:
+						if choice.wordCountCursor < len(choice.wordCountSelections)-1 {
+							choice.wordCountCursor++
+						} else {
+							choice.wordCountCursor = 0
+						}
+					case 2:
+						if choice.wordListCursor < len(choice.wordListSelections)-1 {
+							choice.wordListCursor++
+						} else {
+							choice.wordListCursor = 0
+						}
+					}
+				}
+				state.choices[cursorToSave] = choice
+				m.state = state
+			}
+
+		}
 
 	case TimerBasedTestResults:
 		switch msg := msg.(type) {
 		case tea.KeyMsg:
 			switch msg.String() {
 			case "enter", "ctrl+r":
-				m.state = initialTimerBasedTest()
+				m.state = initTimerBasedTest(state.settings)
 				return m, nil
 			}
 		}
@@ -47,7 +169,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 			if state.timer.timer.Timedout() {
 				state.timer.timedout = true
-				m.state = TimerBasedTestResults{results: state.calculateResults()}
+				m.state = TimerBasedTestResults{
+					settings: state.settings,
+					results:  state.calculateResults(),
+				}
 			}
 
 		case tea.KeyMsg:
@@ -56,7 +181,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			case "enter":
 
 			case "ctrl+r":
-				m.state = initialTimerBasedTest()
+				m.state = initTimerBasedTest(state.settings)
 				return m, nil
 
 			case "backspace":
