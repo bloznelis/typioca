@@ -19,6 +19,26 @@ func (m model) View() string {
 	var s string
 
 	switch state := m.state.(type) {
+	case MainMenu:
+		s := style("typioca", m.styles.magenta)
+		s += "\n\n\n"
+
+		for i, choice := range state.choices {
+			cursor := " "
+			cursorClose := " "
+			if state.cursor == i {
+				cursor = style(">", m.styles.runningTimer)
+				cursorClose = style("<", m.styles.runningTimer)
+			}
+
+			// Render the row
+			s += fmt.Sprintf("%s %s%s\n\n", cursor, choice.show(m.styles), cursorClose)
+		}
+		termWidth, termHeight, _ := term.GetSize(0)
+
+		s = lipgloss.NewStyle().Align(lipgloss.Left).Render(s)
+
+		return lipgloss.Place(termWidth, termHeight, lipgloss.Center, lipgloss.Center, s)
 	case TimerBasedTestResults:
 		termenv.Reset()
 
@@ -27,8 +47,9 @@ func (m model) View() string {
 		wpm := "wpm: " + style(strconv.Itoa(state.results.wpm), m.styles.runningTimer)
 		givenTime := "time: " + style(state.results.time.String(), m.styles.greener)
 		accuracy := "accuracy: " + style(fmt.Sprintf("%.1f", state.results.accuracy), m.styles.greener)
+		words := "words: " + style(state.results.wordList, m.styles.greener)
 
-		content := wpm + "\n\n" + accuracy + " " + rawWpmShow + " " + cpm + "\n" + givenTime
+		content := wpm + "\n\n" + accuracy + " " + rawWpmShow + " " + cpm + "\n" + givenTime + " " + words
 
 		var style = lipgloss.NewStyle().
 			Align(lipgloss.Center).
@@ -75,9 +96,43 @@ func (m model) View() string {
 		indentBy := uint(termWidth/2) - (uint(avgLineLen) / 2)
 
 		s += m.indent(coloredTimer, indentBy) + "\n\n" + m.indent(linesAroundCursor, indentBy)
+
+		if !state.timer.isRunning {
+			s += "\n\n\n"
+			s += lipgloss.PlaceHorizontal(termWidth, lipgloss.Center, style("ctrl+r to restart", m.styles.toEnter))
+		}
 	}
 
 	return s
+}
+
+func (selection TimerBasedTestSettings) show(s styles) string {
+	var optionsStr string
+	options := []string{selection.timeSelections[selection.timeCursor].String(), selection.wordListSelections[selection.wordListCursor]}
+	for i, option := range options {
+		if i+1 == selection.cursor {
+			// optionsStr += style("[", s.greener) + style(option, s.runningTimer) + style("]", s.greener)
+			optionsStr += "[" + style(option, s.runningTimer) + "]"
+		} else {
+			optionsStr += "[" + style(option, s.greener) + "]"
+		}
+		optionsStr += " "
+	}
+	return fmt.Sprintf("%s %s", "Timer run", optionsStr)
+}
+
+func (selection WordCountBasedTestSettings) show(s styles) string {
+	var optionsStr string
+	options := []string{fmt.Sprint(selection.wordCountSelections[selection.wordCountCursor]), selection.wordListSelections[selection.wordListCursor]}
+	for i, option := range options {
+		if i+1 == selection.cursor {
+			optionsStr += "[" + style(option, s.runningTimer) + "]"
+		} else {
+			optionsStr += "[" + style(option, s.greener) + "]"
+		}
+		optionsStr += " "
+	}
+	return fmt.Sprintf("%s %s", "Word count run", optionsStr)
 }
 
 func getLinesAroundCursor(lines []string, cursorLine int) []string {

@@ -9,6 +9,7 @@ func (m TimerBasedTest) calculateResults() Results {
 		rawWpm:   calculateRawWpm(m),
 		cpm:      calculateCpm(m),
 		time:     m.timer.duration,
+		wordList: m.settings.wordListSelections[m.settings.wordListCursor],
 	}
 }
 
@@ -22,7 +23,7 @@ func calculateRawWpm(m TimerBasedTest) int {
 
 func calculateWpm(m TimerBasedTest, wordCnt int) int {
 	grossWpm := float64(wordCnt) / m.timer.duration.Minutes()
-	netWpm := grossWpm - (float64(len(m.mistakes.mistakesAt)) / m.timer.duration.Minutes())
+	netWpm := grossWpm - float64(len(m.mistakes.mistakesAt))/m.timer.duration.Minutes()
 
 	return int(netWpm)
 }

@@ -29,6 +29,7 @@ type styles struct {
 	runningTimer StringStyle
 	stoppedTimer StringStyle
 	greener      StringStyle
+	magenta      StringStyle
 }
 
 type model struct {
@@ -42,11 +43,38 @@ type Results struct {
 	rawWpm   int
 	cpm      int
 	time     time.Duration
+	wordList string
 }
 
 type State interface{}
 
+type MainMenuSelection interface {
+	show(s styles) string
+}
+
+type TimerBasedTestSettings struct {
+	timeSelections     []time.Duration
+	timeCursor         int
+	wordListSelections []string
+	wordListCursor     int
+	cursor             int
+}
+
+type WordCountBasedTestSettings struct {
+	wordCountSelections []int
+	wordCountCursor     int
+	wordListSelections  []string
+	wordListCursor      int
+	cursor              int
+}
+
+type MainMenu struct {
+	choices []MainMenuSelection
+	cursor  int
+}
+
 type TimerBasedTest struct {
+	settings     TimerBasedTestSettings
 	timer        myTimer
 	wordsToEnter string
 	inputBuffer  []rune
@@ -57,5 +85,6 @@ type TimerBasedTest struct {
 }
 
 type TimerBasedTestResults struct {
-	results Results
+	settings TimerBasedTestSettings
+	results  Results
 }

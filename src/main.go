@@ -24,22 +24,16 @@ func main() {
 	println("bye!")
 }
 
-func initialTimerBasedTest() TimerBasedTest {
-	generator := NewGenerator()
-	generator.Pools = []string{commonEnglish}
-
-	testDuration := time.Second * 30
-
-	textToEnter := generator.Generate()
-
+func initTimerBasedTest(settings TimerBasedTestSettings) TimerBasedTest {
 	return TimerBasedTest{
+		settings: settings,
 		timer: myTimer{
-			timer:     timer.NewWithInterval(testDuration, time.Second),
-			duration:  testDuration,
+			timer:     timer.NewWithInterval(settings.timeSelections[settings.timeCursor], time.Second),
+			duration:  settings.timeSelections[settings.timeCursor],
 			isRunning: false,
 			timedout:  false,
 		},
-		wordsToEnter: textToEnter,
+		wordsToEnter: NewGenerator().Generate(settings.wordListSelections[settings.wordListCursor]),
 		inputBuffer:  make([]rune, 0),
 		rawInputCnt:  0,
 		mistakes: mistakes{
@@ -51,12 +45,39 @@ func initialTimerBasedTest() TimerBasedTest {
 	}
 }
 
+func initTimerBasedTestSelection() TimerBasedTestSettings {
+	return TimerBasedTestSettings{
+		timeSelections:     []time.Duration{time.Second * 120, time.Second * 60, time.Second * 30, time.Second * 15},
+		timeCursor:         2,
+		wordListSelections: []string{"dorian-gray", "frankenstein", "common-words", "pride-and-prejudice"},
+		wordListCursor:     2,
+		cursor:             0,
+	}
+}
+
+func initWordCountBasedTestSelection() WordCountBasedTestSettings {
+	return WordCountBasedTestSettings{
+		wordCountSelections: []int{100, 50, 25, 10},
+		wordCountCursor:     1,
+		wordListSelections:  []string{"dorian-gray", "frankenstein", "common-words", "pride-and-prejudice"},
+		wordListCursor:      2,
+		cursor:              0,
+	}
+}
+
+func initMainMenu() MainMenu {
+	return MainMenu{
+		choices: []MainMenuSelection{initTimerBasedTestSelection(), initWordCountBasedTestSelection()},
+		cursor:  0,
+	}
+}
+
 func initialModel() model {
 	profile := termenv.ColorProfile()
 	fore := termenv.ForegroundColor()
 
 	return model{
-		state: initialTimerBasedTest(),
+		state: initMainMenu(),
 		styles: styles{
 			correct: func(str string) termenv.Style {
 				return termenv.String(str).Foreground(fore)
@@ -78,6 +99,9 @@ func initialModel() model {
 			},
 			greener: func(str string) termenv.Style {
 				return termenv.String(str).Foreground(profile.Color("6")).Faint()
+			},
+			magenta: func(str string) termenv.Style {
+				return termenv.String(str).Foreground(profile.Color("10")).Faint()
 			},
 		},
 	}
