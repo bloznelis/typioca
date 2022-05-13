@@ -10,6 +10,7 @@ Minimal, terminal based typing speed tester.
 ## Features
   * Time or word count based typing speed tests
   * Proper WPM results based on https://www.speedtypingonline.com/typing-equations
+  * Multiple word lists made out of classical books to spice your test up
   * Cursor aware word lines
   * Interactive menu
   * ctrl+w support ;)
