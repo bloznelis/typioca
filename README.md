@@ -27,6 +27,10 @@ Minimal, terminal based typing speed tester.
   * `make`
   * `go`
 
+### With [IndiePKG](https://github.com/talwat/indiepkg)
+
+`indiepkg install typioca`
+
 ### Prebuilt binaries
 Can be found under releases section.
 
