@@ -29,9 +29,10 @@ Minimal, terminal based typing speed tester.
 Can be found under releases section.
 
 ---
-![image](https://user-images.githubusercontent.com/33397865/168289173-8d34391f-e4e8-4756-8eef-de2634d29a41.png)
-![image](https://user-images.githubusercontent.com/33397865/168289345-9e763f06-b175-4879-808e-b7c97f95fb12.png)
-![image](https://user-images.githubusercontent.com/33397865/168289871-47cd7f06-87d9-4b96-ad9f-d6d43458f371.png)
+![image](https://user-images.githubusercontent.com/33397865/168308689-d6fbb1cc-5cb5-450b-a561-61463fd558d6.png)
+![image](https://user-images.githubusercontent.com/33397865/168308259-e35c8ad1-5fce-44c4-b58a-36ba696c25ec.png)
+![image](https://user-images.githubusercontent.com/33397865/168308543-99aa5c5f-ad01-41bf-bd38-5171019c1d18.png)
+
 
 ### Acknowledgments
 Built with [bubbletea](https://github.com/charmbracelet/bubbletea)
