@@ -3,8 +3,10 @@ package main
 import (
 	"fmt"
 	"os"
+	"strings"
 	"time"
 
+	"github.com/charmbracelet/bubbles/stopwatch"
 	input "github.com/charmbracelet/bubbles/textinput"
 	"github.com/charmbracelet/bubbles/timer"
 	tea "github.com/charmbracelet/bubbletea"
@@ -45,6 +47,27 @@ func initTimerBasedTest(settings TimerBasedTestSettings) TimerBasedTest {
 	}
 }
 
+func initWordCountBasedTest(settings WordCountBasedTestSettings) WordCountBasedTest {
+	generator := NewGenerator()
+	generator.Count = settings.wordCountSelections[settings.wordCountCursor]
+	return WordCountBasedTest{
+		settings: settings,
+		stopwatch: myStopWatch{
+			stopwatch: stopwatch.New(),
+			isRunning: false,
+		},
+		wordsToEnter: strings.TrimSpace(generator.Generate(settings.wordListSelections[settings.wordListCursor])),
+		inputBuffer:  make([]rune, 0),
+		rawInputCnt:  0,
+		mistakes: mistakes{
+			mistakesAt:     make(map[int]bool, 0),
+			rawMistakesCnt: 0,
+		},
+		completed: false,
+		cursor:    0,
+	}
+}
+
 func initTimerBasedTestSelection() TimerBasedTestSettings {
 	return TimerBasedTestSettings{
 		timeSelections:     []time.Duration{time.Second * 120, time.Second * 60, time.Second * 30, time.Second * 15},
@@ -58,7 +81,7 @@ func initTimerBasedTestSelection() TimerBasedTestSettings {
 func initWordCountBasedTestSelection() WordCountBasedTestSettings {
 	return WordCountBasedTestSettings{
 		wordCountSelections: []int{100, 50, 25, 10},
-		wordCountCursor:     1,
+		wordCountCursor:     2,
 		wordListSelections:  []string{"dorian-gray", "frankenstein", "common-words", "pride-and-prejudice"},
 		wordListCursor:      2,
 		cursor:              0,

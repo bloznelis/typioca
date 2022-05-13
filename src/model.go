@@ -3,6 +3,7 @@ package main
 import (
 	"time"
 
+	"github.com/charmbracelet/bubbles/stopwatch"
 	"github.com/charmbracelet/bubbles/timer"
 	"github.com/muesli/termenv"
 )
@@ -12,6 +13,11 @@ type myTimer struct {
 	duration  time.Duration
 	isRunning bool // Inner is running is being handled weirdly.
 	timedout  bool
+}
+
+type myStopWatch struct {
+	stopwatch stopwatch.Model
+	isRunning bool
 }
 
 type mistakes struct {
@@ -86,5 +92,22 @@ type TimerBasedTest struct {
 
 type TimerBasedTestResults struct {
 	settings TimerBasedTestSettings
+	results  Results
+}
+
+type WordCountBasedTest struct {
+	settings     WordCountBasedTestSettings
+	stopwatch    myStopWatch
+	wordsToEnter string
+	inputBuffer  []rune
+	rawInputCnt  int // Should not be reduced
+	mistakes     mistakes
+	completed    bool
+	cursor       int
+}
+
+type WordCountTestResults struct {
+	settings WordCountBasedTestSettings
+	wordCnt  int
 	results  Results
 }
