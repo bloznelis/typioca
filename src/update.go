@@ -54,7 +54,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.state = initWordCountBasedTest(state.settings)
 				return m, nil
 
-			case "backspace":
+			case "backspace", "ctrl+h":
 				state.base = state.base.handleBackspace()
 				m.state = state
 
@@ -110,7 +110,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.state = initTimerBasedTest(state.settings)
 				return m, nil
 
-			case "backspace":
+			case "backspace", "ctrl+h":
 				state.base = state.base.handleBackspace()
 				m.state = state
 
