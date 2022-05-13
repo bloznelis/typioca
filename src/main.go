@@ -35,15 +35,17 @@ func initTimerBasedTest(settings TimerBasedTestSettings) TimerBasedTest {
 			isRunning: false,
 			timedout:  false,
 		},
-		wordsToEnter: NewGenerator().Generate(settings.wordListSelections[settings.wordListCursor]),
-		inputBuffer:  make([]rune, 0),
-		rawInputCnt:  0,
-		mistakes: mistakes{
-			mistakesAt:     make(map[int]bool, 0),
-			rawMistakesCnt: 0,
+		base: TestBase{
+			wordsToEnter: NewGenerator().Generate(settings.wordListSelections[settings.wordListCursor]),
+			inputBuffer:  make([]rune, 0),
+			rawInputCnt:  0,
+			mistakes: mistakes{
+				mistakesAt:     make(map[int]bool, 0),
+				rawMistakesCnt: 0,
+			},
+			cursor: 0,
 		},
 		completed: false,
-		cursor:    0,
 	}
 }
 
@@ -56,15 +58,17 @@ func initWordCountBasedTest(settings WordCountBasedTestSettings) WordCountBasedT
 			stopwatch: stopwatch.New(),
 			isRunning: false,
 		},
-		wordsToEnter: strings.TrimSpace(generator.Generate(settings.wordListSelections[settings.wordListCursor])),
-		inputBuffer:  make([]rune, 0),
-		rawInputCnt:  0,
-		mistakes: mistakes{
-			mistakesAt:     make(map[int]bool, 0),
-			rawMistakesCnt: 0,
+		base: TestBase{
+			wordsToEnter: strings.TrimSpace(generator.Generate(settings.wordListSelections[settings.wordListCursor])),
+			inputBuffer:  make([]rune, 0),
+			rawInputCnt:  0,
+			mistakes: mistakes{
+				mistakesAt:     make(map[int]bool, 0),
+				rawMistakesCnt: 0,
+			},
+			cursor: 0,
 		},
 		completed: false,
-		cursor:    0,
 	}
 }
 
@@ -90,8 +94,8 @@ func initWordCountBasedTestSelection() WordCountBasedTestSettings {
 
 func initMainMenu() MainMenu {
 	return MainMenu{
-		choices: []MainMenuSelection{initTimerBasedTestSelection(), initWordCountBasedTestSelection()},
-		cursor:  0,
+		selections: []MainMenuSelection{initTimerBasedTestSelection(), initWordCountBasedTestSelection()},
+		cursor:     0,
 	}
 }
 
@@ -101,7 +105,7 @@ func initialModel() model {
 
 	return model{
 		state: initMainMenu(),
-		styles: styles{
+		styles: Styles{
 			correct: func(str string) termenv.Style {
 				return termenv.String(str).Foreground(fore)
 			},
@@ -123,7 +127,7 @@ func initialModel() model {
 			greener: func(str string) termenv.Style {
 				return termenv.String(str).Foreground(profile.Color("6")).Faint()
 			},
-			magenta: func(str string) termenv.Style {
+			faintGreen: func(str string) termenv.Style {
 				return termenv.String(str).Foreground(profile.Color("10")).Faint()
 			},
 		},

@@ -5,6 +5,7 @@ import (
 
 	"github.com/charmbracelet/bubbles/stopwatch"
 	"github.com/charmbracelet/bubbles/timer"
+	tea "github.com/charmbracelet/bubbletea"
 	"github.com/muesli/termenv"
 )
 
@@ -27,7 +28,7 @@ type mistakes struct {
 
 type StringStyle func(string) termenv.Style
 
-type styles struct {
+type Styles struct {
 	correct      StringStyle
 	toEnter      StringStyle
 	mistakes     StringStyle
@@ -35,12 +36,12 @@ type styles struct {
 	runningTimer StringStyle
 	stoppedTimer StringStyle
 	greener      StringStyle
-	magenta      StringStyle
+	faintGreen   StringStyle
 }
 
 type model struct {
 	state  State
-	styles styles
+	styles Styles
 }
 
 type Results struct {
@@ -55,7 +56,8 @@ type Results struct {
 type State interface{}
 
 type MainMenuSelection interface {
-	show(s styles) string
+	show(s Styles) string
+	handleInput(msg tea.Msg, menu MainMenu) State
 }
 
 type TimerBasedTestSettings struct {
@@ -75,19 +77,23 @@ type WordCountBasedTestSettings struct {
 }
 
 type MainMenu struct {
-	choices []MainMenuSelection
-	cursor  int
+	selections []MainMenuSelection
+	cursor     int
 }
 
-type TimerBasedTest struct {
-	settings     TimerBasedTestSettings
-	timer        myTimer
+type TestBase struct {
 	wordsToEnter string
 	inputBuffer  []rune
 	rawInputCnt  int // Should not be reduced
 	mistakes     mistakes
-	completed    bool
 	cursor       int
+}
+
+type TimerBasedTest struct {
+	settings  TimerBasedTestSettings
+	timer     myTimer
+	base      TestBase
+	completed bool
 }
 
 type TimerBasedTestResults struct {
@@ -96,14 +102,10 @@ type TimerBasedTestResults struct {
 }
 
 type WordCountBasedTest struct {
-	settings     WordCountBasedTestSettings
-	stopwatch    myStopWatch
-	wordsToEnter string
-	inputBuffer  []rune
-	rawInputCnt  int // Should not be reduced
-	mistakes     mistakes
-	completed    bool
-	cursor       int
+	settings  WordCountBasedTestSettings
+	stopwatch myStopWatch
+	base      TestBase
+	completed bool
 }
 
 type WordCountTestResults struct {
