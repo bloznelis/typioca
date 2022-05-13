@@ -1,8 +1,10 @@
 # typioca
 Minimal, terminal based typing speed tester.
 
+
 > **Tapioca** (/ˌtæpiˈoʊkə/) is a starch extracted from the storage roots of the cassava plant. Pearl tapioca is a common ingredient in Asian desserts...and sweet drinks such as **bubble tea**.
 
+![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/bloznelis/typioca)
 ---
 
 ![](https://github.com/bloznelis/typioca/blob/master/img/typioca.gif)
