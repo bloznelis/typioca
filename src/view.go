@@ -39,6 +39,32 @@ func (m model) View() string {
 		s = lipgloss.NewStyle().Align(lipgloss.Left).Render(s)
 
 		return lipgloss.Place(termWidth, termHeight, lipgloss.Center, lipgloss.Center, s)
+	case WordCountTestResults:
+		termenv.Reset()
+
+		rawWpmShow := "raw: " + style(strconv.Itoa(state.results.rawWpm), m.styles.greener)
+		cpm := "cpm: " + style(strconv.Itoa(state.results.cpm), m.styles.greener)
+		wpm := "wpm: " + style(strconv.Itoa(state.results.wpm), m.styles.runningTimer)
+		givenTime := "time: " + style(state.results.time.String(), m.styles.greener)
+		wordCnt := "cnt: " + style(strconv.Itoa(state.wordCnt), m.styles.greener)
+		accuracy := "accuracy: " + style(fmt.Sprintf("%.1f", state.results.accuracy), m.styles.greener)
+		words := "words: " + style(state.results.wordList, m.styles.greener)
+
+		content := wpm + "\n\n" + accuracy + " " + rawWpmShow + " " + cpm + "\n" + givenTime + " " + wordCnt + " " + words
+
+		var style = lipgloss.NewStyle().
+			Align(lipgloss.Center).
+			PaddingTop(1).
+			PaddingBottom(1).
+			PaddingLeft(5).
+			PaddingRight(5).
+			BorderStyle(lipgloss.HiddenBorder()).
+			BorderForeground(lipgloss.Color("2"))
+
+		termWidth, termHeight, _ := term.GetSize(0)
+
+		s = lipgloss.Place(termWidth, termHeight, lipgloss.Center, lipgloss.Center, style.Render(content))
+
 	case TimerBasedTestResults:
 		termenv.Reset()
 
@@ -63,6 +89,44 @@ func (m model) View() string {
 		termWidth, termHeight, _ := term.GetSize(0)
 
 		s = lipgloss.Place(termWidth, termHeight, lipgloss.Center, lipgloss.Center, style.Render(content))
+
+	case WordCountBasedTest:
+		termWidth, termHeight, _ := term.GetSize(0)
+
+		var lineLenLimit int = 40
+
+		reactiveLimit := (termWidth / 10) * 6
+		if reactiveLimit < lineLenLimit {
+			lineLenLimit = reactiveLimit
+		}
+
+		var coloredStopwatch string
+		if state.stopwatch.isRunning {
+			coloredStopwatch = style(state.stopwatch.stopwatch.View(), m.styles.runningTimer)
+		} else {
+			coloredStopwatch = style(state.stopwatch.stopwatch.View(), m.styles.stoppedTimer)
+		}
+
+		paragraphView := m.paragraphViewWordCount(lineLenLimit, state)
+		lines := strings.Split(paragraphView, "\n")
+		cursorLine := findCursorLine(strings.Split(paragraphView, "\n"), state.cursor)
+
+		linesAroundCursor := strings.Join(getLinesAroundCursor(lines, cursorLine), "\n")
+
+		// Vertical positioning
+		for i := 0; i < termHeight/2-3; i++ {
+			s += "\n"
+		}
+
+		avgLineLen := averageStringLen(lines[:len(lines)-1])
+		indentBy := uint(termWidth/2) - (uint(avgLineLen) / 2)
+
+		s += m.indent(coloredStopwatch, indentBy) + "\n\n" + m.indent(linesAroundCursor, indentBy)
+
+		if !state.stopwatch.isRunning {
+			s += "\n\n\n"
+			s += lipgloss.PlaceHorizontal(termWidth, lipgloss.Center, style("ctrl+r to restart", m.styles.toEnter))
+		}
 
 	case TimerBasedTest:
 		termWidth, termHeight, _ := term.GetSize(0)
@@ -163,6 +227,16 @@ func (m model) indent(block string, indentBy uint) string {
 	return indentedBlock
 }
 
+func (m model) paragraphViewWordCount(lineLimit int, test WordCountBasedTest) string {
+	paragraph := m.colorInputWordCount(test)
+	paragraph += m.colorCursorWordCount(test)
+	paragraph += m.colorWordsToEnterWordCount(test)
+
+	wrapped := wrapStyledParagraph(paragraph, lineLimit)
+
+	return wrapped
+}
+
 func (m model) paragraphView(lineLimit int, test TimerBasedTest) string {
 	paragraph := m.colorInput(test)
 	paragraph += m.colorCursor(test)
@@ -171,6 +245,37 @@ func (m model) paragraphView(lineLimit int, test TimerBasedTest) string {
 	wrapped := wrapStyledParagraph(paragraph, lineLimit)
 
 	return wrapped
+}
+
+func (m model) colorInputWordCount(test WordCountBasedTest) string {
+	mistakes := toKeysSlice(test.mistakes.mistakesAt)
+	sort.Ints(mistakes)
+
+	coloredInput := ""
+
+	if len(mistakes) == 0 {
+
+		coloredInput += styleAllRunes(test.inputBuffer, m.styles.correct)
+
+	} else {
+
+		previousMistake := -1
+
+		for _, mistakeAt := range mistakes {
+			sliceUntilMistake := test.inputBuffer[previousMistake+1 : mistakeAt]
+			mistakeSlice := test.wordsToEnter[mistakeAt : mistakeAt+1]
+
+			coloredInput += styleAllRunes(sliceUntilMistake, m.styles.correct)
+			coloredInput += style(mistakeSlice, m.styles.mistakes)
+
+			previousMistake = mistakeAt
+		}
+
+		inputAfterLastMistake := test.inputBuffer[previousMistake+1:]
+		coloredInput += styleAllRunes(inputAfterLastMistake, m.styles.correct)
+	}
+
+	return coloredInput
 }
 
 func (m model) colorInput(test TimerBasedTest) string {
@@ -204,10 +309,22 @@ func (m model) colorInput(test TimerBasedTest) string {
 	return coloredInput
 }
 
+func (m model) colorCursorWordCount(test WordCountBasedTest) string {
+	cursorLetter := test.wordsToEnter[len(test.inputBuffer) : len(test.inputBuffer)+1]
+
+	return style(cursorLetter, m.styles.cursor)
+}
+
 func (m model) colorCursor(test TimerBasedTest) string {
 	cursorLetter := test.wordsToEnter[len(test.inputBuffer) : len(test.inputBuffer)+1]
 
 	return style(cursorLetter, m.styles.cursor)
+}
+
+func (m model) colorWordsToEnterWordCount(test WordCountBasedTest) string {
+	wordsToEnter := test.wordsToEnter[len(test.inputBuffer)+1:] // without cursor
+
+	return style(wordsToEnter, m.styles.toEnter)
 }
 
 func (m model) colorWordsToEnter(test TimerBasedTest) string {
@@ -217,7 +334,6 @@ func (m model) colorWordsToEnter(test TimerBasedTest) string {
 }
 
 func wrapStyledParagraph(paragraph string, lineLimit int) string {
-
 	// XXX: Replace spaces, because wordwrap trims them out at the ends
 	paragraph = strings.Replace(paragraph, " ", "·", -1)
 
@@ -225,6 +341,7 @@ func wrapStyledParagraph(paragraph string, lineLimit int) string {
 	f.Breakpoints = []rune{'·'}
 	f.KeepNewlines = false
 	f.Write([]byte(paragraph))
+	f.Close()
 
 	paragraph = strings.Replace(f.String(), "·", " ", -1)
 

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/charmbracelet/bubbles/stopwatch"
 	"github.com/charmbracelet/bubbles/timer"
 	tea "github.com/charmbracelet/bubbletea"
 )
@@ -92,6 +93,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			switch msg := msg.(type) {
 			case tea.KeyMsg:
 				switch msg.String() {
+				case "enter":
+					m.state = initWordCountBasedTest(choice)
+					return m, nil
 				case "left", "h":
 					if choice.cursor > 0 {
 						choice.cursor--
@@ -156,6 +160,63 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return m, nil
 			}
 		}
+	case WordCountTestResults:
+		switch msg := msg.(type) {
+		case tea.KeyMsg:
+			switch msg.String() {
+			case "enter", "ctrl+r":
+				m.state = initWordCountBasedTest(state.settings)
+				return m, nil
+			}
+		}
+	case WordCountBasedTest:
+		switch msg := msg.(type) {
+
+		case stopwatch.StartStopMsg:
+			stopwatchUpdate, cmdUpdate := state.stopwatch.stopwatch.Update(msg)
+			state.stopwatch.stopwatch = stopwatchUpdate
+			commands = append(commands, cmdUpdate)
+
+			m.state = state
+
+		case stopwatch.TickMsg:
+			stopwatchUpdate, cmdUpdate := state.stopwatch.stopwatch.Update(msg)
+			state.stopwatch.stopwatch = stopwatchUpdate
+			commands = append(commands, cmdUpdate)
+
+			m.state = state
+
+		case tea.KeyMsg:
+
+			switch msg.String() {
+			case "enter":
+
+			case "ctrl+r":
+				m.state = initWordCountBasedTest(state.settings)
+				return m, nil
+
+			case "backspace":
+				m.state = state.handleBackspace()
+
+			case "ctrl+w":
+				m.state = state.handleCtrlW()
+
+			case " ":
+				m.state = state.handleSpace()
+
+			default:
+				newState := state.handleRunes(msg, &commands)
+				m.state = newState
+
+				if len(newState.wordsToEnter) == len(newState.inputBuffer) {
+					m.state = WordCountTestResults{
+						settings: state.settings,
+						wordCnt:  state.settings.wordCountSelections[state.settings.wordCountCursor],
+						results:  state.calculateResults(),
+					}
+				}
+			}
+		}
 
 	case TimerBasedTest:
 		switch msg := msg.(type) {
@@ -203,6 +264,21 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, tea.Batch(commands...)
 }
 
+func (state WordCountBasedTest) handleBackspace() WordCountBasedTest {
+	state.inputBuffer = dropLastRune(state.inputBuffer)
+
+	//Delete mistakes
+	inputLength := len(state.inputBuffer)
+	_, ok := state.mistakes.mistakesAt[inputLength]
+	if ok {
+		delete(state.mistakes.mistakesAt, inputLength)
+	}
+
+	state.cursor = inputLength
+
+	return state
+}
+
 func (state TimerBasedTest) handleBackspace() TimerBasedTest {
 	state.inputBuffer = dropLastRune(state.inputBuffer)
 
@@ -214,6 +290,23 @@ func (state TimerBasedTest) handleBackspace() TimerBasedTest {
 	}
 
 	state.cursor = inputLength
+
+	return state
+}
+
+func (state WordCountBasedTest) handleCtrlW() WordCountBasedTest {
+	state.inputBuffer = dropUntilWsIdx(state.inputBuffer, state.findLatestWsIndex())
+	bufferLen := len(state.inputBuffer)
+	state.cursor = bufferLen
+
+	//Delete mistakes
+	var newMistakes map[int]bool = make(map[int]bool, 0)
+	for at := range state.mistakes.mistakesAt {
+		if at < bufferLen {
+			newMistakes[at] = true
+		}
+	}
+	state.mistakes.mistakesAt = newMistakes
 
 	return state
 }
@@ -241,6 +334,32 @@ func dropUntilWsIdx(input []rune, wsIdx int) []rune {
 	} else {
 		return input[:wsIdx+1]
 	}
+}
+
+func (state WordCountBasedTest) handleRunes(msg tea.KeyMsg, commands *[]tea.Cmd) WordCountBasedTest {
+	state.inputBuffer = append(state.inputBuffer, msg.Runes...)
+	state.rawInputCnt += len(msg.Runes)
+
+	if !state.stopwatch.isRunning {
+		*commands = append(*commands, state.stopwatch.stopwatch.Init())
+		state.stopwatch.isRunning = true
+	}
+
+	inputLen := len(state.inputBuffer)
+	inputLenDec := inputLen - 1
+
+	letterToInput := state.wordsToEnter[inputLenDec:inputLen]
+	inputLetter := string(state.inputBuffer[inputLenDec:])
+
+	if letterToInput != inputLetter {
+		state.mistakes.mistakesAt[inputLenDec] = true
+		state.mistakes.rawMistakesCnt = state.mistakes.rawMistakesCnt + 1
+	}
+
+	//Set cursor
+	state.cursor = inputLen
+
+	return state
 }
 
 func (state TimerBasedTest) handleRunes(msg tea.KeyMsg, commands *[]tea.Cmd) TimerBasedTest {
@@ -295,6 +414,32 @@ func (state TimerBasedTest) handleSpace() TimerBasedTest {
 	return state
 }
 
+func (state WordCountBasedTest) handleSpace() WordCountBasedTest {
+	if len(state.inputBuffer) > 0 && state.wordsToEnter[state.cursor-1] != ' ' {
+		nextSpaceIdx := findNextSpaceIndex(state.wordsToEnter, state.cursor)
+		spacesToEnterCnt := (nextSpaceIdx - state.cursor) + 1
+		spaces := make([]rune, spacesToEnterCnt)
+		for i := range spaces {
+			spaces[i] = ' '
+		}
+
+		if spacesToEnterCnt > 1 {
+			//Mark mistakes
+			for i := state.cursor; i < nextSpaceIdx; i++ {
+				state.mistakes.mistakesAt[i] = true
+			}
+
+			state.mistakes.rawMistakesCnt = state.mistakes.rawMistakesCnt + 1
+		}
+
+		state.inputBuffer = append(state.inputBuffer, spaces...)
+		state.cursor = len(state.inputBuffer)
+		state.rawInputCnt += 1
+	}
+
+	return state
+}
+
 func findNextSpaceIndex(wordsToInput string, cursorAt int) int {
 	trimmedWordsToInput := wordsToInput[cursorAt:]
 	words := []rune(trimmedWordsToInput)
@@ -308,6 +453,10 @@ func findNextSpaceIndex(wordsToInput string, cursorAt int) int {
 	}
 
 	return wsIdx + cursorAt
+}
+
+func (state WordCountBasedTest) findLatestWsIndex() int {
+	return findLatestWsIndex(state.wordsToEnter, state.cursor)
 }
 
 func (state TimerBasedTest) findLatestWsIndex() int {
