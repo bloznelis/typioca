@@ -22,8 +22,8 @@ Minimal, terminal based typing speed tester.
 `yay typioca-git`
 
 ### Homebrew
-`brew tap bloznelis/tap`
-`brew install typioca`
+1. `brew tap bloznelis/tap`
+2. `brew install typioca`
 
 ### Building from source
   1. Checkout the code
