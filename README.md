@@ -18,6 +18,9 @@ Minimal, terminal based typing speed tester.
   * ctrl+w support ;)
 
 ## Installation
+### AUR
+`yay typioca-git`
+
 ### Building from source
   1. Checkout the code
   2. `make build`
