@@ -1,30 +1,28 @@
 GO_FLAGS   ?=
 NAME       := typioca
-OUTPUT_BIN ?= execs/$(ARCH)/$(NAME)
+OUTPUT_BIN ?= execs/$(NAME)$(ARCH)
 PACKAGE    := github.com/bloznelis/$(NAME)
 GIT_REV    ?= $(shell git rev-parse --short HEAD)
-SOURCE_DATE_EPOCH ?= $(shell date +%s)
-DATE       ?= $(shell date -u -d @${SOURCE_DATE_EPOCH} +"%Y-%m-%dT%H:%M:%SZ")
-VERSION 	 := 1.0.1
+VERSION 	 ?=
 
 default: help
 
 build-win:  ## Builds the win-amd64 CLI
-	@env GOOS=windows GOARCH=amd64 ARCH=win-amd64 make build
+	@env GOOS=windows GOARCH=amd64 ARCH=-win-amd64 make build
 
 build-mac-amd:  ## Builds the mac-amd64 CLI
-	@env GOOS=darwin GOARCH=amd64 ARCH=mac-amd64 make build
+	@env GOOS=darwin GOARCH=amd64 ARCH=-mac-amd64 make build
 
 build-mac-arm:  ## Builds the mac-arm64 CLI
-	@env GOOS=darwin GOARCH=arm64 ARCH=mac-arm64 make build
+	@env GOOS=darwin GOARCH=arm64 ARCH=-mac-arm64 make build
 
 build-linux-amd:  ## Builds the linux-amd64 CLI
-	@env GOOS=linux GOARCH=amd64 ARCH=linux-amd64 make build
+	@env GOOS=linux GOARCH=amd64 ARCH=-linux-amd64 make build
 
 build:  ## Builds the CLI
-	@go build ${GO_FLAGS} \
-	-ldflags "-w -s -X ${PACKAGE}/cmd.version=${VERSION} -X ${PACKAGE}/cmd.commit=${GIT_REV} -X ${PACKAGE}/cmd.date=${DATE}" \
-	-a -tags netgo -o ${OUTPUT_BIN} src/*.go
+	@go build -trimpath ${GO_FLAGS} \
+	-ldflags "-w -s -X ${PACKAGE}/cmd.version=${VERSION} -X ${PACKAGE}/cmd.commit=${GIT_REV}" \
+	-a -tags netgo -o ${OUTPUT_BIN} ./src
 
 build-all: build-win build-mac-amd build-mac-arm build-linux-amd ## Builds execs for all architectures
 
