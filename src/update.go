@@ -47,6 +47,23 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.state = state
 
 		case tea.KeyMsg:
+			switch msg.Type {
+			case tea.KeyRunes:
+				if !state.stopwatch.isRunning {
+					commands = append(commands, state.stopwatch.stopwatch.Init())
+					state.stopwatch.isRunning = true
+				}
+				state.base = state.base.handleRunes(msg)
+				m.state = state
+
+				if len(state.base.wordsToEnter) == len(state.base.inputBuffer) {
+					m.state = WordCountTestResults{
+						settings: state.settings,
+						wordCnt:  state.settings.wordCountSelections[state.settings.wordCountCursor],
+						results:  state.calculateResults(),
+					}
+				}
+			}
 			switch msg.String() {
 			case "enter", "tab":
 
@@ -65,22 +82,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			case " ":
 				state.base = state.base.handleSpace()
 				m.state = state
-
-			default:
-				if !state.stopwatch.isRunning {
-					commands = append(commands, state.stopwatch.stopwatch.Init())
-					state.stopwatch.isRunning = true
-				}
-				state.base = state.base.handleRunes(msg)
-				m.state = state
-
-				if len(state.base.wordsToEnter) == len(state.base.inputBuffer) {
-					m.state = WordCountTestResults{
-						settings: state.settings,
-						wordCnt:  state.settings.wordCountSelections[state.settings.wordCountCursor],
-						results:  state.calculateResults(),
-					}
-				}
 			}
 		}
 
@@ -103,6 +104,15 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 
 		case tea.KeyMsg:
+			switch msg.Type {
+			case tea.KeyRunes:
+				if !state.timer.isRunning {
+					commands = append(commands, state.timer.timer.Init())
+					state.timer.isRunning = true
+				}
+				state.base = state.base.handleRunes(msg)
+				m.state = state
+			}
 			switch msg.String() {
 			case "enter", "tab":
 
@@ -120,14 +130,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 			case " ":
 				state.base = state.base.handleSpace()
-				m.state = state
-
-			default:
-				if !state.timer.isRunning {
-					commands = append(commands, state.timer.timer.Init())
-					state.timer.isRunning = true
-				}
-				state.base = state.base.handleRunes(msg)
 				m.state = state
 			}
 		}
