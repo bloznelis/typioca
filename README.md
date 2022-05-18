@@ -34,9 +34,6 @@ Minimal, terminal based typing speed tester.
   * `make`
   * `go`
 
-### Prebuilt binaries
-Can be found under releases section.
-
 ---
 ![image](https://user-images.githubusercontent.com/33397865/168308689-d6fbb1cc-5cb5-450b-a561-61463fd558d6.png)
 ![image](https://user-images.githubusercontent.com/33397865/168308259-e35c8ad1-5fce-44c4-b58a-36ba696c25ec.png)
