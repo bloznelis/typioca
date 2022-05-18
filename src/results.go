@@ -1,6 +1,9 @@
 package main
 
-import "strings"
+import (
+	"math"
+	"strings"
+)
 
 func (m TimerBasedTest) calculateResults() Results {
 	return Results{
@@ -25,7 +28,7 @@ func calculateWpm(m TimerBasedTest, wordCnt int) int {
 	grossWpm := float64(wordCnt) / m.timer.duration.Minutes()
 	netWpm := grossWpm - float64(len(m.base.mistakes.mistakesAt))/m.timer.duration.Minutes()
 
-	return int(netWpm)
+	return int(math.Max(0, netWpm))
 }
 
 func calculateCpm(m TimerBasedTest) int {
@@ -60,7 +63,7 @@ func (m WordCountBasedTest) calculateWpm(wordCnt int) int {
 	grossWpm := float64(wordCnt) / m.stopwatch.stopwatch.Elapsed().Minutes()
 	netWpm := grossWpm - float64(len(m.base.mistakes.mistakesAt))/m.stopwatch.stopwatch.Elapsed().Minutes()
 
-	return int(netWpm)
+	return int(math.Max(0, netWpm))
 }
 
 func (m WordCountBasedTest) calculateCpm() int {
