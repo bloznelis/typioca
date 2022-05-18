@@ -19,7 +19,7 @@ Minimal, terminal based typing speed tester.
 
 ## Installation
 ### AUR
-`yay typioca-git`
+`yay -S typioca-git`
 
 ### Homebrew
 1. `brew tap bloznelis/tap`
