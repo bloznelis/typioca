@@ -1,17 +1,12 @@
 package main
 
 import (
-	"fmt"
-	"log"
-	"time"
-
 	"github.com/charmbracelet/bubbles/stopwatch"
 	"github.com/charmbracelet/bubbles/timer"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	startTime := time.Now()
 	var commands []tea.Cmd
 
 	switch msg := msg.(type) {
@@ -211,8 +206,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 	}
 
-	elapsedUpdateTime := time.Since(startTime)
-	log.Println("time to update:" + fmt.Sprint(elapsedUpdateTime))
 	// Return the updated model to the Bubble Tea runtime for processing.
 	return m, tea.Batch(commands...)
 }
@@ -377,7 +370,7 @@ func (settings SentenceCountBasedTestSettings) handleInput(msg tea.Msg, menu Mai
 				if settings.sentenceListCursor > 0 {
 					settings.sentenceListCursor--
 				} else {
-					settings.sentenceListCursor = len(settings.sentenceCountSelections) - 1
+					settings.sentenceListCursor = len(settings.sentenceListSelections) - 1
 				}
 			}
 		case "down", "j":
@@ -393,7 +386,7 @@ func (settings SentenceCountBasedTestSettings) handleInput(msg tea.Msg, menu Mai
 					settings.sentenceCountCursor = 0
 				}
 			case 2:
-				if settings.sentenceListCursor < len(settings.sentenceCountSelections)-1 {
+				if settings.sentenceListCursor < len(settings.sentenceListSelections)-1 {
 					settings.sentenceListCursor++
 				} else {
 					settings.sentenceListCursor = 0

@@ -53,6 +53,11 @@ type Results struct {
 	wordList string
 }
 
+type WordListSelection struct {
+	key  string
+	show string
+}
+
 type State interface{}
 
 type MainMenuSelection interface {
@@ -63,7 +68,7 @@ type MainMenuSelection interface {
 type TimerBasedTestSettings struct {
 	timeSelections     []time.Duration
 	timeCursor         int
-	wordListSelections []string
+	wordListSelections []WordListSelection
 	wordListCursor     int
 	cursor             int
 }
@@ -71,7 +76,7 @@ type TimerBasedTestSettings struct {
 type WordCountBasedTestSettings struct {
 	wordCountSelections []int
 	wordCountCursor     int
-	wordListSelections  []string
+	wordListSelections  []WordListSelection
 	wordListCursor      int
 	cursor              int
 }
@@ -79,7 +84,7 @@ type WordCountBasedTestSettings struct {
 type SentenceCountBasedTestSettings struct {
 	sentenceCountSelections []int
 	sentenceCountCursor     int
-	sentenceListSelections  []string
+	sentenceListSelections  []WordListSelection
 	sentenceListCursor      int
 	cursor                  int
 }
