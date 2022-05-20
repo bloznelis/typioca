@@ -36,7 +36,7 @@ func initTimerBasedTest(settings TimerBasedTestSettings) TimerBasedTest {
 			timedout:  false,
 		},
 		base: TestBase{
-			wordsToEnter: NewGenerator().Generate(settings.wordListSelections[settings.wordListCursor]),
+			wordsToEnter: NewGenerator().Generate(settings.wordListSelections[settings.wordListCursor].key),
 			inputBuffer:  make([]rune, 0),
 			rawInputCnt:  0,
 			mistakes: mistakes{
@@ -59,7 +59,7 @@ func initWordCountBasedTest(settings WordCountBasedTestSettings) WordCountBasedT
 			isRunning: false,
 		},
 		base: TestBase{
-			wordsToEnter: strings.TrimSpace(generator.Generate(settings.wordListSelections[settings.wordListCursor])),
+			wordsToEnter: strings.TrimSpace(generator.Generate(settings.wordListSelections[settings.wordListCursor].key)),
 			inputBuffer:  make([]rune, 0),
 			rawInputCnt:  0,
 			mistakes: mistakes{
@@ -83,7 +83,7 @@ func initSentenceCountBasedTest(settings SentenceCountBasedTestSettings) Sentenc
 			isRunning: false,
 		},
 		base: TestBase{
-			wordsToEnter: strings.TrimSpace(generator.Generate(settings.sentenceListSelections[settings.sentenceListCursor])),
+			wordsToEnter: strings.TrimSpace(generator.Generate(settings.sentenceListSelections[settings.sentenceListCursor].key)),
 			inputBuffer:  make([]rune, 0),
 			rawInputCnt:  0,
 			mistakes: mistakes{
@@ -100,14 +100,35 @@ func initTimerBasedTestSelection() TimerBasedTestSettings {
 	return TimerBasedTestSettings{
 		timeSelections: []time.Duration{time.Second * 120, time.Second * 60, time.Second * 30, time.Second * 15},
 		timeCursor:     2,
-		wordListSelections: []string{
-			"dorian-gray",
-			"frankenstein",
-			"common-words",
-			"pride-and-prejudice",
-			"dorian-gray-sentences",
-			"frankenstein-sentences",
-			"pride-and-prejudice-sentences",
+		wordListSelections: []WordListSelection{
+			{
+				key:  "dorian-gray-words",
+				show: "dorian-gray",
+			},
+			{
+				key:  "frankenstein-words",
+				show: "frankenstein",
+			},
+			{
+				key:  "common-words",
+				show: "common-words",
+			},
+			{
+				key:  "pride-and-prejudice-words",
+				show: "pride-and-prejudice",
+			},
+			{
+				key:  "dorian-gray-sentences",
+				show: "dorian-gray-sentences",
+			},
+			{
+				key:  "frankenstein-sentences",
+				show: "frankenstein-sentences",
+			},
+			{
+				key:  "pride-and-prejudice-sentences",
+				show: "pride-and-prejudice-sentences",
+			},
 		},
 		wordListCursor: 2,
 		cursor:         0,
@@ -118,9 +139,26 @@ func initWordCountBasedTestSelection() WordCountBasedTestSettings {
 	return WordCountBasedTestSettings{
 		wordCountSelections: []int{100, 50, 25, 10},
 		wordCountCursor:     2,
-		wordListSelections:  []string{"dorian-gray", "frankenstein", "common-words", "pride-and-prejudice"},
-		wordListCursor:      2,
-		cursor:              0,
+		wordListSelections: []WordListSelection{
+			{
+				key:  "dorian-gray-words",
+				show: "dorian-gray",
+			},
+			{
+				key:  "frankenstein-words",
+				show: "frankenstein",
+			},
+			{
+				key:  "common-words",
+				show: "common-words",
+			},
+			{
+				key:  "pride-and-prejudice-words",
+				show: "pride-and-prejudice",
+			},
+		},
+		wordListCursor: 2,
+		cursor:         0,
 	}
 }
 
@@ -128,9 +166,22 @@ func initSentenceCountBasedTestSelection() SentenceCountBasedTestSettings {
 	return SentenceCountBasedTestSettings{
 		sentenceCountSelections: []int{30, 15, 5, 1},
 		sentenceCountCursor:     2,
-		sentenceListSelections:  []string{"frankenstein-sentences", "dorian-gray-sentences", "pride-and-prejudice-sentences"},
-		sentenceListCursor:      1,
-		cursor:                  0,
+		sentenceListSelections: []WordListSelection{
+			{
+				key:  "dorian-gray-sentences",
+				show: "dorian-gray",
+			},
+			{
+				key:  "frankenstein-sentences",
+				show: "frankenstein",
+			},
+			{
+				key:  "pride-and-prejudice-sentences",
+				show: "pride-and-prejudice",
+			},
+		},
+		sentenceListCursor: 1,
+		cursor:             0,
 	}
 }
 

@@ -217,19 +217,19 @@ func averageLineLen(lines []string) int {
 }
 
 func (selection TimerBasedTestSettings) show(styles Styles) string {
-	selections := []string{selection.timeSelections[selection.timeCursor].String(), selection.wordListSelections[selection.wordListCursor]}
+	selections := []string{selection.timeSelections[selection.timeCursor].String(), selection.wordListSelections[selection.wordListCursor].show}
 	selectionsStr := showSelections(selections, selection.cursor, styles)
 	return fmt.Sprintf("%s %s", "Timer run", selectionsStr)
 }
 
 func (selection WordCountBasedTestSettings) show(styles Styles) string {
-	selections := []string{fmt.Sprint(selection.wordCountSelections[selection.wordCountCursor]), selection.wordListSelections[selection.wordListCursor]}
+	selections := []string{fmt.Sprint(selection.wordCountSelections[selection.wordCountCursor]), selection.wordListSelections[selection.wordListCursor].show}
 	selectionsStr := showSelections(selections, selection.cursor, styles)
 	return fmt.Sprintf("%s %s", "Word count run", selectionsStr)
 }
 
 func (selection SentenceCountBasedTestSettings) show(styles Styles) string {
-	selections := []string{fmt.Sprint(selection.sentenceCountSelections[selection.sentenceCountCursor]), selection.sentenceListSelections[selection.sentenceListCursor]}
+	selections := []string{fmt.Sprint(selection.sentenceCountSelections[selection.sentenceCountCursor]), selection.sentenceListSelections[selection.sentenceListCursor].show}
 	selectionsStr := showSelections(selections, selection.cursor, styles)
 	return fmt.Sprintf("%s %s", "Sentence count run", selectionsStr)
 }

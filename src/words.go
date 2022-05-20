@@ -54,11 +54,11 @@ func NewGenerator() (g WordsGenerator) {
 	g.Count = 300
 	g.pools = map[string]string{
 		"common-words":                  commonEnglish,
-		"dorian-gray":                   dorianGray,
+		"dorian-gray-words":             dorianGray,
 		"dorian-gray-sentences":         dorianGraySentences,
-		"frankenstein":                  frankenstein,
+		"frankenstein-words":            frankenstein,
 		"frankenstein-sentences":        frankensteinSentences,
-		"pride-and-prejudice":           prideAndPrejudice,
+		"pride-and-prejudice-words":     prideAndPrejudice,
 		"pride-and-prejudice-sentences": prideAndPrejudiceSentences,
 	}
 	return g
