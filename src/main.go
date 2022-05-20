@@ -74,11 +74,19 @@ func initWordCountBasedTest(settings WordCountBasedTestSettings) WordCountBasedT
 
 func initTimerBasedTestSelection() TimerBasedTestSettings {
 	return TimerBasedTestSettings{
-		timeSelections:     []time.Duration{time.Second * 120, time.Second * 60, time.Second * 30, time.Second * 15},
-		timeCursor:         2,
-		wordListSelections: []string{"dorian-gray", "frankenstein", "common-words", "pride-and-prejudice"},
-		wordListCursor:     2,
-		cursor:             0,
+		timeSelections: []time.Duration{time.Second * 120, time.Second * 60, time.Second * 30, time.Second * 15},
+		timeCursor:     2,
+		wordListSelections: []string{
+			"dorian-gray",
+			"frankenstein",
+			"common-words",
+			"pride-and-prejudice",
+			"dorian-gray-sentences",
+			"frankenstein-sentences",
+			"pride-and-prejudice-sentences",
+		},
+		wordListCursor: 2,
+		cursor:         0,
 	}
 }
 
