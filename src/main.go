@@ -1,29 +1,121 @@
 package main
 
 import (
+	"context"
 	"fmt"
+	"log"
 	"os"
+	"os/signal"
 	"strings"
+	"syscall"
 	"time"
 
 	"github.com/charmbracelet/bubbles/stopwatch"
 	input "github.com/charmbracelet/bubbles/textinput"
 	"github.com/charmbracelet/bubbles/timer"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/wish"
+	bm "github.com/charmbracelet/wish/bubbletea"
+	lm "github.com/charmbracelet/wish/logging"
+	"github.com/gliderlabs/ssh"
 	"github.com/muesli/termenv"
+	"github.com/spf13/cobra"
+	"golang.org/x/term"
 )
 
-func main() {
-	termenv.ClearScreen()
-	termenv.SetWindowTitle("typioca")
+var (
+	serverBind    = ""
+	serverPort    = 2229
+	serverKeyPath = ""
+)
 
-	p := tea.NewProgram(initialModel())
-	if err := p.Start(); err != nil {
-		fmt.Printf("Alas, there's been an error: %v", err)
-		os.Exit(1)
+var (
+	rootCmd = &cobra.Command{
+		Use:  "typioca",
+		Long: "typioca is a typing test program.",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			termenv.SetWindowTitle("typioca")
+			defer println("bye!")
+
+			termWidth, termHeight, _ := term.GetSize(0)
+			p := tea.NewProgram(
+				initialModel(
+					termenv.ColorProfile(),
+					termenv.ForegroundColor(),
+					termWidth,
+					termHeight,
+				),
+				tea.WithAltScreen(),
+			)
+
+			return p.Start()
+		},
 	}
-	termenv.Reset()
-	println("bye!")
+	serveCmd = &cobra.Command{
+		Use:   "serve",
+		Short: "Serve the typioca server",
+		Long:  "serve starts the typioca SSH server.",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			s, err := wish.NewServer(
+				wish.WithAddress(fmt.Sprintf("%s:%d", serverBind, serverPort)),
+				wish.WithHostKeyPath(serverKeyPath),
+				wish.WithMiddleware(
+					lm.Middleware(),
+					bm.Middleware(func(s ssh.Session) (tea.Model, []tea.ProgramOption) {
+						pty, _, active := s.Pty()
+						if !active {
+							wish.Fatal(s, fmt.Errorf("not a tty"))
+							return nil, nil
+						}
+						return initialModel(
+								termenv.ANSI256,
+								termenv.ANSIWhite,
+								pty.Window.Width,
+								pty.Window.Height,
+							),
+							[]tea.ProgramOption{tea.WithAltScreen()}
+					}),
+				),
+			)
+			if err != nil {
+				return err
+			}
+
+			done := make(chan os.Signal, 1)
+			signal.Notify(done, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
+
+			log.Printf("Starting server on %s:%d", serverBind, serverPort)
+			go func() {
+				if err := s.ListenAndServe(); err != nil {
+					log.Fatalln(err)
+				}
+			}()
+
+			<-done
+
+			log.Printf("Stopping SSH server on %s:%d", serverBind, serverPort)
+			ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+			defer func() { cancel() }()
+			if err := s.Shutdown(ctx); err != nil {
+				return err
+			}
+
+			return nil
+		},
+	}
+)
+
+func init() {
+	serveCmd.Flags().StringVarP(&serverKeyPath, "key", "k", "typioca", "path to the server key")
+	serveCmd.Flags().StringVarP(&serverBind, "bind", "b", "", "address to bind on")
+	serveCmd.Flags().IntVarP(&serverPort, "port", "p", 2229, "port to serve on")
+	rootCmd.AddCommand(serveCmd)
+}
+
+func main() {
+	if err := rootCmd.Execute(); err != nil {
+		log.Fatal(err)
+	}
 }
 
 func initTimerBasedTest(settings TimerBasedTestSettings) TimerBasedTest {
@@ -196,12 +288,11 @@ func initMainMenu() MainMenu {
 	}
 }
 
-func initialModel() model {
-	profile := termenv.ColorProfile()
-	fore := termenv.ForegroundColor()
-
+func initialModel(profile termenv.Profile, fore termenv.Color, width, height int) model {
 	return model{
-		state: initMainMenu(),
+		width:  width,
+		height: height,
+		state:  initMainMenu(),
 		styles: Styles{
 			correct: func(str string) termenv.Style {
 				return termenv.String(str).Foreground(fore)

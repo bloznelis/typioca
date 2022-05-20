@@ -11,8 +11,6 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	"github.com/muesli/reflow/indent"
 	"github.com/muesli/reflow/wordwrap"
-	"github.com/muesli/termenv"
-	"golang.org/x/term"
 )
 
 var avgLineLen int = 0
@@ -29,7 +27,7 @@ var resultsStyle = lipgloss.NewStyle().
 func (m model) View() string {
 	var s string
 
-	termWidth, termHeight, _ := term.GetSize(0)
+	termWidth, termHeight := m.width, m.height
 
 	reactiveLimit := (termWidth / 10) * 6
 	if reactiveLimit < lineLenLimit {
@@ -52,15 +50,12 @@ func (m model) View() string {
 			// Render the row
 			s += fmt.Sprintf("%s %s%s\n\n", cursor, choice.show(m.styles), cursorClose)
 		}
-		termWidth, termHeight, _ := term.GetSize(0)
 
 		s = lipgloss.NewStyle().Align(lipgloss.Left).Render(s)
 
 		return lipgloss.Place(termWidth, termHeight, lipgloss.Center, lipgloss.Center, s)
 
 	case TimerBasedTestResults:
-		termenv.Reset()
-
 		rawWpmShow := "raw: " + style(strconv.Itoa(state.results.rawWpm), m.styles.greener)
 		cpm := "cpm: " + style(strconv.Itoa(state.results.cpm), m.styles.greener)
 		wpm := "wpm: " + style(strconv.Itoa(state.results.wpm), m.styles.runningTimer)
@@ -70,13 +65,9 @@ func (m model) View() string {
 
 		content := wpm + "\n\n" + accuracy + " " + rawWpmShow + " " + cpm + "\n" + givenTime + " " + words
 
-		termWidth, termHeight, _ := term.GetSize(0)
-
 		s = lipgloss.Place(termWidth, termHeight, lipgloss.Center, lipgloss.Center, resultsStyle.Render(content))
 
 	case WordCountTestResults:
-		termenv.Reset()
-
 		rawWpmShow := "raw: " + style(strconv.Itoa(state.results.rawWpm), m.styles.greener)
 		cpm := "cpm: " + style(strconv.Itoa(state.results.cpm), m.styles.greener)
 		wpm := "wpm: " + style(strconv.Itoa(state.results.wpm), m.styles.runningTimer)
@@ -87,13 +78,9 @@ func (m model) View() string {
 
 		content := wpm + "\n\n" + accuracy + " " + rawWpmShow + " " + cpm + "\n" + givenTime + " " + wordCnt + " " + words
 
-		termWidth, termHeight, _ := term.GetSize(0)
-
 		s = lipgloss.Place(termWidth, termHeight, lipgloss.Center, lipgloss.Center, resultsStyle.Render(content))
 
 	case SentenceCountTestResults:
-		termenv.Reset()
-
 		rawWpmShow := "raw: " + style(strconv.Itoa(state.results.rawWpm), m.styles.greener)
 		cpm := "cpm: " + style(strconv.Itoa(state.results.cpm), m.styles.greener)
 		wpm := "wpm: " + style(strconv.Itoa(state.results.wpm), m.styles.runningTimer)
@@ -103,8 +90,6 @@ func (m model) View() string {
 		words := "sentences: " + style(state.results.wordList, m.styles.greener)
 
 		content := wpm + "\n\n" + accuracy + " " + rawWpmShow + " " + cpm + "\n" + givenTime + " " + sentenceCnt + " " + words
-
-		termWidth, termHeight, _ := term.GetSize(0)
 
 		s = lipgloss.Place(termWidth, termHeight, lipgloss.Center, lipgloss.Center, resultsStyle.Render(content))
 
