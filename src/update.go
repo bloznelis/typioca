@@ -62,6 +62,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			switch msg.String() {
 			case "enter", "tab":
 
+			case "ctrl+q":
+				m.state = initMainMenu()
+				return m, nil
+
 			case "ctrl+r":
 				m.state = initTimerBasedTest(state.settings)
 				return m, nil
@@ -104,6 +108,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case tea.KeyMsg:
 			switch msg.String() {
 			case "enter", "tab":
+
+			case "ctrl+q":
+				m.state = initMainMenu()
+				return m, nil
 
 			case "ctrl+r":
 				m.state = initWordCountBasedTest(state.settings)

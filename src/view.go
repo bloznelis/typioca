@@ -134,7 +134,7 @@ func (m model) View() string {
 
 		if !state.timer.isRunning {
 			s += "\n\n\n"
-			s += lipgloss.PlaceHorizontal(termWidth, lipgloss.Center, style("ctrl+r to restart", m.styles.toEnter))
+			s += lipgloss.PlaceHorizontal(termWidth, lipgloss.Center, style("ctrl+r to restart, ctrl+q to menu", m.styles.toEnter))
 		}
 
 	case WordCountBasedTest:
@@ -163,7 +163,7 @@ func (m model) View() string {
 
 		if !state.stopwatch.isRunning {
 			s += "\n\n\n"
-			s += lipgloss.PlaceHorizontal(termWidth, lipgloss.Center, style("ctrl+r to restart", m.styles.toEnter))
+			s += lipgloss.PlaceHorizontal(termWidth, lipgloss.Center, style("ctrl+r to restart, ctrl+q to menu", m.styles.toEnter))
 		}
 
 	case SentenceCountBasedTest:
@@ -192,7 +192,7 @@ func (m model) View() string {
 
 		if !state.stopwatch.isRunning {
 			s += "\n\n\n"
-			s += lipgloss.PlaceHorizontal(termWidth, lipgloss.Center, style("ctrl+r to restart", m.styles.toEnter))
+			s += lipgloss.PlaceHorizontal(termWidth, lipgloss.Center, style("ctrl+r to restart, ctrl+q to menu", m.styles.toEnter))
 		}
 
 	}
