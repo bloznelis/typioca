@@ -72,13 +72,45 @@ func initWordCountBasedTest(settings WordCountBasedTestSettings) WordCountBasedT
 	}
 }
 
+func initSentenceCountBasedTest(settings SentenceCountBasedTestSettings) SentenceCountBasedTest {
+	generator := NewGenerator()
+	generator.Count = 40
+	generator.Count = settings.sentenceCountSelections[settings.sentenceCountCursor]
+	return SentenceCountBasedTest{
+		settings: settings,
+		stopwatch: myStopWatch{
+			stopwatch: stopwatch.New(),
+			isRunning: false,
+		},
+		base: TestBase{
+			wordsToEnter: strings.TrimSpace(generator.Generate(settings.sentenceListSelections[settings.sentenceListCursor])),
+			inputBuffer:  make([]rune, 0),
+			rawInputCnt:  0,
+			mistakes: mistakes{
+				mistakesAt:     make(map[int]bool, 0),
+				rawMistakesCnt: 0,
+			},
+			cursor: 0,
+		},
+		completed: false,
+	}
+}
+
 func initTimerBasedTestSelection() TimerBasedTestSettings {
 	return TimerBasedTestSettings{
-		timeSelections:     []time.Duration{time.Second * 120, time.Second * 60, time.Second * 30, time.Second * 15},
-		timeCursor:         2,
-		wordListSelections: []string{"dorian-gray", "frankenstein", "common-words", "pride-and-prejudice"},
-		wordListCursor:     2,
-		cursor:             0,
+		timeSelections: []time.Duration{time.Second * 120, time.Second * 60, time.Second * 30, time.Second * 15},
+		timeCursor:     2,
+		wordListSelections: []string{
+			"dorian-gray",
+			"frankenstein",
+			"common-words",
+			"pride-and-prejudice",
+			"dorian-gray-sentences",
+			"frankenstein-sentences",
+			"pride-and-prejudice-sentences",
+		},
+		wordListCursor: 2,
+		cursor:         0,
 	}
 }
 
@@ -92,10 +124,24 @@ func initWordCountBasedTestSelection() WordCountBasedTestSettings {
 	}
 }
 
+func initSentenceCountBasedTestSelection() SentenceCountBasedTestSettings {
+	return SentenceCountBasedTestSettings{
+		sentenceCountSelections: []int{30, 15, 5, 1},
+		sentenceCountCursor:     2,
+		sentenceListSelections:  []string{"frankenstein-sentences", "dorian-gray-sentences", "pride-and-prejudice-sentences"},
+		sentenceListCursor:      1,
+		cursor:                  0,
+	}
+}
+
 func initMainMenu() MainMenu {
 	return MainMenu{
-		selections: []MainMenuSelection{initTimerBasedTestSelection(), initWordCountBasedTestSelection()},
-		cursor:     0,
+		selections: []MainMenuSelection{
+			initTimerBasedTestSelection(),
+			initWordCountBasedTestSelection(),
+			initSentenceCountBasedTestSelection(),
+		},
+		cursor: 0,
 	}
 }
 

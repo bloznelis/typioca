@@ -58,6 +58,22 @@ func (m model) View() string {
 
 		return lipgloss.Place(termWidth, termHeight, lipgloss.Center, lipgloss.Center, s)
 
+	case TimerBasedTestResults:
+		termenv.Reset()
+
+		rawWpmShow := "raw: " + style(strconv.Itoa(state.results.rawWpm), m.styles.greener)
+		cpm := "cpm: " + style(strconv.Itoa(state.results.cpm), m.styles.greener)
+		wpm := "wpm: " + style(strconv.Itoa(state.results.wpm), m.styles.runningTimer)
+		givenTime := "time: " + style(state.results.time.String(), m.styles.greener)
+		accuracy := "accuracy: " + style(fmt.Sprintf("%.1f", state.results.accuracy), m.styles.greener)
+		words := "words: " + style(state.results.wordList, m.styles.greener)
+
+		content := wpm + "\n\n" + accuracy + " " + rawWpmShow + " " + cpm + "\n" + givenTime + " " + words
+
+		termWidth, termHeight, _ := term.GetSize(0)
+
+		s = lipgloss.Place(termWidth, termHeight, lipgloss.Center, lipgloss.Center, resultsStyle.Render(content))
+
 	case WordCountTestResults:
 		termenv.Reset()
 
@@ -75,50 +91,22 @@ func (m model) View() string {
 
 		s = lipgloss.Place(termWidth, termHeight, lipgloss.Center, lipgloss.Center, resultsStyle.Render(content))
 
-	case TimerBasedTestResults:
+	case SentenceCountTestResults:
 		termenv.Reset()
 
 		rawWpmShow := "raw: " + style(strconv.Itoa(state.results.rawWpm), m.styles.greener)
 		cpm := "cpm: " + style(strconv.Itoa(state.results.cpm), m.styles.greener)
 		wpm := "wpm: " + style(strconv.Itoa(state.results.wpm), m.styles.runningTimer)
 		givenTime := "time: " + style(state.results.time.String(), m.styles.greener)
+		sentenceCnt := "cnt: " + style(strconv.Itoa(state.sentenceCnt), m.styles.greener)
 		accuracy := "accuracy: " + style(fmt.Sprintf("%.1f", state.results.accuracy), m.styles.greener)
-		words := "words: " + style(state.results.wordList, m.styles.greener)
+		words := "sentences: " + style(state.results.wordList, m.styles.greener)
 
-		content := wpm + "\n\n" + accuracy + " " + rawWpmShow + " " + cpm + "\n" + givenTime + " " + words
+		content := wpm + "\n\n" + accuracy + " " + rawWpmShow + " " + cpm + "\n" + givenTime + " " + sentenceCnt + " " + words
 
 		termWidth, termHeight, _ := term.GetSize(0)
 
 		s = lipgloss.Place(termWidth, termHeight, lipgloss.Center, lipgloss.Center, resultsStyle.Render(content))
-
-	case WordCountBasedTest:
-		var coloredStopwatch string
-		if state.stopwatch.isRunning {
-			coloredStopwatch = style(state.stopwatch.stopwatch.View(), m.styles.runningTimer)
-		} else {
-			coloredStopwatch = style(state.stopwatch.stopwatch.View(), m.styles.stoppedTimer)
-		}
-
-		paragraphView := state.base.paragraphView(lineLenLimit, m.styles)
-		lines := strings.Split(paragraphView, "\n")
-		cursorLine := findCursorLine(strings.Split(paragraphView, "\n"), state.base.cursor)
-
-		linesAroundCursor := strings.Join(getLinesAroundCursor(lines, cursorLine), "\n")
-
-		// Vertical positioning
-		for i := 0; i < termHeight/2-3; i++ {
-			s += "\n"
-		}
-
-		avgLineLen := averageStringLen(lines[:len(lines)-1])
-		indentBy := uint(termWidth/2) - (uint(avgLineLen) / 2)
-
-		s += m.indent(coloredStopwatch, indentBy) + "\n\n" + m.indent(linesAroundCursor, indentBy)
-
-		if !state.stopwatch.isRunning {
-			s += "\n\n\n"
-			s += lipgloss.PlaceHorizontal(termWidth, lipgloss.Center, style("ctrl+r to restart", m.styles.toEnter))
-		}
 
 	case TimerBasedTest:
 		var coloredTimer string
@@ -139,7 +127,7 @@ func (m model) View() string {
 			s += "\n"
 		}
 
-		avgLineLen := averageStringLen(lines[:len(lines)-1])
+		avgLineLen := averageLineLen(lines)
 		indentBy := uint(termWidth/2) - (uint(avgLineLen) / 2)
 
 		s += m.indent(coloredTimer, indentBy) + "\n\n" + m.indent(linesAroundCursor, indentBy)
@@ -148,9 +136,77 @@ func (m model) View() string {
 			s += "\n\n\n"
 			s += lipgloss.PlaceHorizontal(termWidth, lipgloss.Center, style("ctrl+r to restart", m.styles.toEnter))
 		}
+
+	case WordCountBasedTest:
+		var coloredStopwatch string
+		if state.stopwatch.isRunning {
+			coloredStopwatch = style(state.stopwatch.stopwatch.View(), m.styles.runningTimer)
+		} else {
+			coloredStopwatch = style(state.stopwatch.stopwatch.View(), m.styles.stoppedTimer)
+		}
+
+		paragraphView := state.base.paragraphView(lineLenLimit, m.styles)
+		lines := strings.Split(paragraphView, "\n")
+		cursorLine := findCursorLine(strings.Split(paragraphView, "\n"), state.base.cursor)
+
+		linesAroundCursor := strings.Join(getLinesAroundCursor(lines, cursorLine), "\n")
+
+		// Vertical positioning
+		for i := 0; i < termHeight/2-3; i++ {
+			s += "\n"
+		}
+
+		avgLineLen := averageLineLen(lines)
+		indentBy := uint(termWidth/2) - (uint(avgLineLen) / 2)
+
+		s += m.indent(coloredStopwatch, indentBy) + "\n\n" + m.indent(linesAroundCursor, indentBy)
+
+		if !state.stopwatch.isRunning {
+			s += "\n\n\n"
+			s += lipgloss.PlaceHorizontal(termWidth, lipgloss.Center, style("ctrl+r to restart", m.styles.toEnter))
+		}
+
+	case SentenceCountBasedTest:
+		var coloredStopwatch string
+		if state.stopwatch.isRunning {
+			coloredStopwatch = style(state.stopwatch.stopwatch.View(), m.styles.runningTimer)
+		} else {
+			coloredStopwatch = style(state.stopwatch.stopwatch.View(), m.styles.stoppedTimer)
+		}
+
+		paragraphView := state.base.paragraphView(lineLenLimit, m.styles)
+		lines := strings.Split(paragraphView, "\n")
+		cursorLine := findCursorLine(strings.Split(paragraphView, "\n"), state.base.cursor)
+
+		linesAroundCursor := strings.Join(getLinesAroundCursor(lines, cursorLine), "\n")
+
+		// Vertical positioning
+		for i := 0; i < termHeight/2-3; i++ {
+			s += "\n"
+		}
+
+		avgLineLen := averageLineLen(lines)
+		indentBy := uint(termWidth/2) - (uint(avgLineLen) / 2)
+
+		s += m.indent(coloredStopwatch, indentBy) + "\n\n" + m.indent(linesAroundCursor, indentBy)
+
+		if !state.stopwatch.isRunning {
+			s += "\n\n\n"
+			s += lipgloss.PlaceHorizontal(termWidth, lipgloss.Center, style("ctrl+r to restart", m.styles.toEnter))
+		}
+
 	}
 
 	return s
+}
+
+func averageLineLen(lines []string) int {
+	linesLen := len(lines)
+	if linesLen > 1 {
+		lines = lines[:linesLen-1] //Drop last line, as it might skew up average length
+	}
+
+	return averageStringLen(lines)
 }
 
 func (selection TimerBasedTestSettings) show(styles Styles) string {
@@ -163,6 +219,12 @@ func (selection WordCountBasedTestSettings) show(styles Styles) string {
 	selections := []string{fmt.Sprint(selection.wordCountSelections[selection.wordCountCursor]), selection.wordListSelections[selection.wordListCursor]}
 	selectionsStr := showSelections(selections, selection.cursor, styles)
 	return fmt.Sprintf("%s %s", "Word count run", selectionsStr)
+}
+
+func (selection SentenceCountBasedTestSettings) show(styles Styles) string {
+	selections := []string{fmt.Sprint(selection.sentenceCountSelections[selection.sentenceCountCursor]), selection.sentenceListSelections[selection.sentenceListCursor]}
+	selectionsStr := showSelections(selections, selection.cursor, styles)
+	return fmt.Sprintf("%s %s", "Sentence count run", selectionsStr)
 }
 
 func showSelections(selections []string, cursor int, styles Styles) string {
