@@ -19,6 +19,15 @@ var frankenstein string
 //go:embed embedables/words/pride-and-prejudice.txt
 var prideAndPrejudice string
 
+//go:embed embedables/sentences/dorian-gray.txt
+var dorianGraySentences string
+
+//go:embed embedables/sentences/pride-and-prejudice.txt
+var prideAndPrejudiceSentences string
+
+//go:embed embedables/sentences/frankenstein.txt
+var frankensteinSentences string
+
 func init() {
 	seed := time.Now().UnixNano()
 	rand.Seed(seed)
@@ -44,10 +53,13 @@ func makePool(content string) []string {
 func NewGenerator() (g WordsGenerator) {
 	g.Count = 300
 	g.pools = map[string]string{
-		"common-words":        commonEnglish,
-		"dorian-gray":         dorianGray,
-		"frankenstein":        frankenstein,
-		"pride-and-prejudice": prideAndPrejudice,
+		"common-words":                  commonEnglish,
+		"dorian-gray":                   dorianGray,
+		"dorian-gray-sentences":         dorianGraySentences,
+		"frankenstein":                  frankenstein,
+		"frankenstein-sentences":        frankensteinSentences,
+		"pride-and-prejudice":           prideAndPrejudice,
+		"pride-and-prejudice-sentences": prideAndPrejudiceSentences,
 	}
 	return g
 }
