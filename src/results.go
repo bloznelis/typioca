@@ -20,6 +20,7 @@ func (m TimerBasedTest) calculateResults() Results {
 func (m WordCountBasedTest) calculateResults() Results {
 	elapsedMinutes := m.stopwatch.stopwatch.Elapsed().Minutes()
 	return Results{
+		wpm:      m.base.calculateNormalizedWpm(elapsedMinutes),
 		accuracy: m.base.calculateAccuracy(),
 		rawWpm:   m.base.calculateRawWpm(elapsedMinutes),
 		cpm:      m.base.calculateCpm(elapsedMinutes),
