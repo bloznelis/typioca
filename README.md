@@ -16,6 +16,7 @@ Minimal, terminal based typing speed tester.
   * Cursor aware word lines
   * Interactive menu
   * ctrl+w support ;)
+  * SSH server `typioca serve`
 
 ## Installation
 ### AUR

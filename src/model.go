@@ -42,6 +42,8 @@ type Styles struct {
 type model struct {
 	state  State
 	styles Styles
+	width  int
+	height int
 }
 
 type Results struct {
