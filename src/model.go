@@ -76,6 +76,14 @@ type WordCountBasedTestSettings struct {
 	cursor              int
 }
 
+type SentenceCountBasedTestSettings struct {
+	sentenceCountSelections []int
+	sentenceCountCursor     int
+	sentenceListSelections  []string
+	sentenceListCursor      int
+	cursor                  int
+}
+
 type MainMenu struct {
 	selections []MainMenuSelection
 	cursor     int
@@ -112,4 +120,17 @@ type WordCountTestResults struct {
 	settings WordCountBasedTestSettings
 	wordCnt  int
 	results  Results
+}
+
+type SentenceCountBasedTest struct {
+	settings  SentenceCountBasedTestSettings
+	stopwatch myStopWatch
+	base      TestBase
+	completed bool
+}
+
+type SentenceCountTestResults struct {
+	settings    SentenceCountBasedTestSettings
+	sentenceCnt int
+	results     Results
 }
