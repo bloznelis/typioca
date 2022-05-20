@@ -15,26 +15,26 @@ import (
 	"golang.org/x/term"
 )
 
+var avgLineLen int = 0
+var lineLenLimit int = 40
+var resultsStyle = lipgloss.NewStyle().
+	Align(lipgloss.Center).
+	PaddingTop(1).
+	PaddingBottom(1).
+	PaddingLeft(5).
+	PaddingRight(5).
+	BorderStyle(lipgloss.HiddenBorder()).
+	BorderForeground(lipgloss.Color("2"))
+
 func (m model) View() string {
 	var s string
 
 	termWidth, termHeight, _ := term.GetSize(0)
 
-	var lineLenLimit int = 40
-
 	reactiveLimit := (termWidth / 10) * 6
 	if reactiveLimit < lineLenLimit {
 		lineLenLimit = reactiveLimit
 	}
-
-	resultsStyle := lipgloss.NewStyle().
-		Align(lipgloss.Center).
-		PaddingTop(1).
-		PaddingBottom(1).
-		PaddingLeft(5).
-		PaddingRight(5).
-		BorderStyle(lipgloss.HiddenBorder()).
-		BorderForeground(lipgloss.Color("2"))
 
 	switch state := m.state.(type) {
 	case MainMenu:
@@ -127,7 +127,10 @@ func (m model) View() string {
 			s += "\n"
 		}
 
-		avgLineLen := averageLineLen(lines)
+		if avgLineLen == 0 {
+			avgLineLen = averageLineLen(lines)
+		}
+
 		indentBy := uint(termWidth/2) - (uint(avgLineLen) / 2)
 
 		s += m.indent(coloredTimer, indentBy) + "\n\n" + m.indent(linesAroundCursor, indentBy)
@@ -156,7 +159,9 @@ func (m model) View() string {
 			s += "\n"
 		}
 
-		avgLineLen := averageLineLen(lines)
+		if avgLineLen == 0 {
+			avgLineLen = averageLineLen(lines)
+		}
 		indentBy := uint(termWidth/2) - (uint(avgLineLen) / 2)
 
 		s += m.indent(coloredStopwatch, indentBy) + "\n\n" + m.indent(linesAroundCursor, indentBy)
@@ -185,7 +190,9 @@ func (m model) View() string {
 			s += "\n"
 		}
 
-		avgLineLen := averageLineLen(lines)
+		if avgLineLen == 0 {
+			avgLineLen = averageLineLen(lines)
+		}
 		indentBy := uint(termWidth/2) - (uint(avgLineLen) / 2)
 
 		s += m.indent(coloredStopwatch, indentBy) + "\n\n" + m.indent(linesAroundCursor, indentBy)
@@ -362,8 +369,14 @@ func style(str string, style StringStyle) string {
 func styleAllRunes(runes []rune, style StringStyle) string {
 	acc := ""
 
-	for _, char := range runes {
+	for idx, char := range runes {
+		_ = idx
 		acc += style(string(char)).String()
+		// if idx == 0 {
+		// 	acc += style(string(char)).String()
+		// } else {
+		// 	acc += string(char)
+		// }
 	}
 
 	return acc
