@@ -1,12 +1,17 @@
 package main
 
 import (
+	"fmt"
+	"log"
+	"time"
+
 	"github.com/charmbracelet/bubbles/stopwatch"
 	"github.com/charmbracelet/bubbles/timer"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	startTime := time.Now()
 	var commands []tea.Cmd
 
 	switch msg := msg.(type) {
@@ -206,6 +211,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 	}
 
+	elapsedUpdateTime := time.Since(startTime)
+	log.Println("time to update:" + fmt.Sprint(elapsedUpdateTime))
 	// Return the updated model to the Bubble Tea runtime for processing.
 	return m, tea.Batch(commands...)
 }
