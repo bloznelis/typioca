@@ -13,6 +13,7 @@ jobs:
         uses: shimataro/ssh-key-action@v2
         with:
           key: ${{ secrets.AUR_SSH_KEY }}
+          known_hosts: ""
       - name: Set env
         run: echo "GIT_TAG=`echo $(git describe --tags --abbrev=0)`" >> $GITHUB_ENV
       - name: Push to AUR
