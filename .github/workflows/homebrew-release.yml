@@ -1,0 +1,17 @@
+name: Homebrew release
+
+on:
+  push:
+    tags: '*'
+
+jobs:
+  homebrew:
+    name: Bump Homebrew formula
+    runs-on: ubuntu-latest
+    steps:
+      - uses: mislav/bump-homebrew-formula-action@v2
+        with:
+          formula-name: typioca
+          homebrew-tap: bloznelis/homebrew-tap
+        env:
+          COMMITTER_TOKEN: ${{ secrets.PUBLIC_REPO_ACCESS }}
