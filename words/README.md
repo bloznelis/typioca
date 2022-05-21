@@ -11,6 +11,9 @@
 ## Words from books
 `bb book-word-list.clj [book-uri] [output]`
 
+## Sentences from books
+`bb book-sentence-list.clj [book-uri] [output]`
+
 ---
 
 * **Frankenstein** - https://www.gutenberg.org/files/84/84-0.txt
