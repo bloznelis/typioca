@@ -1,0 +1,16 @@
+pkgbase = typioca-git
+	pkgdesc = Minimal, terminal based typing speed tester
+	pkgver = ${PKGVER}
+	pkgrel = 1
+	url = https://github.com/bloznelis/typioca
+	arch = x86_64
+	license = MIT
+	makedepends = git
+	makedepends = make
+	makedepends = go
+	provides = typioca
+	conflicts = typioca
+	source = git+https://github.com/bloznelis/typioca
+	sha256sums = SKIP
+
+pkgname = typioca-git
