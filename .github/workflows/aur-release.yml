@@ -18,4 +18,4 @@ jobs:
       - name: Set env
         run: echo "GIT_TAG=`echo $(git describe --tags --abbrev=0)`" >> $GITHUB_ENV
       - name: Push to AUR
-        run: .github/aur/publish.sh {{ env.GIT_TAG }}
+        run: .github/aur/publish.sh ${{ env.GIT_TAG }}
