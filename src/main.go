@@ -27,28 +27,35 @@ var (
 	serverBind    = ""
 	serverPort    = 2229
 	serverKeyPath = ""
+	showVersion   = false
 )
 
 var (
+	Version = "dev"
 	rootCmd = &cobra.Command{
 		Use:  "typioca",
 		Long: "typioca is a typing test program.",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			termenv.SetWindowTitle("typioca")
-			defer println("bye!")
+			if showVersion {
+				fmt.Println("typioca ", Version)
+				return nil
+			} else {
+				termenv.SetWindowTitle("typioca")
+				defer println("bye!")
 
-			termWidth, termHeight, _ := term.GetSize(0)
-			p := tea.NewProgram(
-				initialModel(
-					termenv.ColorProfile(),
-					termenv.ForegroundColor(),
-					termWidth,
-					termHeight,
-				),
-				tea.WithAltScreen(),
-			)
+				termWidth, termHeight, _ := term.GetSize(0)
+				p := tea.NewProgram(
+					initialModel(
+						termenv.ColorProfile(),
+						termenv.ForegroundColor(),
+						termWidth,
+						termHeight,
+					),
+					tea.WithAltScreen(),
+				)
 
-			return p.Start()
+				return p.Start()
+			}
 		},
 	}
 	serveCmd = &cobra.Command{
@@ -109,6 +116,7 @@ func init() {
 	serveCmd.Flags().StringVarP(&serverKeyPath, "key", "k", "typioca", "path to the server key")
 	serveCmd.Flags().StringVarP(&serverBind, "bind", "b", "", "address to bind on")
 	serveCmd.Flags().IntVarP(&serverPort, "port", "p", 2229, "port to serve on")
+	rootCmd.Flags().BoolVarP(&showVersion, "version", "v", false, "show typioca version")
 	rootCmd.AddCommand(serveCmd)
 }
 

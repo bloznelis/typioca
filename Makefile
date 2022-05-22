@@ -3,7 +3,7 @@ NAME       := typioca
 OUTPUT_BIN ?= execs/$(NAME)$(ARCH)
 PACKAGE    := github.com/bloznelis/$(NAME)
 GIT_REV    ?= $(shell git rev-parse --short HEAD)
-VERSION 	 ?=
+VERSION 	 ?= $(shell git describe --abbrev=0 --tags)
 
 default: help
 
@@ -21,7 +21,7 @@ build-linux-amd:  ## Builds the linux-amd64 CLI
 
 build:  ## Builds the CLI
 	@go build -trimpath ${GO_FLAGS} \
-	-ldflags "-w -s -X ${PACKAGE}/cmd.version=${VERSION} -X ${PACKAGE}/cmd.commit=${GIT_REV}" \
+	-ldflags "-w -s -X main.Version=${VERSION} -X main.Commit=${GIT_REV}" \
 	-a -tags netgo -o ${OUTPUT_BIN} ./src
 
 build-all: build-win build-mac-amd build-mac-arm build-linux-amd ## Builds execs for all architectures
