@@ -2,8 +2,8 @@ GO_FLAGS   ?=
 NAME       := typioca
 OUTPUT_BIN ?= execs/$(NAME)$(ARCH)
 PACKAGE    := github.com/bloznelis/$(NAME)
-GIT_REV    ?= $(shell git rev-parse --short HEAD)
-VERSION 	 ?= $(shell git describe --abbrev=0 --tags)
+GIT_REV     = $(shell git rev-parse --short HEAD)
+VERSION     = $(shell git describe --abbrev=0 --tags)
 
 default: help
 
