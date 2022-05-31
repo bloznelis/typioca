@@ -43,7 +43,7 @@ var (
 				termenv.SetWindowTitle("typioca")
 				defer println("bye!")
 
-				termWidth, termHeight, _ := term.GetSize(0)
+				termWidth, termHeight, _ := term.GetSize(int(os.Stdin.Fd()))
 				p := tea.NewProgram(
 					initialModel(
 						termenv.ColorProfile(),
@@ -121,6 +121,8 @@ func init() {
 }
 
 func main() {
+	OsInit()
+
 	if err := rootCmd.Execute(); err != nil {
 		log.Fatal(err)
 	}

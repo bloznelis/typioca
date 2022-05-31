@@ -3,6 +3,7 @@ package main
 import (
 	_ "embed"
 	"math/rand"
+	"regexp"
 	"strings"
 	"time"
 )
@@ -69,7 +70,9 @@ func (this WordsGenerator) Generate(poolKey string) string {
 	acc := []string{}
 	poolLength := len(pool)
 	for i := 0; i < this.Count; i++ {
-		acc = append(acc, pool[rand.Int()%poolLength])
+		word := pool[rand.Int()%poolLength]
+		word = regexp.MustCompile("\r|\n").ReplaceAllString(word, "")
+		acc = append(acc, word)
 	}
 
 	return strings.Join(acc, " ")

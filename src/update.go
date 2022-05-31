@@ -13,9 +13,13 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	// Update window size
 	case tea.WindowSizeMsg:
-		m.width = msg.Width
-		m.height = msg.Height
-		return m, nil
+		if msg.Width == 0 && msg.Height == 0 {
+			return m, nil
+		} else {
+			m.width = msg.Width
+			m.height = msg.Height
+			return m, nil
+		}
 
 	// Is it a key press?
 	case tea.KeyMsg:
