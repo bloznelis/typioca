@@ -14,7 +14,9 @@ import (
 )
 
 var avgLineLen int = 0
-var lineLenLimit int = 40
+var lineLenLimit int
+var minLineLen int = 5
+var maxLineLen int = 40
 var resultsStyle = lipgloss.NewStyle().
 	Align(lipgloss.Center).
 	PaddingTop(1).
@@ -29,10 +31,8 @@ func (m model) View() string {
 
 	termWidth, termHeight := m.width, m.height
 
-	reactiveLimit := (termWidth / 10) * 6
-	if reactiveLimit < lineLenLimit {
-		lineLenLimit = reactiveLimit
-	}
+	reactiveLimit := (termWidth * 6) / 10
+	lineLenLimit = int(math.Min(float64(maxLineLen), math.Max(float64(minLineLen), float64(reactiveLimit))))
 
 	switch state := m.state.(type) {
 	case MainMenu:
@@ -116,7 +116,7 @@ func (m model) View() string {
 			avgLineLen = averageLineLen(lines)
 		}
 
-		indentBy := uint(termWidth/2) - (uint(avgLineLen) / 2)
+		indentBy := uint(math.Max(0, float64(termWidth/2-avgLineLen/2)))
 
 		s += m.indent(coloredTimer, indentBy) + "\n\n" + m.indent(linesAroundCursor, indentBy)
 
@@ -147,7 +147,7 @@ func (m model) View() string {
 		if avgLineLen == 0 {
 			avgLineLen = averageLineLen(lines)
 		}
-		indentBy := uint(termWidth/2) - (uint(avgLineLen) / 2)
+		indentBy := uint(math.Max(0, float64(termWidth/2-avgLineLen/2)))
 
 		s += m.indent(coloredStopwatch, indentBy) + "\n\n" + m.indent(linesAroundCursor, indentBy)
 
@@ -178,7 +178,7 @@ func (m model) View() string {
 		if avgLineLen == 0 {
 			avgLineLen = averageLineLen(lines)
 		}
-		indentBy := uint(termWidth/2) - (uint(avgLineLen) / 2)
+		indentBy := uint(math.Max(0, float64(termWidth/2-avgLineLen/2)))
 
 		s += m.indent(coloredStopwatch, indentBy) + "\n\n" + m.indent(linesAroundCursor, indentBy)
 
@@ -315,7 +315,8 @@ func (base TestBase) colorWordsToEnter(styles Styles) string {
 
 func wrapStyledParagraph(paragraph string, lineLimit int) string {
 	// XXX: Replace spaces, because wordwrap trims them out at the ends
-	paragraph = strings.Replace(paragraph, " ", "·", -1)
+
+	paragraph = strings.ReplaceAll(paragraph, " ", "·")
 
 	f := wordwrap.NewWriter(lineLimit)
 	f.Breakpoints = []rune{'·'}
@@ -323,7 +324,7 @@ func wrapStyledParagraph(paragraph string, lineLimit int) string {
 	f.Write([]byte(paragraph))
 	f.Close()
 
-	paragraph = strings.Replace(f.String(), "·", " ", -1)
+	paragraph = strings.ReplaceAll(f.String(), "·", " ")
 
 	return paragraph
 }
@@ -357,11 +358,6 @@ func styleAllRunes(runes []rune, style StringStyle) string {
 	for idx, char := range runes {
 		_ = idx
 		acc += style(string(char)).String()
-		// if idx == 0 {
-		// 	acc += style(string(char)).String()
-		// } else {
-		// 	acc += string(char)
-		// }
 	}
 
 	return acc

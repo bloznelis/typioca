@@ -1,6 +1,8 @@
 package main
 
-import "math"
+import (
+	"math"
+)
 
 func averageStringLen(strings []string) int {
 	var totalLen int = 0
