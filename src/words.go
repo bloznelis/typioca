@@ -70,7 +70,7 @@ func (this WordsGenerator) Generate(poolKey string) string {
 	acc := []string{}
 	poolLength := len(pool)
 	for i := 0; i < this.Count; i++ {
-		word := pool[rand.Int()%poolLength]
+		word := pool[rand.Int()%(poolLength-1)]
 		word = regexp.MustCompile("\r|\n").ReplaceAllString(word, "")
 		acc = append(acc, word)
 	}
