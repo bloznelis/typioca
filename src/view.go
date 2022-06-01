@@ -289,7 +289,7 @@ func (base TestBase) colorInput(styles Styles) string {
 			mistakeSlice := base.wordsToEnter[mistakeAt : mistakeAt+1]
 
 			coloredInput += styleAllRunes(sliceUntilMistake, styles.correct)
-			coloredInput += style(mistakeSlice, styles.mistakes)
+			coloredInput += style(string(mistakeSlice), styles.mistakes)
 
 			previousMistake = mistakeAt
 		}
@@ -304,13 +304,13 @@ func (base TestBase) colorInput(styles Styles) string {
 func (base TestBase) colorCursor(styles Styles) string {
 	cursorLetter := base.wordsToEnter[len(base.inputBuffer) : len(base.inputBuffer)+1]
 
-	return style(cursorLetter, styles.cursor)
+	return style(string(cursorLetter), styles.cursor)
 }
 
 func (base TestBase) colorWordsToEnter(styles Styles) string {
 	wordsToEnter := base.wordsToEnter[len(base.inputBuffer)+1:] // without cursor
 
-	return style(wordsToEnter, styles.toEnter)
+	return style(string(wordsToEnter), styles.toEnter)
 }
 
 func wrapStyledParagraph(paragraph string, lineLimit int) string {

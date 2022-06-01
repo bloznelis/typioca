@@ -97,7 +97,7 @@ type MainMenu struct {
 }
 
 type TestBase struct {
-	wordsToEnter string
+	wordsToEnter []rune
 	inputBuffer  []rune
 	rawInputCnt  int // Should not be reduced
 	mistakes     mistakes
