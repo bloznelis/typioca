@@ -552,19 +552,15 @@ func (base TestBase) findLatestWsIndex() int {
 }
 
 func findLatestWsIndex(wordsToInput []rune, cursorAt int) int {
-	var wordsToInputCopy []rune
-	copy(wordsToInputCopy, wordsToInput)
-
-	trimmedWordsToInput := wordsToInputCopy[:cursorAt]
-	reversed := reverse([]rune(trimmedWordsToInput))
-
 	var wsIdx int = 0
-	for idx, value := range reversed {
-		if value == ' ' && idx != 0 {
-			wsIdx = len(reversed) - 1 - idx
+	for idx, value := range wordsToInput {
+		if idx+1 >= cursorAt {
 			break
+		}
+		if value == ' ' && idx != 0 {
+			wsIdx = idx
 		}
 	}
 
-	return int(floor(wsIdx))
+	return wsIdx
 }
