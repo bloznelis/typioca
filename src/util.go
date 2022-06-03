@@ -9,7 +9,7 @@ func averageStringLen(strings []string) int {
 	var cnt int = 0
 
 	for _, str := range strings {
-		currentLen := len(dropAnsiCodes(str))
+		currentLen := len([]rune(dropAnsiCodes(str)))
 		totalLen += currentLen
 		cnt += 1
 	}
