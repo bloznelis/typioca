@@ -548,16 +548,12 @@ func findNextSpaceIndex(wordsToInput []rune, cursorAt int) int {
 }
 
 func (base TestBase) findLatestWsIndex() int {
-	return findLatestWsIndex(base.wordsToEnter, base.cursor)
-}
-
-func findLatestWsIndex(wordsToInput []rune, cursorAt int) int {
 	var wsIdx int = 0
-	for idx, value := range wordsToInput {
-		if idx+1 >= cursorAt {
+	for idx, value := range base.wordsToEnter {
+		if idx+1 >= base.cursor {
 			break
 		}
-		if value == ' ' && idx != 0 {
+		if value == ' ' {
 			wsIdx = idx
 		}
 	}
