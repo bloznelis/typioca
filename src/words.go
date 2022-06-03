@@ -65,7 +65,7 @@ func NewGenerator() (g WordsGenerator) {
 	return g
 }
 
-func (this WordsGenerator) Generate(poolKey string) string {
+func (this WordsGenerator) Generate(poolKey string) []rune {
 	pool := makePool(this.pools[poolKey])
 	acc := []string{}
 	poolLength := len(pool)
@@ -75,5 +75,5 @@ func (this WordsGenerator) Generate(poolKey string) string {
 		acc = append(acc, word)
 	}
 
-	return strings.Join(acc, " ")
+	return []rune(strings.TrimSpace(strings.Join(acc, " ")))
 }

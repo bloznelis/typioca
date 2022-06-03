@@ -6,7 +6,6 @@ import (
 	"log"
 	"os"
 	"os/signal"
-	"strings"
 	"syscall"
 	"time"
 
@@ -138,7 +137,7 @@ func initTimerBasedTest(settings TimerBasedTestSettings) TimerBasedTest {
 			timedout:  false,
 		},
 		base: TestBase{
-			wordsToEnter: []rune(NewGenerator().Generate(settings.wordListSelections[settings.wordListCursor].key)),
+			wordsToEnter: NewGenerator().Generate(settings.wordListSelections[settings.wordListCursor].key),
 			inputBuffer:  make([]rune, 0),
 			rawInputCnt:  0,
 			mistakes: mistakes{
@@ -161,7 +160,7 @@ func initWordCountBasedTest(settings WordCountBasedTestSettings) WordCountBasedT
 			isRunning: false,
 		},
 		base: TestBase{
-			wordsToEnter: []rune(strings.TrimSpace(generator.Generate(settings.wordListSelections[settings.wordListCursor].key))),
+			wordsToEnter: generator.Generate(settings.wordListSelections[settings.wordListCursor].key),
 			inputBuffer:  make([]rune, 0),
 			rawInputCnt:  0,
 			mistakes: mistakes{
@@ -185,7 +184,7 @@ func initSentenceCountBasedTest(settings SentenceCountBasedTestSettings) Sentenc
 			isRunning: false,
 		},
 		base: TestBase{
-			wordsToEnter: []rune(strings.TrimSpace(generator.Generate(settings.sentenceListSelections[settings.sentenceListCursor].key))),
+			wordsToEnter: generator.Generate(settings.sentenceListSelections[settings.sentenceListCursor].key),
 			inputBuffer:  make([]rune, 0),
 			rawInputCnt:  0,
 			mistakes: mistakes{
