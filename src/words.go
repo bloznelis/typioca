@@ -70,9 +70,11 @@ func (this WordsGenerator) Generate(poolKey string) []rune {
 	acc := []string{}
 	poolLength := len(pool)
 	for i := 0; i < this.Count; i++ {
-		word := pool[rand.Int()%(poolLength-1)]
+		word := pool[rand.Int()%poolLength]
 		word = regexp.MustCompile("\r|\n").ReplaceAllString(word, "")
-		acc = append(acc, word)
+		if word != "" {
+			acc = append(acc, word)
+		}
 	}
 
 	return []rune(strings.TrimSpace(strings.Join(acc, " ")))
