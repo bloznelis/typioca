@@ -495,7 +495,7 @@ func (base TestBase) handleRunes(msg tea.KeyMsg) TestBase {
 	letterToInput := base.wordsToEnter[inputLenDec:inputLen]
 	inputLetter := string(base.inputBuffer[inputLenDec:])
 
-	if letterToInput != inputLetter {
+	if string(letterToInput) != inputLetter {
 		base.mistakes.mistakesAt[inputLenDec] = true
 		base.mistakes.rawMistakesCnt = base.mistakes.rawMistakesCnt + 1
 	}
@@ -532,7 +532,7 @@ func (base TestBase) handleSpace() TestBase {
 	return base
 }
 
-func findNextSpaceIndex(wordsToInput string, cursorAt int) int {
+func findNextSpaceIndex(wordsToInput []rune, cursorAt int) int {
 	trimmedWordsToInput := wordsToInput[cursorAt:]
 	words := []rune(trimmedWordsToInput)
 
@@ -548,7 +548,7 @@ func findNextSpaceIndex(wordsToInput string, cursorAt int) int {
 }
 
 func (base TestBase) findLatestWsIndex() int {
-	return findLatestWsIndex(base.wordsToEnter, base.cursor)
+	return findLatestWsIndex(string(base.wordsToEnter), base.cursor)
 }
 
 func findLatestWsIndex(wordsToInput string, cursorAt int) int {

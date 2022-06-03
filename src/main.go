@@ -138,7 +138,7 @@ func initTimerBasedTest(settings TimerBasedTestSettings) TimerBasedTest {
 			timedout:  false,
 		},
 		base: TestBase{
-			wordsToEnter: NewGenerator().Generate(settings.wordListSelections[settings.wordListCursor].key),
+			wordsToEnter: []rune(NewGenerator().Generate(settings.wordListSelections[settings.wordListCursor].key)),
 			inputBuffer:  make([]rune, 0),
 			rawInputCnt:  0,
 			mistakes: mistakes{
@@ -161,7 +161,7 @@ func initWordCountBasedTest(settings WordCountBasedTestSettings) WordCountBasedT
 			isRunning: false,
 		},
 		base: TestBase{
-			wordsToEnter: strings.TrimSpace(generator.Generate(settings.wordListSelections[settings.wordListCursor].key)),
+			wordsToEnter: []rune(strings.TrimSpace(generator.Generate(settings.wordListSelections[settings.wordListCursor].key))),
 			inputBuffer:  make([]rune, 0),
 			rawInputCnt:  0,
 			mistakes: mistakes{
@@ -185,7 +185,7 @@ func initSentenceCountBasedTest(settings SentenceCountBasedTestSettings) Sentenc
 			isRunning: false,
 		},
 		base: TestBase{
-			wordsToEnter: strings.TrimSpace(generator.Generate(settings.sentenceListSelections[settings.sentenceListCursor].key)),
+			wordsToEnter: []rune(strings.TrimSpace(generator.Generate(settings.sentenceListSelections[settings.sentenceListCursor].key))),
 			inputBuffer:  make([]rune, 0),
 			rawInputCnt:  0,
 			mistakes: mistakes{
