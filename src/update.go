@@ -37,6 +37,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch state := m.state.(type) {
 	case MainMenu:
 		m.state = state.selections[state.cursor].handleInput(msg, state)
+		return m.quitOn(msg, "ctrl+q")
 
 	case TimerBasedTestResults:
 		m.state = state.handleInput(msg, state)
@@ -218,6 +219,18 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	// Return the updated model to the Bubble Tea runtime for processing.
 	return m, tea.Batch(commands...)
+}
+
+func (m model) quitOn(msg tea.Msg, strokes ...string) (tea.Model, tea.Cmd) {
+	switch msg := msg.(type) {
+	case tea.KeyMsg:
+		for _, elem := range strokes {
+			if elem == msg.String() {
+				return m, tea.Quit
+			}
+		}
+	}
+	return m, nil
 }
 
 func (settings TimerBasedTestSettings) handleInput(msg tea.Msg, menu MainMenu) State {
@@ -415,6 +428,8 @@ func (results TimerBasedTestResults) handleInput(msg tea.Msg, state State) State
 		switch msg.String() {
 		case "enter", "ctrl+r":
 			state = initTimerBasedTest(results.settings)
+		case "ctrl+q":
+			state = initMainMenu()
 		}
 	}
 
@@ -427,6 +442,8 @@ func (results WordCountTestResults) handleInput(msg tea.Msg, state State) State 
 		switch msg.String() {
 		case "enter", "ctrl+r":
 			state = initWordCountBasedTest(results.settings)
+		case "ctrl+q":
+			state = initMainMenu()
 		}
 	}
 
@@ -439,6 +456,8 @@ func (results SentenceCountTestResults) handleInput(msg tea.Msg, state State) St
 		switch msg.String() {
 		case "enter", "ctrl+r":
 			state = initSentenceCountBasedTest(results.settings)
+		case "ctrl+q":
+			state = initMainMenu()
 		}
 	}
 
