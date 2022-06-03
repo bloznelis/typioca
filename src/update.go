@@ -30,13 +30,13 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		// These keys should exit the program.
 		case "ctrl+c", "esc":
 			return m, tea.Quit
-
 		}
 	}
 
 	switch state := m.state.(type) {
 	case MainMenu:
 		m.state = state.selections[state.cursor].handleInput(msg, state)
+		return m.quitOn(msg, "ctrl+q")
 
 	case TimerBasedTestResults:
 		m.state = state.handleInput(msg, state)
@@ -65,6 +65,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.state = TimerBasedTestResults{
 					settings: state.settings,
 					results:  state.calculateResults(),
+					mainMenu: state.mainMenu,
 				}
 			}
 
@@ -73,11 +74,11 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			case "enter", "tab":
 
 			case "ctrl+q":
-				m.state = initMainMenu()
+				m.state = state.mainMenu
 				return m, nil
 
 			case "ctrl+r":
-				m.state = initTimerBasedTest(state.settings)
+				m.state = initTimerBasedTest(state.settings, state.mainMenu)
 				return m, nil
 
 			case "backspace", "ctrl+h":
@@ -120,11 +121,11 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			case "enter", "tab":
 
 			case "ctrl+q":
-				m.state = initMainMenu()
+				m.state = state.mainMenu
 				return m, nil
 
 			case "ctrl+r":
-				m.state = initWordCountBasedTest(state.settings)
+				m.state = initWordCountBasedTest(state.settings, state.mainMenu)
 				return m, nil
 
 			case "backspace", "ctrl+h":
@@ -154,6 +155,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 							settings: state.settings,
 							wordCnt:  state.settings.wordCountSelections[state.settings.wordCountCursor],
 							results:  state.calculateResults(),
+							mainMenu: state.mainMenu,
 						}
 					}
 				}
@@ -175,11 +177,11 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			case "enter", "tab":
 
 			case "ctrl+q":
-				m.state = initMainMenu()
+				m.state = state.mainMenu
 				return m, nil
 
 			case "ctrl+r":
-				m.state = initSentenceCountBasedTest(state.settings)
+				m.state = initSentenceCountBasedTest(state.settings, state.mainMenu)
 				return m, nil
 
 			case "backspace", "ctrl+h":
@@ -209,6 +211,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 							settings:    state.settings,
 							sentenceCnt: state.settings.sentenceCountSelections[state.settings.sentenceCountCursor],
 							results:     state.calculateResults(),
+							mainMenu:    state.mainMenu,
 						}
 					}
 				}
@@ -220,6 +223,18 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, tea.Batch(commands...)
 }
 
+func (m model) quitOn(msg tea.Msg, strokes ...string) (tea.Model, tea.Cmd) {
+	switch msg := msg.(type) {
+	case tea.KeyMsg:
+		for _, elem := range strokes {
+			if elem == msg.String() {
+				return m, tea.Quit
+			}
+		}
+	}
+	return m, nil
+}
+
 func (settings TimerBasedTestSettings) handleInput(msg tea.Msg, menu MainMenu) State {
 	cursorToSave := menu.cursor
 
@@ -227,7 +242,7 @@ func (settings TimerBasedTestSettings) handleInput(msg tea.Msg, menu MainMenu) S
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "enter":
-			return initTimerBasedTest(settings)
+			return initTimerBasedTest(settings, menu)
 		case "left", "h":
 			if settings.cursor > 0 {
 				settings.cursor--
@@ -290,7 +305,7 @@ func (settings WordCountBasedTestSettings) handleInput(msg tea.Msg, menu MainMen
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "enter":
-			return initWordCountBasedTest(settings)
+			return initWordCountBasedTest(settings, menu)
 		case "left", "h":
 			if settings.cursor > 0 {
 				settings.cursor--
@@ -353,7 +368,7 @@ func (settings SentenceCountBasedTestSettings) handleInput(msg tea.Msg, menu Mai
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "enter":
-			return initSentenceCountBasedTest(settings)
+			return initSentenceCountBasedTest(settings, menu)
 		case "left", "h":
 			if settings.cursor > 0 {
 				settings.cursor--
@@ -414,7 +429,9 @@ func (results TimerBasedTestResults) handleInput(msg tea.Msg, state State) State
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "enter", "ctrl+r":
-			state = initTimerBasedTest(results.settings)
+			state = initTimerBasedTest(results.settings, results.mainMenu)
+		case "ctrl+q":
+			state = results.mainMenu
 		}
 	}
 
@@ -426,7 +443,9 @@ func (results WordCountTestResults) handleInput(msg tea.Msg, state State) State 
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "enter", "ctrl+r":
-			state = initWordCountBasedTest(results.settings)
+			state = initWordCountBasedTest(results.settings, results.mainMenu)
+		case "ctrl+q":
+			state = results.mainMenu
 		}
 	}
 
@@ -438,7 +457,9 @@ func (results SentenceCountTestResults) handleInput(msg tea.Msg, state State) St
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "enter", "ctrl+r":
-			state = initSentenceCountBasedTest(results.settings)
+			state = initSentenceCountBasedTest(results.settings, results.mainMenu)
+		case "ctrl+q":
+			state = results.mainMenu
 		}
 	}
 

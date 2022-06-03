@@ -127,7 +127,7 @@ func main() {
 	}
 }
 
-func initTimerBasedTest(settings TimerBasedTestSettings) TimerBasedTest {
+func initTimerBasedTest(settings TimerBasedTestSettings, mainMenu MainMenu) TimerBasedTest {
 	return TimerBasedTest{
 		settings: settings,
 		timer: myTimer{
@@ -147,10 +147,11 @@ func initTimerBasedTest(settings TimerBasedTestSettings) TimerBasedTest {
 			cursor: 0,
 		},
 		completed: false,
+		mainMenu:  mainMenu,
 	}
 }
 
-func initWordCountBasedTest(settings WordCountBasedTestSettings) WordCountBasedTest {
+func initWordCountBasedTest(settings WordCountBasedTestSettings, mainMenu MainMenu) WordCountBasedTest {
 	generator := NewGenerator()
 	generator.Count = settings.wordCountSelections[settings.wordCountCursor]
 	return WordCountBasedTest{
@@ -170,10 +171,11 @@ func initWordCountBasedTest(settings WordCountBasedTestSettings) WordCountBasedT
 			cursor: 0,
 		},
 		completed: false,
+		mainMenu:  mainMenu,
 	}
 }
 
-func initSentenceCountBasedTest(settings SentenceCountBasedTestSettings) SentenceCountBasedTest {
+func initSentenceCountBasedTest(settings SentenceCountBasedTestSettings, mainMenu MainMenu) SentenceCountBasedTest {
 	generator := NewGenerator()
 	generator.Count = 40
 	generator.Count = settings.sentenceCountSelections[settings.sentenceCountCursor]
@@ -194,6 +196,7 @@ func initSentenceCountBasedTest(settings SentenceCountBasedTestSettings) Sentenc
 			cursor: 0,
 		},
 		completed: false,
+		mainMenu:  mainMenu,
 	}
 }
 

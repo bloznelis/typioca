@@ -109,11 +109,13 @@ type TimerBasedTest struct {
 	timer     myTimer
 	base      TestBase
 	completed bool
+	mainMenu  MainMenu
 }
 
 type TimerBasedTestResults struct {
 	settings TimerBasedTestSettings
 	results  Results
+	mainMenu MainMenu
 }
 
 type WordCountBasedTest struct {
@@ -121,12 +123,14 @@ type WordCountBasedTest struct {
 	stopwatch myStopWatch
 	base      TestBase
 	completed bool
+	mainMenu  MainMenu
 }
 
 type WordCountTestResults struct {
 	settings WordCountBasedTestSettings
 	wordCnt  int
 	results  Results
+	mainMenu MainMenu
 }
 
 type SentenceCountBasedTest struct {
@@ -134,10 +138,12 @@ type SentenceCountBasedTest struct {
 	stopwatch myStopWatch
 	base      TestBase
 	completed bool
+	mainMenu  MainMenu
 }
 
 type SentenceCountTestResults struct {
 	settings    SentenceCountBasedTestSettings
 	sentenceCnt int
 	results     Results
+	mainMenu    MainMenu
 }
