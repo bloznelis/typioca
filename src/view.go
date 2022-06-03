@@ -274,11 +274,11 @@ func (base TestBase) colorInput(styles Styles) string {
 	mistakes := toKeysSlice(base.mistakes.mistakesAt)
 	sort.Ints(mistakes)
 
-	coloredInput := ""
+	var coloredInput strings.Builder
 
 	if len(mistakes) == 0 {
 
-		coloredInput += styleAllRunes(base.inputBuffer, styles.correct)
+		coloredInput.WriteString(styleAllRunes(base.inputBuffer, styles.correct))
 
 	} else {
 
@@ -288,17 +288,17 @@ func (base TestBase) colorInput(styles Styles) string {
 			sliceUntilMistake := base.inputBuffer[previousMistake+1 : mistakeAt]
 			mistakeSlice := base.wordsToEnter[mistakeAt : mistakeAt+1]
 
-			coloredInput += styleAllRunes(sliceUntilMistake, styles.correct)
-			coloredInput += style(string(mistakeSlice), styles.mistakes)
+			coloredInput.WriteString(styleAllRunes(sliceUntilMistake, styles.correct))
+			coloredInput.WriteString(style(string(mistakeSlice), styles.mistakes))
 
 			previousMistake = mistakeAt
 		}
 
 		inputAfterLastMistake := base.inputBuffer[previousMistake+1:]
-		coloredInput += styleAllRunes(inputAfterLastMistake, styles.correct)
+		coloredInput.WriteString(styleAllRunes(inputAfterLastMistake, styles.correct))
 	}
 
-	return coloredInput
+	return coloredInput.String()
 }
 
 func (base TestBase) colorCursor(styles Styles) string {
@@ -353,12 +353,12 @@ func style(str string, style StringStyle) string {
 }
 
 func styleAllRunes(runes []rune, style StringStyle) string {
-	acc := ""
+	var acc strings.Builder
 
 	for idx, char := range runes {
 		_ = idx
-		acc += style(string(char)).String()
+		acc.WriteString(style(string(char)).String())
 	}
 
-	return acc
+	return acc.String()
 }
