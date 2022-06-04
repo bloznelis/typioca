@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/charmbracelet/lipgloss"
+	"github.com/guptarohit/asciigraph"
 	"github.com/muesli/reflow/indent"
 	"github.com/muesli/reflow/wordwrap"
 )
@@ -22,9 +23,7 @@ var resultsStyle = lipgloss.NewStyle().
 	PaddingTop(1).
 	PaddingBottom(1).
 	PaddingLeft(5).
-	PaddingRight(5).
-	BorderStyle(lipgloss.HiddenBorder()).
-	BorderForeground(lipgloss.Color("2"))
+	PaddingRight(5)
 
 func (m model) View() string {
 	var s string
@@ -63,9 +62,15 @@ func (m model) View() string {
 		accuracy := "accuracy: " + style(fmt.Sprintf("%.1f", state.results.accuracy), m.styles.greener)
 		words := "words: " + style(state.results.wordList, m.styles.greener)
 
-		content := wpm + "\n\n" + accuracy + " " + rawWpmShow + " " + cpm + "\n" + givenTime + " " + words
+		miscStatsLine1 := accuracy + " " + rawWpmShow + " " + cpm + " " + givenTime
+		miscStatsLine2 := words
 
-		s = lipgloss.Place(termWidth, termHeight, lipgloss.Center, lipgloss.Center, resultsStyle.Render(content))
+		miscStatsLine1Len := len(dropAnsiCodes(miscStatsLine1))
+		plotData := append(state.wpmEachSecond, float64(state.results.wpm))
+		wpmsPlot := plotWpms(plotData, miscStatsLine1Len-2)
+
+		fullParagraph := lipgloss.JoinVertical(lipgloss.Center, resultsStyle.Padding(1).Render(wpm), wpmsPlot, resultsStyle.Padding(0).Render(miscStatsLine1), resultsStyle.Render(miscStatsLine2))
+		s = lipgloss.Place(termWidth, termHeight, lipgloss.Center, lipgloss.Center, fullParagraph)
 
 	case WordCountTestResults:
 		rawWpmShow := "raw: " + style(strconv.Itoa(state.results.rawWpm), m.styles.greener)
@@ -76,9 +81,16 @@ func (m model) View() string {
 		accuracy := "accuracy: " + style(fmt.Sprintf("%.1f", state.results.accuracy), m.styles.greener)
 		words := "words: " + style(state.results.wordList, m.styles.greener)
 
-		content := wpm + "\n\n" + accuracy + " " + rawWpmShow + " " + cpm + "\n" + givenTime + " " + wordCnt + " " + words
+		miscStatsLine1 := accuracy + " " + rawWpmShow + " " + cpm + " " + givenTime
+		miscStatsLine2 := wordCnt + " " + words
 
-		s = lipgloss.Place(termWidth, termHeight, lipgloss.Center, lipgloss.Center, resultsStyle.Render(content))
+		miscStatsLine1Len := len(dropAnsiCodes(miscStatsLine1))
+
+		plotData := append(state.wpmEachSecond, float64(state.results.wpm))
+		wpmsPlot := plotWpms(plotData, miscStatsLine1Len-2)
+
+		fullParagraph := lipgloss.JoinVertical(lipgloss.Center, resultsStyle.Padding(1).Render(wpm), wpmsPlot, resultsStyle.Padding(0).Render(miscStatsLine1), resultsStyle.Render(miscStatsLine2))
+		s = lipgloss.Place(termWidth, termHeight, lipgloss.Center, lipgloss.Center, fullParagraph)
 
 	case SentenceCountTestResults:
 		rawWpmShow := "raw: " + style(strconv.Itoa(state.results.rawWpm), m.styles.greener)
@@ -89,9 +101,15 @@ func (m model) View() string {
 		accuracy := "accuracy: " + style(fmt.Sprintf("%.1f", state.results.accuracy), m.styles.greener)
 		words := "sentences: " + style(state.results.wordList, m.styles.greener)
 
-		content := wpm + "\n\n" + accuracy + " " + rawWpmShow + " " + cpm + "\n" + givenTime + " " + sentenceCnt + " " + words
+		miscStatsLine1 := accuracy + " " + rawWpmShow + " " + cpm + " " + givenTime
+		miscStatsLine2 := sentenceCnt + " " + words
 
-		s = lipgloss.Place(termWidth, termHeight, lipgloss.Center, lipgloss.Center, resultsStyle.Render(content))
+		miscStatsLine1Len := len(dropAnsiCodes(miscStatsLine1))
+		plotData := append(state.wpmEachSecond, float64(state.results.wpm))
+		wpmsPlot := plotWpms(plotData, miscStatsLine1Len-2)
+
+		fullParagraph := lipgloss.JoinVertical(lipgloss.Center, resultsStyle.Padding(1).Render(wpm), wpmsPlot, resultsStyle.Padding(0).Render(miscStatsLine1), resultsStyle.Render(miscStatsLine2))
+		s = lipgloss.Place(termWidth, termHeight, lipgloss.Center, lipgloss.Center, fullParagraph)
 
 	case TimerBasedTest:
 		var coloredTimer string
@@ -175,9 +193,7 @@ func (m model) View() string {
 			s += "\n"
 		}
 
-		if avgLineLen == 0 {
-			avgLineLen = averageLineLen(lines)
-		}
+		avgLineLen = averageLineLen(lines)
 		indentBy := uint(math.Max(0, float64(termWidth/2-avgLineLen/2)))
 
 		s += m.indent(coloredStopwatch, indentBy) + "\n\n" + m.indent(linesAroundCursor, indentBy)
@@ -190,6 +206,19 @@ func (m model) View() string {
 	}
 
 	return s
+}
+
+func plotWpms(wpms []float64, width int) string {
+	wpmGraph := asciigraph.Plot(
+		wpms,
+		asciigraph.Precision(0),
+		asciigraph.Height(5),
+		asciigraph.Width(width),
+		asciigraph.CaptionColor(2),
+		asciigraph.LabelColor(2),
+	)
+
+	return lipgloss.NewStyle().Padding(1).Render(wpmGraph)
 }
 
 func averageLineLen(lines []string) int {

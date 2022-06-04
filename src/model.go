@@ -97,11 +97,12 @@ type MainMenu struct {
 }
 
 type TestBase struct {
-	wordsToEnter []rune
-	inputBuffer  []rune
-	rawInputCnt  int // Should not be reduced
-	mistakes     mistakes
-	cursor       int
+	wordsToEnter  []rune
+	inputBuffer   []rune
+	wpmEachSecond []float64
+	rawInputCnt   int // Should not be reduced
+	mistakes      mistakes
+	cursor        int
 }
 
 type TimerBasedTest struct {
@@ -113,9 +114,10 @@ type TimerBasedTest struct {
 }
 
 type TimerBasedTestResults struct {
-	settings TimerBasedTestSettings
-	results  Results
-	mainMenu MainMenu
+	settings      TimerBasedTestSettings
+	wpmEachSecond []float64
+	results       Results
+	mainMenu      MainMenu
 }
 
 type WordCountBasedTest struct {
@@ -127,10 +129,11 @@ type WordCountBasedTest struct {
 }
 
 type WordCountTestResults struct {
-	settings WordCountBasedTestSettings
-	wordCnt  int
-	results  Results
-	mainMenu MainMenu
+	settings      WordCountBasedTestSettings
+	wpmEachSecond []float64
+	wordCnt       int
+	results       Results
+	mainMenu      MainMenu
 }
 
 type SentenceCountBasedTest struct {
@@ -142,8 +145,9 @@ type SentenceCountBasedTest struct {
 }
 
 type SentenceCountTestResults struct {
-	settings    SentenceCountBasedTestSettings
-	sentenceCnt int
-	results     Results
-	mainMenu    MainMenu
+	settings      SentenceCountBasedTestSettings
+	wpmEachSecond []float64
+	sentenceCnt   int
+	results       Results
+	mainMenu      MainMenu
 }
