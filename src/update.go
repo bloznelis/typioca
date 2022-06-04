@@ -4,6 +4,7 @@ import (
 	"github.com/charmbracelet/bubbles/stopwatch"
 	"github.com/charmbracelet/bubbles/timer"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/muesli/termenv"
 )
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -58,14 +59,21 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			state.timer.timer = timerUpdate
 			commands = append(commands, cmdUpdate)
 
+			elapsedMinutes := state.timer.duration.Minutes() - state.timer.timer.Timeout.Minutes()
+			if elapsedMinutes != 0 {
+				state.base.wpmEachSecond = append(state.base.wpmEachSecond, state.base.calculateNormalizedWpm(elapsedMinutes))
+			}
+
 			m.state = state
 
 			if state.timer.timer.Timedout() {
+				termenv.Reset() // get rid of faintness
 				state.timer.timedout = true
 				m.state = TimerBasedTestResults{
-					settings: state.settings,
-					results:  state.calculateResults(),
-					mainMenu: state.mainMenu,
+					settings:      state.settings,
+					wpmEachSecond: state.base.wpmEachSecond,
+					results:       state.calculateResults(),
+					mainMenu:      state.mainMenu,
 				}
 			}
 
@@ -109,10 +117,23 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case WordCountBasedTest:
 		switch msg := msg.(type) {
 
-		case stopwatch.TickMsg, stopwatch.StartStopMsg:
+		case stopwatch.StartStopMsg:
 			stopwatchUpdate, cmdUpdate := state.stopwatch.stopwatch.Update(msg)
 			state.stopwatch.stopwatch = stopwatchUpdate
 			commands = append(commands, cmdUpdate)
+
+			m.state = state
+
+		case stopwatch.TickMsg:
+			stopwatchUpdate, cmdUpdate := state.stopwatch.stopwatch.Update(msg)
+			state.stopwatch.stopwatch = stopwatchUpdate
+			commands = append(commands, cmdUpdate)
+
+			elapsedMinutes := state.stopwatch.stopwatch.Elapsed().Minutes()
+
+			if elapsedMinutes != 0 {
+				state.base.wpmEachSecond = append(state.base.wpmEachSecond, state.base.calculateNormalizedWpm(elapsedMinutes))
+			}
 
 			m.state = state
 
@@ -152,10 +173,11 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 					if len(state.base.wordsToEnter) == len(state.base.inputBuffer) {
 						m.state = WordCountTestResults{
-							settings: state.settings,
-							wordCnt:  state.settings.wordCountSelections[state.settings.wordCountCursor],
-							results:  state.calculateResults(),
-							mainMenu: state.mainMenu,
+							settings:      state.settings,
+							wpmEachSecond: state.base.wpmEachSecond,
+							wordCnt:       state.settings.wordCountSelections[state.settings.wordCountCursor],
+							results:       state.calculateResults(),
+							mainMenu:      state.mainMenu,
 						}
 					}
 				}
@@ -165,10 +187,22 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case SentenceCountBasedTest:
 		switch msg := msg.(type) {
 
-		case stopwatch.TickMsg, stopwatch.StartStopMsg:
+		case stopwatch.StartStopMsg:
 			stopwatchUpdate, cmdUpdate := state.stopwatch.stopwatch.Update(msg)
 			state.stopwatch.stopwatch = stopwatchUpdate
 			commands = append(commands, cmdUpdate)
+
+			m.state = state
+
+		case stopwatch.TickMsg:
+			stopwatchUpdate, cmdUpdate := state.stopwatch.stopwatch.Update(msg)
+			state.stopwatch.stopwatch = stopwatchUpdate
+			commands = append(commands, cmdUpdate)
+
+			elapsedMinutes := state.stopwatch.stopwatch.Elapsed().Minutes()
+			if elapsedMinutes != 0 {
+				state.base.wpmEachSecond = append(state.base.wpmEachSecond, state.base.calculateNormalizedWpm(elapsedMinutes))
+			}
 
 			m.state = state
 
@@ -208,10 +242,11 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 					if len(state.base.wordsToEnter) == len(state.base.inputBuffer) {
 						m.state = SentenceCountTestResults{
-							settings:    state.settings,
-							sentenceCnt: state.settings.sentenceCountSelections[state.settings.sentenceCountCursor],
-							results:     state.calculateResults(),
-							mainMenu:    state.mainMenu,
+							settings:      state.settings,
+							wpmEachSecond: state.base.wpmEachSecond,
+							sentenceCnt:   state.settings.sentenceCountSelections[state.settings.sentenceCountCursor],
+							results:       state.calculateResults(),
+							mainMenu:      state.mainMenu,
 						}
 					}
 				}

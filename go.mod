@@ -20,6 +20,7 @@ require (
 	github.com/charmbracelet/keygen v0.3.0 // indirect
 	github.com/containerd/console v1.0.3 // indirect
 	github.com/gliderlabs/ssh v0.3.4 // indirect
+	github.com/guptarohit/asciigraph v0.5.5 // indirect
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/lucasb-eyer/go-colorful v1.2.0 // indirect
 	github.com/mattn/go-isatty v0.0.14 // indirect
