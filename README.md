@@ -36,9 +36,10 @@ Minimal, terminal based typing speed tester.
   * `go`
 
 ---
-![image](https://user-images.githubusercontent.com/33397865/169536370-d29c59b8-fc41-4129-a887-6b7a69d21043.png)
-![image](https://user-images.githubusercontent.com/33397865/168308259-e35c8ad1-5fce-44c4-b58a-36ba696c25ec.png)
-![image](https://user-images.githubusercontent.com/33397865/172013012-894cb6c3-e088-4fa0-937b-ff605558579b.png)
+![full-menu-cropped](https://user-images.githubusercontent.com/33397865/172426966-d1295987-4df3-4681-a651-b01f3f80be42.png)
+![full-test-cropped](https://user-images.githubusercontent.com/33397865/172427152-b71979e4-8c67-4427-98e0-116c6518071f.png)
+![full-results-cropped](https://user-images.githubusercontent.com/33397865/172427164-b19f1bb5-43a7-47d6-a833-c343e519f447.png)
+
 
 
 
