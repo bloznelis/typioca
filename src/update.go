@@ -171,16 +171,18 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					state.base = state.base.handleRunes(msg)
 					m.state = state
 
-					if len(state.base.wordsToEnter) == len(state.base.inputBuffer) {
-						m.state = WordCountTestResults{
-							settings:      state.settings,
-							wpmEachSecond: state.base.wpmEachSecond,
-							wordCnt:       state.settings.wordCountSelections[state.settings.wordCountCursor],
-							results:       state.calculateResults(),
-							mainMenu:      state.mainMenu,
-						}
-					}
 				}
+			}
+		}
+
+		// Finished?
+		if len(state.base.wordsToEnter) == len(state.base.inputBuffer) {
+			m.state = WordCountTestResults{
+				settings:      state.settings,
+				wpmEachSecond: state.base.wpmEachSecond,
+				wordCnt:       state.settings.wordCountSelections[state.settings.wordCountCursor],
+				results:       state.calculateResults(),
+				mainMenu:      state.mainMenu,
 			}
 		}
 
@@ -240,18 +242,21 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					state.base = state.base.handleRunes(msg)
 					m.state = state
 
-					if len(state.base.wordsToEnter) == len(state.base.inputBuffer) {
-						m.state = SentenceCountTestResults{
-							settings:      state.settings,
-							wpmEachSecond: state.base.wpmEachSecond,
-							sentenceCnt:   state.settings.sentenceCountSelections[state.settings.sentenceCountCursor],
-							results:       state.calculateResults(),
-							mainMenu:      state.mainMenu,
-						}
-					}
 				}
 			}
 		}
+
+		//Finished?
+		if len(state.base.wordsToEnter) == len(state.base.inputBuffer) {
+			m.state = SentenceCountTestResults{
+				settings:      state.settings,
+				wpmEachSecond: state.base.wpmEachSecond,
+				sentenceCnt:   state.settings.sentenceCountSelections[state.settings.sentenceCountCursor],
+				results:       state.calculateResults(),
+				mainMenu:      state.mainMenu,
+			}
+		}
+
 	}
 
 	// Return the updated model to the Bubble Tea runtime for processing.
@@ -565,22 +570,28 @@ func (base TestBase) handleRunes(msg tea.KeyMsg) TestBase {
 func (base TestBase) handleSpace() TestBase {
 	if len(base.inputBuffer) > 0 && base.wordsToEnter[base.cursor-1] != ' ' {
 		nextSpaceIdx := findNextSpaceIndex(base.wordsToEnter, base.cursor)
-		spacesToEnterCnt := (nextSpaceIdx - base.cursor) + 1
-		spaces := make([]rune, spacesToEnterCnt)
-		for i := range spaces {
-			spaces[i] = ' '
-		}
-
-		if spacesToEnterCnt > 1 {
-			//Mark mistakes
-			for i := base.cursor; i < nextSpaceIdx; i++ {
-				base.mistakes.mistakesAt[i] = true
+		var spacesToAppend []rune
+		if nextSpaceIdx == base.cursor {
+			spacesToAppend = []rune{' '}
+		} else {
+			spacesToEnterCnt := (nextSpaceIdx - base.cursor) + 1
+			spaces := make([]rune, spacesToEnterCnt)
+			for i := range spaces {
+				spaces[i] = ' '
 			}
+			spacesToAppend = spaces
 
-			base.mistakes.rawMistakesCnt = base.mistakes.rawMistakesCnt + 1
 		}
 
-		base.inputBuffer = append(base.inputBuffer, spaces...)
+		// Mark mistakes
+		for i := base.cursor; i <= nextSpaceIdx; i++ {
+			if base.wordsToEnter[i] != ' ' {
+				base.mistakes.mistakesAt[i] = true
+				base.mistakes.rawMistakesCnt = base.mistakes.rawMistakesCnt + 1
+			}
+		}
+
+		base.inputBuffer = append(base.inputBuffer, spacesToAppend...)
 		base.cursor = len(base.inputBuffer)
 		base.rawInputCnt += 1
 	}
