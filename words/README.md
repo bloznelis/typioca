@@ -9,10 +9,10 @@
 
 
 ## Words from books
-`bb book-word-list.clj [book-uri] [output]`
+`bb book-word-list.clj [book-uri] [name] [output]`
 
 ## Sentences from books
-`bb book-sentence-list.clj [book-uri] [output]`
+`bb book-sentence-list.clj [book-uri] [name] [output]`
 
 ---
 
