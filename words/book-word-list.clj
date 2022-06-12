@@ -1,4 +1,12 @@
-(defn run [[book-uri output-file]]
+(defn wrap-to-json [list-name words-list]
+  (json/generate-string {:metadata {:name list-name
+                                    :size (count words-list)
+                                    :packagedAt (java.util.Date/from (java.time.Instant/now))
+                                    :version 1}
+
+                         :words words-list} {:pretty true}))
+
+(defn run [[book-uri list-name output-file]]
   (->> (slurp book-uri)
        (re-seq #"[\w|’|']+")
        (map clojure.string/lower-case)
@@ -8,9 +16,9 @@
        (take-last 500)
        (map key)
        (shuffle)
-       (clojure.string/join "\n")
-       (#(clojure.string/replace % #"’" "'"))
-       (#(clojure.string/replace % #"_" ""))
+       (map #(clojure.string/replace % #"’" "'"))
+       (map #(clojure.string/replace % #"_" ""))
+       (wrap-to-json list-name)
        (spit output-file)))
 
 (run *command-line-args*)
