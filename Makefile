@@ -1,6 +1,14 @@
+TARGET_SYSTEM ?= $(OS)
+
+ifneq (,$(filter Windows%,$(TARGET_SYSTEM)))
+  EXT =.exe
+else
+  EXT =
+endif
+
 GO_FLAGS   ?=
 NAME       := typioca
-OUTPUT_BIN ?= execs/$(NAME)$(ARCH)
+OUTPUT_BIN ?= execs/$(NAME)$(ARCH)$(EXT)
 PACKAGE    := github.com/bloznelis/$(NAME)
 GIT_REV     = $(shell git rev-parse --short HEAD)
 VERSION     = $(shell git describe --abbrev=0 --tags)
