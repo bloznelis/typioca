@@ -1,12 +1,18 @@
-package main
+package cmd
 
 import (
 	"time"
 
+	"github.com/bloznelis/typioca/cmd/words"
 	"github.com/charmbracelet/bubbles/stopwatch"
 	"github.com/charmbracelet/bubbles/timer"
+	tea "github.com/charmbracelet/bubbletea"
 	"github.com/muesli/termenv"
 )
+
+func (m model) Init() tea.Cmd {
+	return nil
+}
 
 func initTimerBasedTest(settings TimerBasedTestSettings, mainMenu MainMenu) TimerBasedTest {
 	return TimerBasedTest{
@@ -18,7 +24,7 @@ func initTimerBasedTest(settings TimerBasedTestSettings, mainMenu MainMenu) Time
 			timedout:  false,
 		},
 		base: TestBase{
-			wordsToEnter: NewGenerator().Generate(settings.wordListSelections[settings.wordListCursor].key),
+			wordsToEnter: words.NewGenerator().Generate(settings.wordListSelections[settings.wordListCursor].key),
 			inputBuffer:  make([]rune, 0),
 			rawInputCnt:  0,
 			mistakes: mistakes{
@@ -33,7 +39,7 @@ func initTimerBasedTest(settings TimerBasedTestSettings, mainMenu MainMenu) Time
 }
 
 func initWordCountBasedTest(settings WordCountBasedTestSettings, mainMenu MainMenu) WordCountBasedTest {
-	generator := NewGenerator()
+	generator := words.NewGenerator()
 	generator.Count = settings.wordCountSelections[settings.wordCountCursor]
 	return WordCountBasedTest{
 		settings: settings,
@@ -57,7 +63,7 @@ func initWordCountBasedTest(settings WordCountBasedTestSettings, mainMenu MainMe
 }
 
 func initSentenceCountBasedTest(settings SentenceCountBasedTestSettings, mainMenu MainMenu) SentenceCountBasedTest {
-	generator := NewGenerator()
+	generator := words.NewGenerator()
 	generator.Count = 40
 	generator.Count = settings.sentenceCountSelections[settings.sentenceCountCursor]
 	return SentenceCountBasedTest{

@@ -30,7 +30,7 @@ build-linux-amd:  ## Builds the linux-amd64 CLI
 build:  ## Builds the CLI
 	@go build -trimpath ${GO_FLAGS} \
 	-ldflags "-w -s -X main.Version=${VERSION} -X main.Commit=${GIT_REV}" \
-	-a -tags netgo -o ${OUTPUT_BIN} ./src
+	-a -tags netgo -o ${OUTPUT_BIN}
 
 build-all: build-win build-mac-amd build-mac-arm build-linux-amd ## Builds execs for all architectures
 
