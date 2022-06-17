@@ -28,7 +28,7 @@ Minimal, terminal based typing speed tester.
 
 ### Go
 `go install github.com/bloznelis/typioca@latest`<br>
-*This will typioca install in $GOBIN, which defaults to $GOPATH/bin or $HOME/go/bin if the GOPATH environment variable is not set.*
+*This will install typioca in $GOBIN, which defaults to $GOPATH/bin or $HOME/go/bin if the GOPATH environment variable is not set.*
 
 ### Building from source
   1. Checkout the code
