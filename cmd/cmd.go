@@ -1,4 +1,4 @@
-package main
+package cmd
 
 import (
 	"context"
@@ -28,7 +28,7 @@ var (
 
 var (
 	Version = "dev"
-	rootCmd = &cobra.Command{
+	RootCmd = &cobra.Command{
 		Use:  "typioca",
 		Long: "typioca is a typing test program.",
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -112,6 +112,6 @@ func init() {
 	serveCmd.Flags().StringVarP(&serverKeyPath, "key", "k", "typioca", "path to the server key")
 	serveCmd.Flags().StringVarP(&serverBind, "bind", "b", "", "address to bind on")
 	serveCmd.Flags().IntVarP(&serverPort, "port", "p", 2229, "port to serve on")
-	rootCmd.Flags().BoolVarP(&showVersion, "version", "v", false, "show typioca version")
-	rootCmd.AddCommand(serveCmd)
+	RootCmd.Flags().BoolVarP(&showVersion, "version", "v", false, "show typioca version")
+	RootCmd.AddCommand(serveCmd)
 }
