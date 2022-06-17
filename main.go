@@ -1,9 +1,8 @@
 package main
 
 import (
-	"log"
-
 	"github.com/bloznelis/typioca/cmd"
+	"log"
 )
 
 func main() {

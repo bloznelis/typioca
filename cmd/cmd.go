@@ -30,7 +30,7 @@ var (
 	Version = "dev"
 	RootCmd = &cobra.Command{
 		Use:  "typioca",
-		Long: "typioca is a typing test program.",
+		Long: "typioca — cosy typing speed tester",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if showVersion {
 				fmt.Println("typioca ", Version)
