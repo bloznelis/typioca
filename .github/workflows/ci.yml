@@ -14,3 +14,25 @@ jobs:
       - uses: actions/checkout@v3
       - name: Build all
         run: make build-all
+
+      # Upload artifacts
+      - name: Upload typioca-win-amd64
+        uses: actions/upload-artifact@v3
+        with:
+          name: typioca-win-amd64
+          path: execs/typioca-win-amd64.exe
+      - name: Upload typioca-linux-amd64
+        uses: actions/upload-artifact@v3
+        with:
+          name: typioca-linux-amd64
+          path: execs/typioca-linux-amd64
+      - name: Upload typioca-mac-amd64
+        uses: actions/upload-artifact@v3
+        with:
+          name: typioca-mac-amd64
+          path: execs/typioca-mac-amd64
+      - name: Upload typioca-mac-arm64
+        uses: actions/upload-artifact@v3
+        with:
+          name: typioca-mac-arm64
+          path: execs/typioca-mac-arm64
