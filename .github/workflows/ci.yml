@@ -14,6 +14,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # Build
       - uses: actions/checkout@v3
       - name: Build all
         run: make build-all
@@ -44,6 +45,8 @@ jobs:
         with:
           name: typioca-mac-arm64
           path: execs/typioca-mac-arm64
+
+      # Release
       - id: get_version
         uses: battila7/get-version-action@v2
       - name: Release
