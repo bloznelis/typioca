@@ -49,6 +49,7 @@ jobs:
       # Release
       - id: get_version
         uses: battila7/get-version-action@v2
+        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
       - name: Release
         uses: softprops/action-gh-release@v1
         if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
