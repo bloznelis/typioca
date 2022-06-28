@@ -1,9 +1,14 @@
 TARGET_SYSTEM ?= $(OS)
 
-ifneq (,$(filter Windows%,$(TARGET_SYSTEM)))
-  EXT =.exe
+EXT =
+ifndef GOOS
+  ifneq (,$(filter Windows%,$(TARGET_SYSTEM)))
+    EXT =.exe
+  endif
 else
-  EXT =
+  ifeq ($(GOOS),windows)
+    EXT = .exe
+  endif
 endif
 
 GO_FLAGS   ?=
@@ -15,8 +20,11 @@ VERSION     = $(shell git describe --abbrev=0 --tags)
 
 default: help
 
-build-win:  ## Builds the win-amd64 CLI
+build-win-amd:  ## Builds the win-amd64 CLI
 	@env GOOS=windows GOARCH=amd64 ARCH=-win-amd64 make build
+
+build-win-arm:  ## Builds the win-arm64 CLI
+	@env GOOS=windows GOARCH=arm64 ARCH=-win-arm64 make build
 
 build-mac-amd:  ## Builds the mac-amd64 CLI
 	@env GOOS=darwin GOARCH=amd64 ARCH=-mac-amd64 make build
@@ -32,7 +40,7 @@ build:  ## Builds the CLI
 	-ldflags "-w -s -X 'github.com/bloznelis/typioca/cmd.Version=${VERSION}'" \
 	-a -tags netgo -o ${OUTPUT_BIN}
 
-build-all: build-win build-mac-amd build-mac-arm build-linux-amd ## Builds execs for all architectures
+build-all: build-win-amd build-win-arm build-mac-amd build-mac-arm build-linux-amd ## Builds execs for all architectures
 
 help: ## This message
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":[^:]*?## "}; {printf "\033[38;5;69m%-30s\033[38;5;38m %s\033[0m\n", $$1, $$2}'

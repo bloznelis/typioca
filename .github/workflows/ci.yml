@@ -21,6 +21,11 @@ jobs:
         with:
           name: typioca-win-amd64
           path: execs/typioca-win-amd64.exe
+      - name: Upload typioca-win-arm64
+        uses: actions/upload-artifact@v3
+        with:
+          name: typioca-win-arm64
+          path: execs/typioca-win-arm64.exe
       - name: Upload typioca-linux-amd64
         uses: actions/upload-artifact@v3
         with:
