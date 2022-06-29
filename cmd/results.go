@@ -13,7 +13,7 @@ func (m TimerBasedTest) calculateResults() Results {
 		rawWpm:   int(m.base.calculateRawWpm(elapsedMinutes)),
 		cpm:      m.base.calculateCpm(elapsedMinutes),
 		time:     m.timer.duration,
-		wordList: m.settings.wordListSelections[m.settings.wordListCursor].show,
+		wordList: m.settings.wordListSelections[m.settings.wordListCursor].name,
 	}
 }
 
@@ -25,7 +25,7 @@ func (m WordCountBasedTest) calculateResults() Results {
 		rawWpm:   int(m.base.calculateRawWpm(elapsedMinutes)),
 		cpm:      m.base.calculateCpm(elapsedMinutes),
 		time:     m.stopwatch.stopwatch.Elapsed(),
-		wordList: m.settings.wordListSelections[m.settings.wordListCursor].show,
+		wordList: m.settings.wordListSelections[m.settings.wordListCursor].name,
 	}
 }
 
@@ -37,7 +37,7 @@ func (m SentenceCountBasedTest) calculateResults() Results {
 		rawWpm:   int(m.base.calculateRawWpm(elapsedMinutes)),
 		cpm:      m.base.calculateCpm(elapsedMinutes),
 		time:     m.stopwatch.stopwatch.Elapsed(),
-		wordList: m.settings.sentenceListSelections[m.settings.sentenceListCursor].show,
+		wordList: m.settings.sentenceListSelections[m.settings.sentenceListCursor].name,
 	}
 }
 

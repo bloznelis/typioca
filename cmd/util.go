@@ -4,6 +4,28 @@ import (
 	"math"
 )
 
+func longestStringLen(strings []string) int {
+	var longest int
+	for _, elem := range strings {
+		length := len(elem)
+		if len(elem) > longest {
+			longest = length
+		}
+	}
+
+	return longest
+}
+
+func names(wordList []WordList) []string {
+	var acc []string
+
+	for _, elem := range wordList {
+		acc = append(acc, elem.Name)
+	}
+
+	return acc
+}
+
 func averageStringLen(strings []string) int {
 	var totalLen int = 0
 	var cnt int = 0
