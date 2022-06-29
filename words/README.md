@@ -1,5 +1,9 @@
 # Word processing
 
+## Prerequisites
+
+* [babashka](https://github.com/babashka/babashka) - Fast Clojure interpreter
+
 ## Common words
 `bb common-word-list.clj [words-uri] [output]`
 
