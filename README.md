@@ -17,7 +17,10 @@ Minimal, terminal based typing speed tester.
   * Interactive menu
   * ctrl+w support ;)
   * SSH server `typioca serve`
-
+  * Dynamic word lists
+  * Custom word lists
+  * Linux/Mac/Win support
+  
 ## Installation
 ### AUR
 `yay -S typioca-git`
@@ -40,13 +43,39 @@ Minimal, terminal based typing speed tester.
   * `make`
   * `go`
 
+## Custom wordlists
+2. Create your word list in the same JSON format as the official ones [example](https://raw.githubusercontent.com/bloznelis/typioca/master/words/storage/words/common-english.json)
+1. Place your configuration to platform specific location:
+
+| Platfrom | **User configuration**                                                                     |
+|----------|--------------------------------------------------------------------------------------------|
+| Windows  | `%APPDATA%\typioca\typioca.conf` or `C:\Users\%USER%\AppData\Roaming\typioca\typioca.conf` |
+| Linux    | `$XDG_CONFIG_HOME\typioca\typioca.conf` or `$HOME/.config\typioca\typioca.conf`            |
+| macOS    | `$HOME/Library/Application Support\typioca\typioca.conf`                                   |
+
+Config example (it is [TOML](https://github.com/toml-lang/toml)):
+```toml
+[[words]]
+  name      = "Best hits '22"
+  enabled   = false
+  sentences = false
+  path      = "/home/lukas/.cache/typioca/words/best-hits-22.json"
+[[words]]
+  name      = "Even better hits '23"
+  enabled   = true
+  sentences = false
+  path      = "/home/lukas/.cache/typioca/words/better-hits-23.json"
+```
+3. Use your words!
+
+![image](https://user-images.githubusercontent.com/33397865/176517001-967c10f4-0489-451c-a140-ea2aae839aa5.png)
+
+**Note:** Notice that custom wordlist controls are greyed-out, personal configuration must be handled via the file only.
+
 ---
 ![full-menu-cropped](https://user-images.githubusercontent.com/33397865/172426966-d1295987-4df3-4681-a651-b01f3f80be42.png)
 ![full-test-cropped](https://user-images.githubusercontent.com/33397865/172427152-b71979e4-8c67-4427-98e0-116c6518071f.png)
 ![full-results-cropped](https://user-images.githubusercontent.com/33397865/172427164-b19f1bb5-43a7-47d6-a833-c343e519f447.png)
-
-
-
 
 ### Acknowledgments
 Built with [bubbletea](https://github.com/charmbracelet/bubbletea)
