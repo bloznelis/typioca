@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 
 	"github.com/BurntSushi/toml"
+	"github.com/bloznelis/typioca/cmd/words"
 	"github.com/kirsle/configdir"
 )
 
@@ -50,6 +51,7 @@ func checkSync(config *Config) {
 
 func WriteConfig(config Config) {
 	configFile := getSystemConfigPath()
+	words.EnsureDir(configFile)
 	fh, err := os.Create(configFile)
 	if err != nil {
 		panic(err)
