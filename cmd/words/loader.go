@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"path/filepath"
 )
 
 func LoadWordSources(paths []string) ([]WordSource, error) {
@@ -71,12 +72,18 @@ func DeleteWordList(filePath string) error {
 	return os.Remove(filePath)
 }
 
-func SyncWordList(localPath string, remoteURI string) {
-	DownloadFile(localPath, remoteURI)
+func EnsureDir(fileName string) error {
+	dirName := filepath.Dir(fileName)
+	if _, serr := os.Stat(dirName); serr != nil {
+		merr := os.MkdirAll(dirName, os.ModePerm)
+		if merr != nil {
+			return merr
+		}
+	}
+	return nil
 }
 
 func DownloadFile(filepath string, url string) error {
-	// Get the data
 	resp, err := http.Get(url)
 	if err != nil {
 		return err
@@ -87,6 +94,7 @@ func DownloadFile(filepath string, url string) error {
 		return errors.New("Non 200 response")
 	} else {
 		// Create the file
+		err := EnsureDir(filepath)
 		out, err := os.Create(filepath)
 		if err != nil {
 			return err
