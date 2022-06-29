@@ -44,8 +44,9 @@ Minimal, terminal based typing speed tester.
   * `go`
 
 ## Custom wordlists
-2. Create your word list in the same JSON format as the official ones [example](https://raw.githubusercontent.com/bloznelis/typioca/master/words/storage/words/common-english.json)
-1. Place your configuration to platform specific location:
+1. Create your word list in the same JSON format as the official ones [example](https://raw.githubusercontent.com/bloznelis/typioca/master/words/storage/words/common-english.json).
+   - **Note:** for new-line separated word lists (like [this one](https://raw.githubusercontent.com/powerlanguage/word-lists/master/1000-most-common-words.txt)), for your convenience, you can use [this Clojure script](https://github.com/bloznelis/typioca/blob/master/words/common-word-list.clj). Explanation how to use it can be found [here](https://github.com/bloznelis/typioca/tree/master/words).
+3. Place your configuration to platform specific location:
 
 | Platfrom | **User configuration**                                                                     |
 |----------|--------------------------------------------------------------------------------------------|
