@@ -3,6 +3,7 @@ package cmd
 import (
 	"time"
 
+	"github.com/bloznelis/typioca/cmd/words"
 	"github.com/charmbracelet/bubbles/stopwatch"
 	"github.com/charmbracelet/bubbles/timer"
 	tea "github.com/charmbracelet/bubbletea"
@@ -63,6 +64,7 @@ type WordListSelection struct {
 type State interface{}
 
 type MainMenuSelection interface {
+	Enabled() bool
 	show(s Styles) string
 	handleInput(msg tea.Msg, menu MainMenu) State
 }
@@ -70,30 +72,55 @@ type MainMenuSelection interface {
 type TimerBasedTestSettings struct {
 	timeSelections     []time.Duration
 	timeCursor         int
-	wordListSelections []WordListSelection
+	wordListSelections []WordsSelection
 	wordListCursor     int
 	cursor             int
+	enabled            bool
+}
+
+func (s TimerBasedTestSettings) Enabled() bool {
+	return s.enabled
 }
 
 type WordCountBasedTestSettings struct {
 	wordCountSelections []int
 	wordCountCursor     int
-	wordListSelections  []WordListSelection
+	wordListSelections  []WordsSelection
 	wordListCursor      int
 	cursor              int
+	enabled             bool
+}
+
+func (s WordCountBasedTestSettings) Enabled() bool {
+	return s.enabled
 }
 
 type SentenceCountBasedTestSettings struct {
 	sentenceCountSelections []int
 	sentenceCountCursor     int
-	sentenceListSelections  []WordListSelection
+	sentenceListSelections  []WordsSelection
 	sentenceListCursor      int
 	cursor                  int
+	enabled                 bool
+}
+
+func (s SentenceCountBasedTestSettings) Enabled() bool {
+	return s.enabled
+}
+
+type ConfigViewSelection struct{}
+
+func (s ConfigViewSelection) Enabled() bool {
+	return true
 }
 
 type MainMenu struct {
-	selections []MainMenuSelection
-	cursor     int
+	config                 Config
+	selections             []MainMenuSelection
+	cursor                 int
+	timeBasedGenerator     words.WordsGenerator
+	wordCountGenerator     words.WordsGenerator
+	sentenceCountGenerator words.WordsGenerator
 }
 
 type TestBase struct {
@@ -150,4 +177,55 @@ type SentenceCountTestResults struct {
 	sentenceCnt   int
 	results       Results
 	mainMenu      MainMenu
+}
+
+type ConfigView struct {
+	mainMenu MainMenu
+	config   Config
+	cursor   int
+}
+
+type WordList struct {
+	Sentences bool
+	Name      string
+	Path      string
+	RemoteURI string
+	isLocal   bool
+	Enabled   bool
+	synced    bool
+	syncOK    bool
+}
+
+func (wordList *WordList) toggleEnabled() {
+	if !wordList.isLocal {
+		wordList.Enabled = !wordList.Enabled
+	}
+}
+
+type EmbededWordList struct {
+	Name        string
+	IsSentences bool
+	Enabled     bool
+}
+
+func (embeded *EmbededWordList) toggleEnabled() {
+	embeded.Enabled = !embeded.Enabled
+}
+
+type Config struct {
+	EmbededWordLists []EmbededWordList
+	WordLists        []WordList
+	Version          int
+}
+
+type LocalConfig struct {
+	Words []WordList
+}
+
+func (cfg Config) wordListsCount() int {
+	return len(cfg.WordLists) + len(cfg.EmbededWordLists)
+}
+
+type Toggleable interface {
+	toggle()
 }

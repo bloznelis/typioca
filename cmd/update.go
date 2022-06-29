@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"github.com/bloznelis/typioca/cmd/words"
 	"github.com/charmbracelet/bubbles/stopwatch"
 	"github.com/charmbracelet/bubbles/timer"
 	tea "github.com/charmbracelet/bubbletea"
@@ -38,6 +39,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case MainMenu:
 		m.state = state.selections[state.cursor].handleInput(msg, state)
 		return m.quitOn(msg, "ctrl+q")
+
+	case ConfigView:
+		m.state = state.handleInput(msg, state)
+		return m, nil
 
 	case TimerBasedTestResults:
 		m.state = state.handleInput(msg, state)
@@ -282,7 +287,9 @@ func (settings TimerBasedTestSettings) handleInput(msg tea.Msg, menu MainMenu) S
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "enter":
-			return initTimerBasedTest(settings, menu)
+			if settings.enabled {
+				return initTimerBasedTest(settings, menu)
+			}
 		case "left", "h":
 			if settings.cursor > 0 {
 				settings.cursor--
@@ -298,6 +305,8 @@ func (settings TimerBasedTestSettings) handleInput(msg tea.Msg, menu MainMenu) S
 			case 0:
 				if menu.cursor > 0 {
 					menu.cursor--
+				} else {
+					menu.cursor = len(menu.selections) - 1
 				}
 			case 1:
 				if settings.timeCursor > 0 {
@@ -345,7 +354,9 @@ func (settings WordCountBasedTestSettings) handleInput(msg tea.Msg, menu MainMen
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "enter":
-			return initWordCountBasedTest(settings, menu)
+			if settings.enabled {
+				return initWordCountBasedTest(settings, menu)
+			}
 		case "left", "h":
 			if settings.cursor > 0 {
 				settings.cursor--
@@ -401,6 +412,29 @@ func (settings WordCountBasedTestSettings) handleInput(msg tea.Msg, menu MainMen
 	return menu
 }
 
+func (selection ConfigViewSelection) handleInput(msg tea.Msg, menu MainMenu) State {
+	switch msg := msg.(type) {
+	case tea.KeyMsg:
+		switch msg.String() {
+		case "enter":
+			return initConfigView(menu.config, menu)
+		case "up", "k":
+			if menu.cursor > 0 {
+				menu.cursor--
+			}
+		case "down", "j":
+			if menu.cursor < len(menu.selections)-1 {
+				menu.cursor++
+			} else {
+				menu.cursor = 0
+			}
+
+		}
+	}
+
+	return menu
+}
+
 func (settings SentenceCountBasedTestSettings) handleInput(msg tea.Msg, menu MainMenu) State {
 	cursorToSave := menu.cursor
 
@@ -408,7 +442,9 @@ func (settings SentenceCountBasedTestSettings) handleInput(msg tea.Msg, menu Mai
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "enter":
-			return initSentenceCountBasedTest(settings, menu)
+			if settings.enabled {
+				return initSentenceCountBasedTest(settings, menu)
+			}
 		case "left", "h":
 			if settings.cursor > 0 {
 				settings.cursor--
@@ -462,6 +498,69 @@ func (settings SentenceCountBasedTestSettings) handleInput(msg tea.Msg, menu Mai
 	}
 
 	return menu
+}
+
+func (configView ConfigView) handleInput(msg tea.Msg, state State) State {
+	switch msg := msg.(type) {
+	case tea.KeyMsg:
+		switch msg.String() {
+		case "e":
+			embededLength := len(configView.config.EmbededWordLists)
+			if configView.cursor < embededLength {
+				configView.config.EmbededWordLists[configView.cursor].toggleEnabled()
+			} else {
+				configView.config.WordLists[configView.cursor-embededLength].toggleEnabled()
+			}
+
+			WriteConfig(configView.config)
+			state = configView
+		case "s":
+			embededLength := len(configView.config.EmbededWordLists)
+			if configView.cursor > embededLength-1 {
+				configView.config.WordLists[configView.cursor-embededLength].toggleSynced()
+			}
+			WriteConfig(configView.config)
+			state = configView
+		case "up", "k":
+			if configView.cursor > 0 {
+				configView.cursor--
+			} else {
+				configView.cursor = configView.config.wordListsCount() - 1
+			}
+
+			state = configView
+		case "down", "j":
+			if configView.cursor < configView.config.wordListsCount()-1 {
+				configView.cursor++
+			} else {
+				configView.cursor = 0
+			}
+
+			state = configView
+		case "ctrl+q":
+			state = initMainMenu()
+		}
+	}
+
+	return state
+}
+
+func (wl *WordList) toggleSynced() {
+	if !wl.isLocal {
+		var err error
+		if wl.synced {
+			err = words.DeleteWordList(wl.Path)
+		} else {
+			err = words.DownloadFile(wl.Path, wl.RemoteURI)
+		}
+
+		if err != nil {
+			wl.syncOK = false
+		} else {
+			wl.synced = !wl.synced
+			wl.syncOK = true
+		}
+	}
 }
 
 func (results TimerBasedTestResults) handleInput(msg tea.Msg, state State) State {

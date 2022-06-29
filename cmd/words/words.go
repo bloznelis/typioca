@@ -4,6 +4,7 @@ import (
 	_ "embed"
 	"encoding/json"
 	"math/rand"
+	"os"
 	"strings"
 	"time"
 )
@@ -22,21 +23,6 @@ type WordSource struct {
 
 //go:embed embedables/words/common-english.json
 var commonEnglish string
-
-//go:embed embedables/words/dorian-gray.json
-var dorianGray string
-
-//go:embed embedables/words/frankenstein.json
-var frankenstein string
-
-//go:embed embedables/words/pride-and-prejudice.json
-var prideAndPrejudice string
-
-//go:embed embedables/sentences/dorian-gray.json
-var dorianGraySentences string
-
-//go:embed embedables/sentences/pride-and-prejudice.json
-var prideAndPrejudiceSentences string
 
 //go:embed embedables/sentences/frankenstein.json
 var frankensteinSentences string
@@ -58,35 +44,49 @@ func check(e error) {
 	}
 }
 
-func unmarshalSources(sources []string) map[string]WordSource {
-	acc := make(map[string]WordSource, len(sources))
-	for _, source := range sources {
-		wordSource := unmarshalSource(source)
-		acc[wordSource.Metadata.Name] = wordSource
+func addEmbededSource(sources map[string]WordSource) map[string]WordSource {
+	var wordSource WordSource
+	err := json.Unmarshal([]byte(commonEnglish), &wordSource)
+	check(err)
+	var sentenceSource WordSource
+	err = json.Unmarshal([]byte(frankensteinSentences), &sentenceSource)
+	check(err)
+
+	sources["Common words"] = wordSource
+	sources["Frankenstein sentences"] = sentenceSource
+
+	return sources
+}
+
+func unmarshalSources(paths []string) map[string]WordSource {
+	acc := make(map[string]WordSource, len(paths))
+	for _, sourceFilePath := range paths {
+		wordSource := unmarshalSource(sourceFilePath)
+		acc[sourceFilePath] = wordSource
 	}
 
 	return acc
 }
 
-func unmarshalSource(sourceRaw string) WordSource {
+func unmarshalSource(sourceFilePath string) WordSource {
 	var wordSource WordSource
-	err := json.Unmarshal([]byte(sourceRaw), &wordSource)
 
+	fh, err := os.Open(sourceFilePath)
+	defer fh.Close()
 	check(err)
+
+	decoder := json.NewDecoder(fh)
+	err = decoder.Decode(&wordSource)
+	check(err)
+
 	return wordSource
 }
 
-func NewGenerator() (g WordsGenerator) {
+func NewGenerator(paths []string) (g WordsGenerator) {
 	g.Count = 300
-	g.poolsJson = unmarshalSources([]string{
-		commonEnglish,
-		dorianGray,
-		dorianGraySentences,
-		frankenstein,
-		frankensteinSentences,
-		prideAndPrejudice,
-		prideAndPrejudiceSentences,
-	})
+	g.poolsJson = unmarshalSources(paths)
+	g.poolsJson = addEmbededSource(g.poolsJson)
+
 	return g
 }
 

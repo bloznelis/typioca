@@ -25,6 +25,17 @@ var resultsStyle = lipgloss.NewStyle().
 	PaddingLeft(5).
 	PaddingRight(5)
 
+func wrapWithCursor(shouldWrap bool, line string, stringStyle StringStyle) string {
+	cursor := " "
+	cursorClose := " "
+	if shouldWrap {
+		cursor = style(">", stringStyle)
+		cursorClose = style("<", stringStyle)
+	}
+
+	return fmt.Sprintf("%s %s%s", cursor, line, cursorClose)
+}
+
 func (m model) View() string {
 	var s string
 
@@ -39,20 +50,98 @@ func (m model) View() string {
 		s += "\n\n\n"
 
 		for i, choice := range state.selections {
-			cursor := " "
-			cursorClose := " "
-			if state.cursor == i {
-				cursor = style(">", m.styles.runningTimer)
-				cursorClose = style("<", m.styles.runningTimer)
+			choiceShow := choice.show(m.styles)
+			if !choice.Enabled() {
+				choiceShow = style(dropAnsiCodes(choiceShow), m.styles.toEnter)
 			}
 
-			// Render the row
-			s += fmt.Sprintf("%s %s%s\n\n", cursor, choice.show(m.styles), cursorClose)
+			s += wrapWithCursor(state.cursor == i, choiceShow, m.styles.runningTimer)
+			s += "\n\n"
 		}
 
 		s = lipgloss.NewStyle().Align(lipgloss.Left).Render(s)
 
 		return lipgloss.Place(termWidth, termHeight, lipgloss.Center, lipgloss.Center, s)
+
+	case ConfigView:
+		absolutePad := longestStringLen(names(state.config.WordLists)) + 2
+		var view string
+		header := fmt.Sprintf("%s%20s%s/%s\n\n", "  wordlist", " ", "synced", "enabled")
+		view += header
+
+		for idx, elem := range state.config.EmbededWordLists {
+			var enabled string
+			if elem.Enabled {
+				enabled = "x"
+			} else {
+				enabled = " "
+			}
+			enabled = style(enabled, m.styles.greener)
+
+			toPad := absolutePad - len(elem.Name)
+			line := fmt.Sprintf("%s%*s     [%s] ", style(elem.Name, m.styles.greener), toPad, "", enabled)
+
+			view += wrapWithCursor(idx == state.cursor, line, m.styles.runningTimer)
+			view += "\n"
+		}
+		view += "\n"
+
+		maxAmmountToShow := m.height / 7
+		total := len(state.config.WordLists)
+		curs := state.cursor - len(state.config.EmbededWordLists) + 1
+		lower := floor(curs - maxAmmountToShow)
+		upper := int(math.Min(math.Max(float64(curs), float64(maxAmmountToShow)), float64(total)))
+
+		wordListsToShow := state.config.WordLists[lower:upper]
+		cursorWidget := fmt.Sprintf("  [%d-%d:%d]", lower+1, upper, total)
+
+		view += style(cursorWidget, m.styles.toEnter)
+		view += "\n"
+
+		for idx, elem := range wordListsToShow {
+			var synced string
+			if elem.synced {
+				synced = "x"
+			} else {
+				synced = " "
+			}
+			if !elem.isLocal {
+				synced = style(synced, m.styles.greener)
+			} else {
+				synced = style(synced, m.styles.toEnter)
+			}
+
+			var enabled string
+			if elem.Enabled {
+				enabled = "x"
+			} else {
+				enabled = " "
+			}
+
+			if !elem.isLocal {
+				enabled = style(enabled, m.styles.greener)
+			} else {
+				enabled = style(enabled, m.styles.toEnter)
+			}
+
+			toPad := absolutePad - len(elem.Name)
+			line := fmt.Sprintf("%s%*s[%s]  [%s] ", style(elem.Name, m.styles.greener), toPad, "", synced, enabled)
+			if !elem.syncOK {
+				line = style(dropAnsiCodes(line), m.styles.mistakes)
+			}
+
+			view += wrapWithCursor(int(lower)+idx+len(defaultConfig().EmbededWordLists) == state.cursor, line, m.styles.runningTimer)
+			view += "\n"
+		}
+
+		help := style("s sync/delete, e enable/disable, ctrl+q to menu", m.styles.toEnter)
+		cursorWidget = lipgloss.NewStyle().Align(lipgloss.Left).Render(cursorWidget)
+		help = lipgloss.NewStyle().Align(lipgloss.Center).Padding(1).Render(help)
+		view = lipgloss.NewStyle().Align(lipgloss.Left).Render(view)
+
+		all := lipgloss.JoinVertical(lipgloss.Center, view, help)
+
+		return lipgloss.Place(termWidth, termHeight, lipgloss.Center, lipgloss.Center, all)
 
 	case TimerBasedTestResults:
 		rawWpmShow := "raw: " + style(strconv.Itoa(state.results.rawWpm), m.styles.greener)
@@ -231,21 +320,45 @@ func averageLineLen(lines []string) int {
 }
 
 func (selection TimerBasedTestSettings) show(styles Styles) string {
-	selections := []string{selection.timeSelections[selection.timeCursor].String(), selection.wordListSelections[selection.wordListCursor].show}
+	var wordListSelection string
+	if selection.enabled {
+		wordListSelection = selection.wordListSelections[selection.wordListCursor].name
+	} else {
+		wordListSelection = "no wordlist enabled"
+	}
+
+	selections := []string{selection.timeSelections[selection.timeCursor].String(), wordListSelection}
 	selectionsStr := showSelections(selections, selection.cursor, styles)
 	return fmt.Sprintf("%s %s", "Timer run", selectionsStr)
 }
 
 func (selection WordCountBasedTestSettings) show(styles Styles) string {
-	selections := []string{fmt.Sprint(selection.wordCountSelections[selection.wordCountCursor]), selection.wordListSelections[selection.wordListCursor].show}
+	var wordListSelection string
+	if selection.enabled {
+		wordListSelection = selection.wordListSelections[selection.wordListCursor].name
+	} else {
+		wordListSelection = "no wordlist enabled"
+	}
+
+	selections := []string{fmt.Sprint(selection.wordCountSelections[selection.wordCountCursor]), wordListSelection}
 	selectionsStr := showSelections(selections, selection.cursor, styles)
 	return fmt.Sprintf("%s %s", "Word count run", selectionsStr)
 }
 
 func (selection SentenceCountBasedTestSettings) show(styles Styles) string {
-	selections := []string{fmt.Sprint(selection.sentenceCountSelections[selection.sentenceCountCursor]), selection.sentenceListSelections[selection.sentenceListCursor].show}
+	var wordListSelection string
+	if selection.enabled {
+		wordListSelection = selection.sentenceListSelections[selection.sentenceListCursor].name
+	} else {
+		wordListSelection = "no wordlist enabled"
+	}
+	selections := []string{fmt.Sprint(selection.sentenceCountSelections[selection.sentenceCountCursor]), wordListSelection}
 	selectionsStr := showSelections(selections, selection.cursor, styles)
 	return fmt.Sprintf("%s %s", "Sentence count run", selectionsStr)
+}
+
+func (selection ConfigViewSelection) show(styles Styles) string {
+	return "Config "
 }
 
 func showSelections(selections []string, cursor int, styles Styles) string {
@@ -344,7 +457,6 @@ func (base TestBase) colorWordsToEnter(styles Styles) string {
 
 func wrapStyledParagraph(paragraph string, lineLimit int) string {
 	// XXX: Replace spaces, because wordwrap trims them out at the ends
-
 	paragraph = strings.ReplaceAll(paragraph, " ", "·")
 
 	f := wordwrap.NewWriter(lineLimit)
