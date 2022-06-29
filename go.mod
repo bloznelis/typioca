@@ -3,7 +3,7 @@ module github.com/bloznelis/typioca
 go 1.18
 
 require (
-	github.com/charmbracelet/bubbles v0.10.3
+	github.com/charmbracelet/bubbles v0.12.0
 	github.com/charmbracelet/bubbletea v0.22.0
 	github.com/charmbracelet/lipgloss v0.5.0
 	github.com/charmbracelet/wish v0.5.0
