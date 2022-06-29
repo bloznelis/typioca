@@ -182,6 +182,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		// Finished?
 		if len(state.base.wordsToEnter) == len(state.base.inputBuffer) {
+			termenv.Reset() // get rid of faintness
 			m.state = WordCountTestResults{
 				settings:      state.settings,
 				wpmEachSecond: state.base.wpmEachSecond,
@@ -253,6 +254,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		//Finished?
 		if len(state.base.wordsToEnter) == len(state.base.inputBuffer) {
+			termenv.Reset() // get rid of faintness
 			m.state = SentenceCountTestResults{
 				settings:      state.settings,
 				wpmEachSecond: state.base.wpmEachSecond,
@@ -555,6 +557,7 @@ func (wl *WordList) toggleSynced() {
 		}
 
 		if err != nil {
+			// log.Panicln(err)
 			wl.syncOK = false
 		} else {
 			wl.synced = !wl.synced
