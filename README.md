@@ -68,8 +68,7 @@ Config example (it is [TOML](https://github.com/toml-lang/toml)):
   path      = "/home/words/better-hits-23.json"
 ```
 3. Use your words!
-
-![image](https://user-images.githubusercontent.com/33397865/176517001-967c10f4-0489-451c-a140-ea2aae839aa5.png)
+![ship it](https://user-images.githubusercontent.com/33397865/176735281-5c2b34cb-5b19-43c1-9954-92c0583c4cc5.png)
 
 **Note:** Notice that custom wordlist controls are greyed-out, personal configuration must be handled via the file only.
 
