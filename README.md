@@ -74,9 +74,10 @@ Config example (it is [TOML](https://github.com/toml-lang/toml)):
 **Note:** Notice that custom wordlist controls are greyed-out, personal configuration must be handled via the file only.
 
 ---
-![full-menu-cropped](https://user-images.githubusercontent.com/33397865/172426966-d1295987-4df3-4681-a651-b01f3f80be42.png)
-![full-test-cropped](https://user-images.githubusercontent.com/33397865/172427152-b71979e4-8c67-4427-98e0-116c6518071f.png)
-![full-results-cropped](https://user-images.githubusercontent.com/33397865/172427164-b19f1bb5-43a7-47d6-a833-c343e519f447.png)
+![1](https://user-images.githubusercontent.com/33397865/176732388-11b66a1e-1d20-420f-a583-5d95241444d6.png)
+![3](https://user-images.githubusercontent.com/33397865/176732403-9c64e277-f533-4bf3-96a5-a26303b37b60.png)
+![2](https://user-images.githubusercontent.com/33397865/176732395-73c6c922-6a0d-4576-90bb-1f77e2c9b065.png)
+![4](https://user-images.githubusercontent.com/33397865/176732415-aac89b54-15d3-4b10-8408-fac997b97085.png)
 
 ### Acknowledgments
 Built with [bubbletea](https://github.com/charmbracelet/bubbletea)
