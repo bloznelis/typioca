@@ -11,6 +11,8 @@ import (
 	"github.com/kirsle/configdir"
 )
 
+const currentConfigVersion = 2
+
 func ReadConfig() Config {
 	var config Config
 	configFile := getSystemConfigPath()
@@ -21,6 +23,10 @@ func ReadConfig() Config {
 		WriteConfig(config)
 	} else {
 		readConfigFile(&config, configFile)
+		if config.Version != currentConfigVersion {
+			config = defaultConfig()
+			WriteConfig(config)
+		}
 	}
 	config = mergeConfigs(config)
 	checkSync(&config)
@@ -177,17 +183,46 @@ func defaultConfig() Config {
 	cachePath := getCachePath()
 
 	return Config{
-		Version: 1,
+		Version: currentConfigVersion,
 		EmbededWordLists: []EmbededWordList{
 			{"Common words", false, true},
 			{"Frankenstein sentences", true, true},
 		},
 		WordLists: []WordList{
 			defaultWordList(cachePath, "Frankenstein words", "frankenstein.json", true, false),
+
 			defaultWordList(cachePath, "Dorian Gray words", "dorian-gray.json", true, false),
-			defaultWordList(cachePath, "Pride and Prejudice words", "pride-and-prejudice.json", true, false),
 			defaultWordList(cachePath, "Dorian gray sentences", "dorian-gray.json", true, true),
+
+			defaultWordList(cachePath, "Pride and Prejudice words", "pride-and-prejudice.json", true, false),
 			defaultWordList(cachePath, "Pride and Prejudice sentences", "pride-and-prejudice.json", true, true),
+
+			defaultWordList(cachePath, "Sherlock Holmes words", "sherlock-holmes.json", true, false),
+			defaultWordList(cachePath, "Sherlock Holmes sentences", "sherlock-holmes.json", true, true),
+
+			defaultWordList(cachePath, "Dracula words", "dracula.json", true, false),
+			defaultWordList(cachePath, "Dracula sentences", "dracula.json", true, true),
+
+			defaultWordList(cachePath, "The Yellow Wallpaper words", "the-yellow-wallpaper.json", true, false),
+			defaultWordList(cachePath, "The Yellow Wallpaper sentences", "the-yellow-wallpaper.json", true, true),
+
+			defaultWordList(cachePath, "A Tale of Two Cities words", "a-tale-of-two-cities.json", true, false),
+			defaultWordList(cachePath, "A Tale of Two Cities sentences", "a-tale-of-two-cities.json", true, true),
+
+			defaultWordList(cachePath, "The Great Gatsby words", "the-great-gatsby.json", true, false),
+			defaultWordList(cachePath, "The Great Gatsby sentences", "the-great-gatsby.json", true, true),
+
+			defaultWordList(cachePath, "The Count of Monte Cristo words", "the-count-of-monte-cristo.json", true, false),
+			defaultWordList(cachePath, "The Count of Monte Cristo sentences", "the-count-of-monte-cristo.json", true, true),
+
+			defaultWordList(cachePath, "Treasure Island words", "treasure-island.json", true, false),
+			defaultWordList(cachePath, "Treasure Island sentences", "treasure-island.json", true, true),
+
+			defaultWordList(cachePath, "Little Women words", "little-women.json", true, false),
+			defaultWordList(cachePath, "Little Women sentences", "little-women.json", true, true),
+
+			defaultWordList(cachePath, "Peter Pan words", "peter-pan.json", true, false),
+			defaultWordList(cachePath, "Peter Pan sentences", "peter-pan.json", true, true),
 		},
 	}
 }

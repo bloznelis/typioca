@@ -22,39 +22,6 @@ func LoadWordSources(paths []string) ([]WordSource, error) {
 	return sources, nil
 }
 
-func ReadMetadata(path string) Metadata {
-	var metadata Metadata
-
-	fh, err := os.Open(path)
-	defer fh.Close()
-	check(err)
-
-	decoder := json.NewDecoder(fh)
-	decoder.Decode(&metadata)
-
-	return metadata
-}
-
-func ReadMetadatas(paths []string) []Metadata {
-	var acc []Metadata
-
-	for _, elem := range paths {
-		var metadata Metadata
-
-		fh, err := os.Open(elem)
-		check(err)
-
-		decoder := json.NewDecoder(fh)
-		decoder.Decode(&metadata)
-
-		acc = append(acc, metadata)
-
-		fh.Close()
-	}
-
-	return acc
-}
-
 func LoadWordList(filePath string, wordSourceToFill WordSource) error {
 	fh, err := os.Open(filePath)
 	if err != nil {
