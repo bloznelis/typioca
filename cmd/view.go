@@ -66,7 +66,7 @@ func (m model) View() string {
 	case ConfigView:
 		absolutePad := longestStringLen(names(state.config.WordLists)) + 2
 		var view string
-		header := fmt.Sprintf("%s%20s%s/%s\n\n", "  wordlist", " ", "synced", "enabled")
+		header := fmt.Sprintf("%s%*s%s/%s\n\n", "  wordlist", absolutePad-11, " ", "synced", "enabled")
 		view += header
 
 		for idx, elem := range state.config.EmbededWordLists {
