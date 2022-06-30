@@ -51,8 +51,8 @@ Minimal, terminal based typing speed tester.
 | Platfrom | **User configuration**                                                                     |
 |----------|--------------------------------------------------------------------------------------------|
 | Windows  | `%APPDATA%\typioca\typioca.conf` or `C:\Users\%USER%\AppData\Roaming\typioca\typioca.conf` |
-| Linux    | `$XDG_CONFIG_HOME\typioca\typioca.conf` or `$HOME/.config\typioca\typioca.conf`            |
-| macOS    | `$HOME/Library/Application Support\typioca\typioca.conf`                                   |
+| Linux    | `$XDG_CONFIG_HOME/typioca/typioca.conf` or `$HOME/.config/typioca/typioca.conf`            |
+| macOS    | `$HOME/Library/Application Support/typioca/typioca.conf`                                   |
 
 Config example (it is [TOML](https://github.com/toml-lang/toml)):
 ```toml
