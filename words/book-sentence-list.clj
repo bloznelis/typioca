@@ -8,7 +8,7 @@
 
                          :words words-list} {:pretty true}))
 
-(def exclusions '("“" "”" "gutenberg" "Gutenberg" "Petersburgh" "Mr." "Mrs." "—" "Chapter"))
+(def exclusions '("“" "”" "gutenberg" "Gutenberg" "Petersburgh" "Mr." "Mrs." "—" "Chapter" "m." "é"))
 
 (defn contains-exclusion? [str]
   (not-every? false? (map #(str/includes? str %) exclusions)))
@@ -23,7 +23,9 @@
        (map #(str/replace % #"\s+" " "))
        (map #(str/replace % #"’" "'"))
        (map #(str/replace % #"_" ""))
+       (map #(str/replace % #"‘" "'"))
        (map str/trim)
+       (map #(str/capitalize %))
        (wrap-to-json list-name)
        (spit output-file)))
 
