@@ -60,12 +60,12 @@ Config example (it is [TOML](https://github.com/toml-lang/toml)):
   name      = "Best hits '22"
   enabled   = false
   sentences = false
-  path      = "/home/lukas/.cache/typioca/words/best-hits-22.json"
+  path      = "/home/words/best-hits-22.json"
 [[words]]
   name      = "Even better hits '23"
   enabled   = true
   sentences = false
-  path      = "/home/lukas/.cache/typioca/words/better-hits-23.json"
+  path      = "/home/words/better-hits-23.json"
 ```
 3. Use your words!
 
