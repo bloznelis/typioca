@@ -40,10 +40,9 @@ scoop install typioca
 yay -S typioca-git
 ```
 
-### macOS
+### Homebrew
 
-#### Homebrew
-
+For Linux and macOS users:
 ```
 brew tap bloznelis/tap
 brew install typioca
