@@ -48,7 +48,7 @@ Minimal, terminal based typing speed tester.
    - **Note:** for new-line separated word lists (like [this one](https://raw.githubusercontent.com/powerlanguage/word-lists/master/1000-most-common-words.txt)), for your convenience, you can use [this Clojure script](https://github.com/bloznelis/typioca/blob/master/words/common-word-list.clj). Explanation how to use it can be found [here](https://github.com/bloznelis/typioca/tree/master/words).
 3. Place your configuration to platform specific location:
 
-| Platfrom | **User configuration**                                                                     |
+| Platform | **User configuration**                                                                     |
 |----------|--------------------------------------------------------------------------------------------|
 | Windows  | `%APPDATA%\typioca\typioca.conf` or `C:\Users\%USER%\AppData\Roaming\typioca\typioca.conf` |
 | Linux    | `$XDG_CONFIG_HOME/typioca/typioca.conf` or `$HOME/.config/typioca/typioca.conf`            |
