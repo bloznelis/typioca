@@ -23,13 +23,12 @@ Minimal, terminal based typing speed tester.
 
 ## Installation
 
-### Windows
+### Homebrew
 
-#### Scoop
-
+For Linux and macOS users:
 ```
-scoop bucket add extras
-scoop install typioca
+brew tap bloznelis/tap
+brew install typioca
 ```
 
 ### Linux
@@ -40,12 +39,13 @@ scoop install typioca
 yay -S typioca-git
 ```
 
-### Homebrew
+### Windows
 
-For Linux and macOS users:
+#### Scoop
+
 ```
-brew tap bloznelis/tap
-brew install typioca
+scoop bucket add extras
+scoop install typioca
 ```
 
 ### Go
