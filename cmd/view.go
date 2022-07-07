@@ -14,7 +14,6 @@ import (
 	"github.com/muesli/reflow/wordwrap"
 )
 
-var avgLineLen int = 0
 var lineLenLimit int
 var minLineLen int = 5
 var maxLineLen int = 40
@@ -46,20 +45,24 @@ func (m model) View() string {
 
 	switch state := m.state.(type) {
 	case MainMenu:
-		s := style("  typioca", m.styles.faintGreen)
-		s += "\n\n\n"
+		typioca := style("  typioca", m.styles.faintGreen)
+		typioca = lipgloss.NewStyle().PaddingBottom(1).Render(typioca)
 
+		var choices []string
+		choiceStyle := lipgloss.NewStyle().PaddingTop(1)
 		for i, choice := range state.selections {
 			choiceShow := choice.show(m.styles)
 			if !choice.Enabled() {
 				choiceShow = style(dropAnsiCodes(choiceShow), m.styles.toEnter)
 			}
 
-			s += wrapWithCursor(state.cursor == i, choiceShow, m.styles.runningTimer)
-			s += "\n\n"
+			choiceShow = wrapWithCursor(state.cursor == i, choiceShow, m.styles.runningTimer)
+			choiceShow = choiceStyle.Render(choiceShow)
+			choices = append(choices, choiceShow)
 		}
 
-		s = lipgloss.NewStyle().Align(lipgloss.Left).Render(s)
+		joined := lipgloss.JoinVertical(lipgloss.Left, append([]string{typioca}, choices...)...)
+		s = lipgloss.NewStyle().Align(lipgloss.Left).Render(joined)
 
 		return lipgloss.Place(termWidth, termHeight, lipgloss.Center, lipgloss.Center, s)
 
@@ -210,19 +213,12 @@ func (m model) View() string {
 
 		paragraphView := state.base.paragraphView(lineLenLimit, m.styles)
 		lines := strings.Split(paragraphView, "\n")
-		cursorLine := findCursorLine(strings.Split(paragraphView, "\n"), state.base.cursor)
+		cursorLine := findCursorLine(lines, state.base.cursor)
 
 		linesAroundCursor := strings.Join(getLinesAroundCursor(lines, cursorLine), "\n")
 
-		// Vertical positioning
-		for i := 0; i < termHeight/2-3; i++ {
-			s += "\n"
-		}
-
-		if avgLineLen == 0 {
-			avgLineLen = averageLineLen(lines)
-		}
-
+		s += positionVerticaly(termHeight)
+		avgLineLen := averageLineLen(lines)
 		indentBy := uint(math.Max(0, float64(termWidth/2-avgLineLen/2)))
 
 		s += m.indent(coloredTimer, indentBy) + "\n\n" + m.indent(linesAroundCursor, indentBy)
@@ -246,14 +242,8 @@ func (m model) View() string {
 
 		linesAroundCursor := strings.Join(getLinesAroundCursor(lines, cursorLine), "\n")
 
-		// Vertical positioning
-		for i := 0; i < termHeight/2-3; i++ {
-			s += "\n"
-		}
-
-		if avgLineLen == 0 {
-			avgLineLen = averageLineLen(lines)
-		}
+		s += positionVerticaly(termHeight)
+		avgLineLen := averageLineLen(lines)
 		indentBy := uint(math.Max(0, float64(termWidth/2-avgLineLen/2)))
 
 		s += m.indent(coloredStopwatch, indentBy) + "\n\n" + m.indent(linesAroundCursor, indentBy)
@@ -273,18 +263,14 @@ func (m model) View() string {
 
 		paragraphView := state.base.paragraphView(lineLenLimit, m.styles)
 		lines := strings.Split(paragraphView, "\n")
-		cursorLine := findCursorLine(strings.Split(paragraphView, "\n"), state.base.cursor)
+		cursorLine := findCursorLine(lines, state.base.cursor)
 
 		linesAroundCursor := strings.Join(getLinesAroundCursor(lines, cursorLine), "\n")
 
-		// Vertical positioning
-		for i := 0; i < termHeight/2-3; i++ {
-			s += "\n"
-		}
-
-		avgLineLen = averageLineLen(lines)
+		avgLineLen := averageLineLen(lines)
 		indentBy := uint(math.Max(0, float64(termWidth/2-avgLineLen/2)))
 
+		s += positionVerticaly(termHeight)
 		s += m.indent(coloredStopwatch, indentBy) + "\n\n" + m.indent(linesAroundCursor, indentBy)
 
 		if !state.stopwatch.isRunning {
@@ -295,6 +281,16 @@ func (m model) View() string {
 	}
 
 	return s
+}
+
+func positionVerticaly(termHeight int) string {
+	var acc strings.Builder
+
+	for i := 0; i < termHeight/2-4; i++ {
+		acc.WriteRune('\n')
+	}
+
+	return acc.String()
 }
 
 func plotWpms(wpms []float64, width int) string {
@@ -308,6 +304,12 @@ func plotWpms(wpms []float64, width int) string {
 	)
 
 	return lipgloss.NewStyle().Padding(1).Render(wpmGraph)
+}
+
+func averageLineLenFast(lines []string) int {
+	linesLen := len(lines)
+	linesToConsider := int(math.Min(float64(linesLen), 3))
+	return averageStringLen(lines[:linesToConsider])
 }
 
 func averageLineLen(lines []string) int {
