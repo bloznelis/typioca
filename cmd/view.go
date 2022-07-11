@@ -286,7 +286,7 @@ func (m model) View() string {
 func positionVerticaly(termHeight int) string {
 	var acc strings.Builder
 
-	for i := 0; i < termHeight/2-4; i++ {
+	for i := 0; i < termHeight/2-3; i++ {
 		acc.WriteRune('\n')
 	}
 
