@@ -25,23 +25,18 @@ Minimal, terminal based typing speed tester.
 
 ### Homebrew
 
-For Linux and macOS users:
 ```
 brew tap bloznelis/tap
 brew install typioca
 ```
 
-### Linux
-
-#### AUR
+### AUR
 
 ```
 yay -S typioca-git
 ```
 
-### Windows
-
-#### Scoop
+### Scoop
 
 ```
 scoop bucket add extras
