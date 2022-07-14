@@ -22,19 +22,36 @@ Minimal, terminal based typing speed tester.
   * Dynamic word lists
   * Custom word lists
   * Linux/Mac/Win support
-  
-## Installation
-### AUR
-`yay -S typioca-git`
 
-### Homebrew
-1. `brew tap bloznelis/tap`
-2. `brew install typioca`
+## Installation
+
+### AUR
+
+```
+yay -S typioca-git
+```
 
 ### Go
-`go install github.com/bloznelis/typioca@latest`
+
+```
+go install github.com/bloznelis/typioca@latest
+```
 
 **Note:** This will install typioca in `$GOBIN`, which defaults to `$GOPATH/bin` or `$HOME/go/bin` if the GOPATH environment variable is not set.
+
+### Homebrew
+
+```
+brew tap bloznelis/tap
+brew install typioca
+```
+
+### Scoop
+
+```
+scoop bucket add extras
+scoop install typioca
+```
 
 ### Building from source
   1. Checkout the code
