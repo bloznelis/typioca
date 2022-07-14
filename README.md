@@ -23,24 +23,10 @@ Minimal, terminal based typing speed tester.
 
 ## Installation
 
-### Homebrew
-
-```
-brew tap bloznelis/tap
-brew install typioca
-```
-
 ### AUR
 
 ```
 yay -S typioca-git
-```
-
-### Scoop
-
-```
-scoop bucket add extras
-scoop install typioca
 ```
 
 ### Go
@@ -49,7 +35,19 @@ scoop install typioca
 go install github.com/bloznelis/typioca@latest
 ```
 
-**Note:** This will install typioca in `$GOBIN`, which defaults to `$GOPATH/bin` or `$HOME/go/bin` if the GOPATH environment variable is not set.
+### Homebrew
+
+```
+brew tap bloznelis/tap
+brew install typioca
+```
+
+### Scoop
+
+```
+scoop bucket add extras
+scoop install typioca
+```
 
 ### Building from source
   1. Checkout the code
