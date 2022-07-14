@@ -35,6 +35,8 @@ yay -S typioca-git
 go install github.com/bloznelis/typioca@latest
 ```
 
+**Note:** This will install typioca in `$GOBIN`, which defaults to `$GOPATH/bin` or `$HOME/go/bin` if the GOPATH environment variable is not set.
+
 ### Homebrew
 
 ```
