@@ -17,7 +17,7 @@ Minimal, terminal based typing speed tester.
   * Multiple word/sentence lists made out of classical books to spice your test up
   * Cursor aware word lines
   * Interactive menu
-  * ctrl+w support ;)
+  * ctrl+w support
   * SSH server `typioca serve`
   * Dynamic word lists
   * Custom word lists
