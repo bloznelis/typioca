@@ -1,4 +1,6 @@
 # typioca
+![image](https://user-images.githubusercontent.com/33397865/189932699-712b77a1-3e16-49c1-b337-69ea3091c6fe.png)
+
 Minimal, terminal based typing speed tester.
 
 
