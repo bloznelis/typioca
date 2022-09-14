@@ -1,4 +1,4 @@
-![image](https://user-images.githubusercontent.com/33397865/189935393-e044d603-03b0-46f3-a4e8-803aa86695e4.png)
+![image](https://user-images.githubusercontent.com/33397865/190091325-ae73ee2f-0bde-4f27-a245-2a8d21d9fd48.png)
 
 <p align=center> Minimal, terminal based typing speed tester. </p>
 
