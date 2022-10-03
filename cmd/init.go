@@ -14,7 +14,7 @@ func (m model) Init() tea.Cmd {
 	return nil
 }
 
-//todo: clean these up. Maybe we could reuse filtering by enabled and synce, because now it's redundant
+// todo: clean these up. Maybe we could reuse filtering by enabled and synce, because now it's redundant
 type WordsSelection struct {
 	name         string
 	generatorKey string
@@ -86,84 +86,6 @@ func filterEnabledSelections(config Config) []WordsSelection {
 
 	return acc
 }
-
-// func filterEnabledWordListPaths(config Config) []string {
-// 	var acc []string
-// 	for _, elem := range config.WordLists {
-// 		if elem.Enabled && elem.synced && !elem.IsSentences {
-// 			acc = append(acc, elem.LocalPath)
-// 		}
-// 	}
-// 	return acc
-// }
-
-// func filterEnabledSentenceListPaths(config Config) []string {
-// 	var acc []string
-// 	for _, elem := range config.WordLists {
-// 		if elem.Enabled && elem.synced && elem.IsSentences {
-// 			acc = append(acc, elem.LocalPath)
-// 		}
-// 	}
-// 	return acc
-// }
-
-// func filterEnabledListPaths(config Config) []string {
-// 	var acc []string
-// 	for _, elem := range config.WordLists {
-// 		if elem.Enabled && elem.synced {
-// 			acc = append(acc, elem.LocalPath)
-// 		}
-// 	}
-// 	return acc
-// }
-
-// func filterEnabledListNames(config Config) []string {
-// 	var acc []string
-// 	for _, elem := range config.EmbededWordLists {
-// 		if elem.Enabled {
-// 			acc = append(acc, elem.Name)
-// 		}
-// 	}
-// 	for _, elem := range config.WordLists {
-// 		if elem.Enabled && elem.synced {
-// 			acc = append(acc, elem.Name)
-// 		}
-// 	}
-
-// 	return acc
-// }
-
-// func filterEnabledWordListNames(config Config) []string {
-// 	var acc []string
-// 	for _, elem := range config.EmbededWordLists {
-// 		if elem.Enabled && !elem.IsSentences {
-// 			acc = append(acc, elem.Name)
-// 		}
-// 	}
-// 	for _, elem := range config.WordLists {
-// 		if elem.Enabled && elem.synced && !elem.IsSentences {
-// 			acc = append(acc, elem.Name)
-// 		}
-// 	}
-
-// 	return acc
-// }
-
-// func filterEnabledSentenceListNames(config Config) []string {
-// 	var acc []string
-// 	for _, elem := range config.EmbededWordLists {
-// 		if elem.Enabled && elem.IsSentences {
-// 			acc = append(acc, elem.Name)
-// 		}
-// 	}
-// 	for _, elem := range config.WordLists {
-// 		if elem.Enabled && elem.synced && elem.IsSentences {
-// 			acc = append(acc, elem.Name)
-// 		}
-// 	}
-
-// 	return acc
-// }
 
 func initTimerBasedTest(settings TimerBasedTestSettings, mainMenu MainMenu) TimerBasedTest {
 	return TimerBasedTest{
