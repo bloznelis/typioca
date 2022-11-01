@@ -1,5 +1,7 @@
 <p align=center> <img alt="typioca" src="https://user-images.githubusercontent.com/33397865/199255707-ddd68df5-b993-4496-8e84-ee333c389ae8.png"> </p>
 
+<h3 align=center> typioca </h3>
+
 <p align=center> Minimal, terminal based typing speed tester. </p>
 
 <p align=center> <img alt="GitHub release (latest SemVer)" src="https://img.shields.io/github/v/release/bloznelis/typioca"> <img alt="GitHub Workflow Status" src="https://img.shields.io/github/workflow/status/bloznelis/typioca/CI"> </p>
