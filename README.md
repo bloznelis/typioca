@@ -1,4 +1,4 @@
-<p align=center> <img alt="typioca" src="https://user-images.githubusercontent.com/33397865/199253979-94898a26-1bc4-4d54-b520-9df3cc81b75b.png"> </p>
+<p align=center> <img alt="typioca" src="https://user-images.githubusercontent.com/33397865/199255707-ddd68df5-b993-4496-8e84-ee333c389ae8.png"> </p>
 
 <p align=center> Minimal, terminal based typing speed tester. </p>
 
