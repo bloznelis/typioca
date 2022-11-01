@@ -7,7 +7,7 @@ require (
 	github.com/charmbracelet/bubbles v0.14.0
 	github.com/charmbracelet/bubbletea v0.22.1
 	github.com/charmbracelet/lipgloss v0.6.0
-	github.com/charmbracelet/wish v0.5.0
+	github.com/charmbracelet/wish v0.6.0
 	github.com/gliderlabs/ssh v0.3.5
 	github.com/guptarohit/asciigraph v0.5.5
 	github.com/kirsle/configdir v0.0.0-20170128060238-e45d2f54772f
