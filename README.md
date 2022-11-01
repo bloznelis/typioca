@@ -1,4 +1,4 @@
-![image](https://user-images.githubusercontent.com/33397865/190091325-ae73ee2f-0bde-4f27-a245-2a8d21d9fd48.png)
+<p align=center> <img alt="typioca" src="https://user-images.githubusercontent.com/33397865/199253979-94898a26-1bc4-4d54-b520-9df3cc81b75b.png"> </p>
 
 <p align=center> Minimal, terminal based typing speed tester. </p>
 
