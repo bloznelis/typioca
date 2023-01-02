@@ -1,8 +1,7 @@
 <h1 align=center> typioca </h1>
 
 <p align=center> Minimal, terminal based typing speed tester. </p>
-
-<p align=center> <img alt="GitHub release (latest SemVer)" src="https://img.shields.io/github/v/release/bloznelis/typioca"> <img alt="GitHub Workflow Status" src="https://img.shields.io/github/workflow/status/bloznelis/typioca/CI"> </p>
+<p align=center> <img alt="GitHub release (latest SemVer)" src="https://img.shields.io/github/v/release/bloznelis/typioca"> <img alt="GitHub Workflow Status" src="https://img.shields.io/github/actions/workflow/status/bloznelis/typioca/ci.yml"> </p>
 
 > **Tapioca** (/ˌtæpiˈoʊkə/) is a starch extracted from the storage roots of the cassava plant. Pearl tapioca is a common ingredient in Asian desserts...and sweet drinks such as **bubble tea**.
 
