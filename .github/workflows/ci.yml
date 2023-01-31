@@ -55,12 +55,10 @@ jobs:
       - uses: actions/download-artifact@v3
         with:
           path: execs
-      - id: get_version
-        uses: battila7/get-version-action@v2
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
-          name: typioca ${{ steps.get_version.outputs.version }}
+          name: typioca ${{ github.ref_name }}
           files: execs/**/*
   winget:
     needs: release
