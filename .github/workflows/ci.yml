@@ -70,4 +70,4 @@ jobs:
         with:
           identifier: bloznelis.typioca
           version: ${{ github.ref_name }}
-          token: ${{ secrets.WINGET_TOKEN }}
+          token: ${{ secrets.PUBLIC_REPO_ACCESS }}
