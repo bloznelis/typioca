@@ -62,3 +62,12 @@ jobs:
         with:
           name: typioca ${{ steps.get_version.outputs.version }}
           files: execs/**/*
+  winget:
+    needs: release
+    runs-on: windows-latest # Action can only be run on Windows
+    steps:
+      - uses: vedantmgoyal2009/winget-releaser@v1
+        with:
+          identifier: bloznelis.typioca
+          version: ${{ github.ref_name }}
+          token: ${{ secrets.WINGET_TOKEN }}
