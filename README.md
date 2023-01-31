@@ -49,6 +49,12 @@ scoop bucket add extras
 scoop install typioca
 ```
 
+### Winget
+
+```
+winget install bloznelis.typioca
+```
+
 ### Building from source
   1. Checkout the code
   2. `make build`
