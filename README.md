@@ -49,6 +49,12 @@ scoop bucket add extras
 scoop install typioca
 ```
 
+### Void Linux
+
+```
+xbps-install typioca
+```
+
 ### Winget
 
 ```
