@@ -85,7 +85,7 @@ or in the same JSON format as the official ones:
   "metadata" : {
     "name" : "My words",
     "size" : 5,
-    "packagedAt" : "2023-02-26T09:35:32Z",
+    "packagedAt" : "1970-01-01T00:00:00Z",
     "version" : 1
   },
   "words": [ "custom", "words", "are", "the", "best" ]
