@@ -64,7 +64,7 @@ jobs:
     needs: release
     runs-on: windows-latest # Action can only be run on Windows
     steps:
-      - uses: vedantmgoyal2009/winget-releaser@v1
+      - uses: vedantmgoyal2009/winget-releaser@v2
         with:
           identifier: bloznelis.typioca
           version: ${{ github.ref_name }}
