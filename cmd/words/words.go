@@ -1,6 +1,7 @@
 package words
 
 import (
+	"bufio"
 	_ "embed"
 	"encoding/json"
 	"math/rand"
@@ -61,14 +62,20 @@ func addEmbededSource(sources map[string]WordSource) map[string]WordSource {
 func unmarshalSources(paths []string) map[string]WordSource {
 	acc := make(map[string]WordSource, len(paths))
 	for _, sourceFilePath := range paths {
-		wordSource := unmarshalSource(sourceFilePath)
+        var wordSource WordSource
+        if strings.HasSuffix(sourceFilePath, ".json") {
+            wordSource = readJsonSource(sourceFilePath)
+        } else {
+            wordSource = readNewLineSource(sourceFilePath)
+        }
+
 		acc[sourceFilePath] = wordSource
 	}
 
 	return acc
 }
 
-func unmarshalSource(sourceFilePath string) WordSource {
+func readJsonSource(sourceFilePath string) WordSource {
 	var wordSource WordSource
 
 	fh, err := os.Open(sourceFilePath)
@@ -80,6 +87,30 @@ func unmarshalSource(sourceFilePath string) WordSource {
 	check(err)
 
 	return wordSource
+}
+
+func readNewLineSource(sourceFilePath string) WordSource {
+    fh, err := os.Open(sourceFilePath)
+    defer fh.Close()
+    check(err)
+
+    var lines []string
+    scanner := bufio.NewScanner(fh)
+    for scanner.Scan() {
+        lines = append(lines, scanner.Text())
+    }
+
+    metadata := Metadata {
+        Name: fh.Name(),
+        Size: len(lines),
+        PackagedAt: "1970-01-01T00:00:00Z",
+        Version: 1,
+    }
+
+    return  WordSource {
+        Metadata: metadata,
+        Words: lines,
+    }
 }
 
 func NewGenerator(paths []string) (g WordsGenerator) {

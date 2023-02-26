@@ -71,9 +71,27 @@ winget install bloznelis.typioca
   * `go`
 
 ## Custom wordlists
-1. Create your word list in the same JSON format as the official ones [example](https://raw.githubusercontent.com/bloznelis/typioca/master/words/storage/words/common-english.json).
-   - **Note:** for new-line separated word lists (like [this one](https://raw.githubusercontent.com/powerlanguage/word-lists/master/1000-most-common-words.txt)), for your convenience, you can use [this Clojure script](https://github.com/bloznelis/typioca/blob/master/words/common-word-list.clj). Explanation how to use it can be found [here](https://github.com/bloznelis/typioca/tree/master/words).
-3. Place your configuration to platform specific location:
+1. Create your word list in a new line separated manner:
+```
+custom
+words
+are
+the
+best
+```
+or in the same JSON format as the official ones:
+```json
+{
+  "metadata" : {
+    "name" : "My words",
+    "size" : 5,
+    "packagedAt" : "2023-02-26T09:35:32Z",
+    "version" : 1
+  },
+  "words": [ "custom", "words", "are", "the", "best" ]
+}
+```
+2. Place your configuration to platform specific location:
 
 | Platform | **User configuration**                                                                     |
 |----------|--------------------------------------------------------------------------------------------|
