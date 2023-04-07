@@ -10,10 +10,10 @@ import (
 	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/ssh"
 	"github.com/charmbracelet/wish"
 	bm "github.com/charmbracelet/wish/bubbletea"
 	lm "github.com/charmbracelet/wish/logging"
-	"github.com/gliderlabs/ssh"
 	"github.com/muesli/termenv"
 	"github.com/spf13/cobra"
 	"golang.org/x/term"
@@ -64,22 +64,26 @@ var (
 				wish.WithHostKeyPath(serverKeyPath),
 				wish.WithMiddleware(
 					lm.Middleware(),
-					bm.Middleware(func(s ssh.Session) (tea.Model, []tea.ProgramOption) {
-						pty, _, active := s.Pty()
-						if !active {
-							wish.Fatal(s, fmt.Errorf("not a tty"))
-							return nil, nil
-						}
-						return initialModel(
-								termenv.ANSI256,
-								termenv.ANSIWhite,
-								pty.Window.Width,
-								pty.Window.Height,
-							),
-							[]tea.ProgramOption{tea.WithAltScreen()}
-					}),
+					bm.Middleware(
+						func(s ssh.Session) (tea.Model, []tea.ProgramOption) {
+							pty, _, active := s.Pty()
+
+							if !active {
+								wish.Fatal(s, fmt.Errorf("not a tty"))
+								return nil, nil
+							}
+
+							return initialModel(
+									termenv.ANSI256,
+									termenv.ANSIWhite,
+									pty.Window.Width,
+									pty.Window.Height,
+								),
+								[]tea.ProgramOption{tea.WithAltScreen()}
+						}),
 				),
 			)
+
 			if err != nil {
 				return err
 			}
