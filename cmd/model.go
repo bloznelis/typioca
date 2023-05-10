@@ -185,6 +185,17 @@ type ConfigView struct {
 	cursor   int
 }
 
+type TestSettingCursors struct {
+	TimerTimeCursor int
+	TimerWordlistCursor int
+
+	WordCountCursor         int
+	WordCountWordlistCursor int
+
+	SentenceCountCursor         int
+	SentenceCountWordlistCursor int
+}
+
 type WordList struct {
 	Sentences bool
 	Name      string
@@ -213,9 +224,10 @@ func (embeded *EmbededWordList) toggleEnabled() {
 }
 
 type Config struct {
-	EmbededWordLists []EmbededWordList
-	WordLists        []WordList
-	Version          int
+	TestSettingCursors TestSettingCursors
+	EmbededWordLists   []EmbededWordList
+	WordLists          []WordList
+	Version            int
 }
 
 type LocalConfig struct {

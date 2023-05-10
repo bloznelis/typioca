@@ -157,34 +157,51 @@ func initSentenceCountBasedTest(settings SentenceCountBasedTestSettings, mainMen
 	}
 }
 
-func initTimerBasedTestSelection(config Config, words []WordsSelection) TimerBasedTestSettings {
+func initTestSettingCursors() TestSettingCursors {
+	return TestSettingCursors{
+		TimerTimeCursor:             2,
+		TimerWordlistCursor:         0,
+		WordCountCursor:             2,
+		WordCountWordlistCursor:     0,
+		SentenceCountCursor:         2,
+		SentenceCountWordlistCursor: 0,
+	}
+}
+
+func (cursors *TestSettingCursors) resetWordlistCursors() {
+    cursors.TimerWordlistCursor = 0
+    cursors.WordCountWordlistCursor = 0
+    cursors.SentenceCountWordlistCursor = 0
+}
+
+func initTimerBasedTestSettings(config Config, words []WordsSelection) TimerBasedTestSettings {
 	return TimerBasedTestSettings{
 		timeSelections:     []time.Duration{time.Second * 120, time.Second * 60, time.Second * 30, time.Second * 15},
-		timeCursor:         2,
+		timeCursor:         config.TestSettingCursors.TimerTimeCursor,
 		wordListSelections: words,
-		wordListCursor:     0,
+		wordListCursor:     config.TestSettingCursors.TimerWordlistCursor,
 		cursor:             0,
 		enabled:            len(words) > 0,
 	}
 }
 
-func initWordCountBasedTestSelection(config Config, words []WordsSelection) WordCountBasedTestSettings {
+func initWordCountBasedTestSettings(config Config, words []WordsSelection) WordCountBasedTestSettings {
 	return WordCountBasedTestSettings{
 		wordCountSelections: []int{100, 50, 25, 10},
-		wordCountCursor:     2,
+		wordCountCursor:     config.TestSettingCursors.WordCountCursor,
 		wordListSelections:  words,
-		wordListCursor:      0,
+		wordListCursor:      config.TestSettingCursors.WordCountWordlistCursor,
 		cursor:              0,
 		enabled:             len(words) > 0,
 	}
 }
 
-func initSentenceCountBasedTestSelection(config Config, words []WordsSelection) SentenceCountBasedTestSettings {
+func initSentenceCountBasedTestSettings(config Config, words []WordsSelection) SentenceCountBasedTestSettings {
 	return SentenceCountBasedTestSettings{
 		sentenceCountSelections: []int{30, 15, 5, 1},
-		sentenceCountCursor:     2,
+		sentenceCountCursor:     config.TestSettingCursors.SentenceCountCursor,
 		sentenceListSelections:  words,
-		sentenceListCursor:      0,
+		sentenceListCursor:      config.TestSettingCursors.SentenceCountWordlistCursor,
 		cursor:                  0,
 		enabled:                 len(words) > 0,
 	}
@@ -210,9 +227,9 @@ func initMainMenu() MainMenu {
 	return MainMenu{
 		config: config,
 		selections: []MainMenuSelection{
-			initTimerBasedTestSelection(config, timeBasedWordSelections),
-			initWordCountBasedTestSelection(config, countBasedWordSelections),
-			initSentenceCountBasedTestSelection(config, countBasedSentenceSelections),
+			initTimerBasedTestSettings(config, timeBasedWordSelections),
+			initWordCountBasedTestSettings(config, countBasedWordSelections),
+			initSentenceCountBasedTestSettings(config, countBasedSentenceSelections),
 			initConfigViewSelection(),
 		},
 		cursor:                 0,

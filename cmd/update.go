@@ -38,6 +38,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch state := m.state.(type) {
 	case MainMenu:
 		m.state = state.selections[state.cursor].handleInput(msg, state)
+        WriteConfig(state.config)
 		return m.quitOn(msg, "ctrl+q")
 
 	case ConfigView:
@@ -346,6 +347,9 @@ func (settings TimerBasedTestSettings) handleInput(msg tea.Msg, menu MainMenu) S
 		menu.selections[cursorToSave] = settings
 	}
 
+    menu.config.TestSettingCursors.TimerTimeCursor = settings.timeCursor
+    menu.config.TestSettingCursors.TimerWordlistCursor = settings.wordListCursor
+
 	return menu
 }
 
@@ -514,6 +518,9 @@ func (configView ConfigView) handleInput(msg tea.Msg, state State) State {
 				configView.config.WordLists[configView.cursor-embededLength].toggleEnabled()
 			}
 
+            // We might not have wordlist that config points to
+            configView.config.TestSettingCursors.resetWordlistCursors()
+
 			WriteConfig(configView.config)
 			state = configView
 		case "s":
@@ -521,6 +528,10 @@ func (configView ConfigView) handleInput(msg tea.Msg, state State) State {
 			if configView.cursor > embededLength-1 {
 				configView.config.WordLists[configView.cursor-embededLength].toggleSynced()
 			}
+
+            // We might not have wordlist that config points to
+            configView.config.TestSettingCursors.resetWordlistCursors()
+
 			WriteConfig(configView.config)
 			state = configView
 		case "up", "k":
