@@ -11,7 +11,7 @@ import (
 	"github.com/kirsle/configdir"
 )
 
-const currentConfigVersion = 2
+const currentConfigVersion = 3
 
 func ReadConfig() Config {
 	var config Config
@@ -183,6 +183,7 @@ func defaultConfig() Config {
 	cachePath := getCachePath()
 
 	return Config{
+		TestSettingCursors: initTestSettingCursors(),
 		Version: currentConfigVersion,
 		EmbededWordLists: []EmbededWordList{
 			{"Common words", false, true},
