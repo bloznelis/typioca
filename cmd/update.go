@@ -415,6 +415,9 @@ func (settings WordCountBasedTestSettings) handleInput(msg tea.Msg, menu MainMen
 		menu.selections[cursorToSave] = settings
 	}
 
+    menu.config.TestSettingCursors.WordCountCursor = settings.wordCountCursor
+    menu.config.TestSettingCursors.WordCountWordlistCursor = settings.wordListCursor
+
 	return menu
 }
 
@@ -502,6 +505,9 @@ func (settings SentenceCountBasedTestSettings) handleInput(msg tea.Msg, menu Mai
 		}
 		menu.selections[cursorToSave] = settings
 	}
+
+    menu.config.TestSettingCursors.SentenceCountCursor = settings.sentenceCountCursor
+    menu.config.TestSettingCursors.SentenceCountWordlistCursor = settings.sentenceListCursor
 
 	return menu
 }
