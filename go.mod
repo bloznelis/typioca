@@ -13,7 +13,7 @@ require (
 	github.com/kirsle/configdir v0.0.0-20170128060238-e45d2f54772f
 	github.com/muesli/reflow v0.3.0
 	github.com/muesli/termenv v0.15.1
-	github.com/spf13/cobra v1.6.1
+	github.com/spf13/cobra v1.7.0
 	golang.org/x/term v0.7.0
 )
 
@@ -25,7 +25,7 @@ require (
 	github.com/charmbracelet/log v0.2.1 // indirect
 	github.com/containerd/console v1.0.3 // indirect
 	github.com/go-logfmt/logfmt v0.6.0 // indirect
-	github.com/inconshreveable/mousetrap v1.0.1 // indirect
+	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/lucasb-eyer/go-colorful v1.2.0 // indirect
 	github.com/mattn/go-isatty v0.0.18 // indirect
 	github.com/mattn/go-localereader v0.0.1 // indirect
