@@ -75,10 +75,15 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if state.timer.timer.Timedout() {
 				termenv.Reset() // get rid of faintness
 				state.timer.timedout = true
+
+        var results = state.calculateResults()
+
+        PersistResults(results)
+
 				m.state = TimerBasedTestResults{
 					settings:      state.settings,
 					wpmEachSecond: state.base.wpmEachSecond,
-					results:       state.calculateResults(),
+					results:       results,
 					mainMenu:      state.mainMenu,
 				}
 			}
@@ -184,11 +189,16 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		// Finished?
 		if len(state.base.wordsToEnter) == len(state.base.inputBuffer) {
 			termenv.Reset() // get rid of faintness
+
+      var results = state.calculateResults()
+
+      PersistResults(results)
+
 			m.state = WordCountTestResults{
 				settings:      state.settings,
 				wpmEachSecond: state.base.wpmEachSecond,
 				wordCnt:       state.settings.wordCountSelections[state.settings.wordCountCursor],
-				results:       state.calculateResults(),
+				results:       results,
 				mainMenu:      state.mainMenu,
 			}
 		}
@@ -253,14 +263,19 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 		}
 
-		//Finished?
+		// Finished?
 		if len(state.base.wordsToEnter) == len(state.base.inputBuffer) {
 			termenv.Reset() // get rid of faintness
+
+      var results = state.calculateResults()
+
+      PersistResults(results)
+
 			m.state = SentenceCountTestResults{
 				settings:      state.settings,
 				wpmEachSecond: state.base.wpmEachSecond,
 				sentenceCnt:   state.settings.sentenceCountSelections[state.settings.sentenceCountCursor],
-				results:       state.calculateResults(),
+				results:       results,
 				mainMenu:      state.mainMenu,
 			}
 		}

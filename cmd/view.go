@@ -148,13 +148,13 @@ func (m model) View() string {
 
 	case TimerBasedTestResults:
 		rawWpmShow := "raw: " + style(strconv.Itoa(state.results.rawWpm), m.styles.greener)
-		cpm := "cpm: " + style(strconv.Itoa(state.results.cpm), m.styles.greener)
 		wpm := "wpm: " + style(strconv.Itoa(state.results.wpm), m.styles.runningTimer)
+    deltaWpm := "Δavg: " + style(fmt.Sprintf("%s%.2f%%", plusIfPositive(state.results.deltaWpm), math.Min(state.results.deltaWpm, 100.0)), m.styles.greener)
 		givenTime := "time: " + style(state.results.time.String(), m.styles.greener)
 		accuracy := "accuracy: " + style(fmt.Sprintf("%.1f", state.results.accuracy), m.styles.greener)
 		words := "words: " + style(state.results.wordList, m.styles.greener)
 
-		miscStatsLine1 := accuracy + " " + rawWpmShow + " " + cpm + " " + givenTime
+		miscStatsLine1 := fmt.Sprintf("%s %s %s %s", accuracy, deltaWpm, rawWpmShow, givenTime)
 		miscStatsLine2 := words
 
 		miscStatsLine1Len := len(dropAnsiCodes(miscStatsLine1))
@@ -166,14 +166,15 @@ func (m model) View() string {
 
 	case WordCountTestResults:
 		rawWpmShow := "raw: " + style(strconv.Itoa(state.results.rawWpm), m.styles.greener)
-		cpm := "cpm: " + style(strconv.Itoa(state.results.cpm), m.styles.greener)
+		//cpm := "cpm: " + style(strconv.Itoa(state.results.cpm), m.styles.greener)
 		wpm := "wpm: " + style(strconv.Itoa(state.results.wpm), m.styles.runningTimer)
+    deltaWpm := "Δavg: " + style(fmt.Sprintf("%s%.2f%%", plusIfPositive(state.results.deltaWpm), math.Min(state.results.deltaWpm, 100.0)), m.styles.greener)
 		givenTime := "time: " + style(state.results.time.String(), m.styles.greener)
 		wordCnt := "cnt: " + style(strconv.Itoa(state.wordCnt), m.styles.greener)
 		accuracy := "accuracy: " + style(fmt.Sprintf("%.1f", state.results.accuracy), m.styles.greener)
 		words := "words: " + style(state.results.wordList, m.styles.greener)
 
-		miscStatsLine1 := accuracy + " " + rawWpmShow + " " + cpm + " " + givenTime
+		miscStatsLine1 := fmt.Sprintf("%s %s %s %s", accuracy, deltaWpm, rawWpmShow, givenTime)
 		miscStatsLine2 := wordCnt + " " + words
 
 		miscStatsLine1Len := len(dropAnsiCodes(miscStatsLine1))
@@ -186,14 +187,15 @@ func (m model) View() string {
 
 	case SentenceCountTestResults:
 		rawWpmShow := "raw: " + style(strconv.Itoa(state.results.rawWpm), m.styles.greener)
-		cpm := "cpm: " + style(strconv.Itoa(state.results.cpm), m.styles.greener)
+		//cpm := "cpm: " + style(strconv.Itoa(state.results.cpm), m.styles.greener)
 		wpm := "wpm: " + style(strconv.Itoa(state.results.wpm), m.styles.runningTimer)
+    deltaWpm := "Δavg: " + style(fmt.Sprintf("%s%.2f%%", plusIfPositive(state.results.deltaWpm), math.Min(state.results.deltaWpm, 100.0)), m.styles.greener)
 		givenTime := "time: " + style(state.results.time.String(), m.styles.greener)
 		sentenceCnt := "cnt: " + style(strconv.Itoa(state.sentenceCnt), m.styles.greener)
 		accuracy := "accuracy: " + style(fmt.Sprintf("%.1f", state.results.accuracy), m.styles.greener)
 		words := "sentences: " + style(state.results.wordList, m.styles.greener)
 
-		miscStatsLine1 := accuracy + " " + rawWpmShow + " " + cpm + " " + givenTime
+		miscStatsLine1 := fmt.Sprintf("%s %s %s %s", accuracy, deltaWpm, rawWpmShow, givenTime)
 		miscStatsLine2 := sentenceCnt + " " + words
 
 		miscStatsLine1Len := len(dropAnsiCodes(miscStatsLine1))
@@ -281,6 +283,14 @@ func (m model) View() string {
 	}
 
 	return s
+}
+
+func plusIfPositive(f float64) string {
+  if f > 0.0 {
+    return "+"
+  } else {
+    return ""
+  }
 }
 
 func positionVerticaly(termHeight int) string {
