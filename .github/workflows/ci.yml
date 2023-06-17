@@ -62,7 +62,7 @@ jobs:
           files: execs/**/*
   winget:
     needs: release
-    runs-on: windows-latest # Action can only be run on Windows
+    runs-on: ubuntu-latest
     steps:
       - uses: vedantmgoyal2009/winget-releaser@v2
         with:
