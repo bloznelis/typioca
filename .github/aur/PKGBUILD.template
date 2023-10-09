@@ -9,16 +9,11 @@ url="https://github.com/bloznelis/typioca"
 license=(MIT)
 groups=()
 depends=()
-makedepends=(git make go)
+makedepends=(go)
 provides=("$name")
 conflicts=("$name")
-source=("git+$url")
+source=("git+$url#tag=$pkgver")
 sha256sums=('SKIP')
-
-pkgver() {
-  cd "$srcdir/$name"
-  printf "%s" "$(git describe --abbrev=0 --tags)"
-}
 
 build() {
   cd "$srcdir/$name"

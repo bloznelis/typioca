@@ -10,7 +10,7 @@ pkgbase = typioca-git
 	makedepends = go
 	provides = typioca
 	conflicts = typioca
-	source = git+https://github.com/bloznelis/typioca
+	source = git+https://github.com/bloznelis/typioca#tag=${PKGVER}
 	sha256sums = SKIP
 
 pkgname = typioca-git
