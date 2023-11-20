@@ -38,7 +38,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch state := m.state.(type) {
 	case MainMenu:
 		m.state = state.selections[state.cursor].handleInput(msg, state)
-        WriteConfig(state.config)
+		WriteConfig(state.config)
 		return m.quitOn(msg, "ctrl+q")
 
 	case ConfigView:
@@ -73,12 +73,12 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.state = state
 
 			if state.timer.timer.Timedout() {
-				termenv.Reset() // get rid of faintness
+				termenv.DefaultOutput().Reset()
 				state.timer.timedout = true
 
-        var results = state.calculateResults()
+				var results = state.calculateResults()
 
-        PersistResults(results)
+				PersistResults(results)
 
 				m.state = TimerBasedTestResults{
 					settings:      state.settings,
@@ -101,15 +101,15 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return m, nil
 
 			case "backspace", "ctrl+h":
-				state.base = state.base.handleBackspace()
+				handleBackspace(&state.base)
 				m.state = state
 
 			case "ctrl+w":
-				state.base = state.base.handleCtrlW()
+				handleCtrlW(&state.base)
 				m.state = state
 
 			case " ":
-				state.base = state.base.handleSpace()
+				handleSpace(&state.base)
 				m.state = state
 
 			default:
@@ -119,7 +119,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 						commands = append(commands, state.timer.timer.Init())
 						state.timer.isRunning = true
 					}
-					state.base = state.base.handleRunes(msg)
+					handleRunes(msg, &state.base)
 					m.state = state
 				}
 			}
@@ -161,15 +161,15 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return m, nil
 
 			case "backspace", "ctrl+h":
-				state.base = state.base.handleBackspace()
+				handleBackspace(&state.base)
 				m.state = state
 
 			case "ctrl+w":
-				state.base = state.base.handleCtrlW()
+				handleCtrlW(&state.base)
 				m.state = state
 
 			case " ":
-				state.base = state.base.handleSpace()
+				handleSpace(&state.base)
 				m.state = state
 
 			default:
@@ -179,7 +179,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 						commands = append(commands, state.stopwatch.stopwatch.Init())
 						state.stopwatch.isRunning = true
 					}
-					state.base = state.base.handleRunes(msg)
+					handleRunes(msg, &state.base)
 					m.state = state
 
 				}
@@ -188,11 +188,11 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		// Finished?
 		if len(state.base.wordsToEnter) == len(state.base.inputBuffer) {
-			termenv.Reset() // get rid of faintness
+			termenv.DefaultOutput().Reset()
 
-      var results = state.calculateResults()
+			var results = state.calculateResults()
 
-      PersistResults(results)
+			PersistResults(results)
 
 			m.state = WordCountTestResults{
 				settings:      state.settings,
@@ -238,15 +238,15 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return m, nil
 
 			case "backspace", "ctrl+h":
-				state.base = state.base.handleBackspace()
+				handleBackspace(&state.base)
 				m.state = state
 
 			case "ctrl+w":
-				state.base = state.base.handleCtrlW()
+				handleCtrlW(&state.base)
 				m.state = state
 
 			case " ":
-				state.base = state.base.handleSpace()
+				handleSpace(&state.base)
 				m.state = state
 
 			default:
@@ -256,20 +256,19 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 						commands = append(commands, state.stopwatch.stopwatch.Init())
 						state.stopwatch.isRunning = true
 					}
-					state.base = state.base.handleRunes(msg)
+					handleRunes(msg, &state.base)
 					m.state = state
-
 				}
 			}
 		}
 
 		// Finished?
 		if len(state.base.wordsToEnter) == len(state.base.inputBuffer) {
-			termenv.Reset() // get rid of faintness
+			termenv.DefaultOutput().Reset()
 
-      var results = state.calculateResults()
+			var results = state.calculateResults()
 
-      PersistResults(results)
+			PersistResults(results)
 
 			m.state = SentenceCountTestResults{
 				settings:      state.settings,
@@ -362,8 +361,8 @@ func (settings TimerBasedTestSettings) handleInput(msg tea.Msg, menu MainMenu) S
 		menu.selections[cursorToSave] = settings
 	}
 
-    menu.config.TestSettingCursors.TimerTimeCursor = settings.timeCursor
-    menu.config.TestSettingCursors.TimerWordlistCursor = settings.wordListCursor
+	menu.config.TestSettingCursors.TimerTimeCursor = settings.timeCursor
+	menu.config.TestSettingCursors.TimerWordlistCursor = settings.wordListCursor
 
 	return menu
 }
@@ -430,8 +429,8 @@ func (settings WordCountBasedTestSettings) handleInput(msg tea.Msg, menu MainMen
 		menu.selections[cursorToSave] = settings
 	}
 
-    menu.config.TestSettingCursors.WordCountCursor = settings.wordCountCursor
-    menu.config.TestSettingCursors.WordCountWordlistCursor = settings.wordListCursor
+	menu.config.TestSettingCursors.WordCountCursor = settings.wordCountCursor
+	menu.config.TestSettingCursors.WordCountWordlistCursor = settings.wordListCursor
 
 	return menu
 }
@@ -521,8 +520,8 @@ func (settings SentenceCountBasedTestSettings) handleInput(msg tea.Msg, menu Mai
 		menu.selections[cursorToSave] = settings
 	}
 
-    menu.config.TestSettingCursors.SentenceCountCursor = settings.sentenceCountCursor
-    menu.config.TestSettingCursors.SentenceCountWordlistCursor = settings.sentenceListCursor
+	menu.config.TestSettingCursors.SentenceCountCursor = settings.sentenceCountCursor
+	menu.config.TestSettingCursors.SentenceCountWordlistCursor = settings.sentenceListCursor
 
 	return menu
 }
@@ -539,8 +538,8 @@ func (configView ConfigView) handleInput(msg tea.Msg, state State) State {
 				configView.config.WordLists[configView.cursor-embededLength].toggleEnabled()
 			}
 
-            // We might not have wordlist that config points to
-            configView.config.TestSettingCursors.resetWordlistCursors()
+			// We might not have wordlist that config points to
+			configView.config.TestSettingCursors.resetWordlistCursors()
 
 			WriteConfig(configView.config)
 			state = configView
@@ -550,8 +549,8 @@ func (configView ConfigView) handleInput(msg tea.Msg, state State) State {
 				configView.config.WordLists[configView.cursor-embededLength].toggleSynced()
 			}
 
-            // We might not have wordlist that config points to
-            configView.config.TestSettingCursors.resetWordlistCursors()
+			// We might not have wordlist that config points to
+			configView.config.TestSettingCursors.resetWordlistCursors()
 
 			WriteConfig(configView.config)
 			state = configView
@@ -589,7 +588,6 @@ func (wl *WordList) toggleSynced() {
 		}
 
 		if err != nil {
-			// log.Panicln(err)
 			wl.syncOK = false
 		} else {
 			wl.synced = !wl.synced
@@ -640,7 +638,7 @@ func (results SentenceCountTestResults) handleInput(msg tea.Msg, state State) St
 	return state
 }
 
-func (base TestBase) handleBackspace() TestBase {
+func handleBackspace(base *TestBase) {
 	base.inputBuffer = dropLastRune(base.inputBuffer)
 
 	//Delete mistakes
@@ -651,11 +649,9 @@ func (base TestBase) handleBackspace() TestBase {
 	}
 
 	base.cursor = inputLength
-
-	return base
 }
 
-func (base TestBase) handleCtrlW() TestBase {
+func handleCtrlW(base *TestBase) {
 	base.inputBuffer = dropUntilWsIdx(base.inputBuffer, base.findLatestWsIndex())
 	bufferLen := len(base.inputBuffer)
 	base.cursor = bufferLen
@@ -668,8 +664,6 @@ func (base TestBase) handleCtrlW() TestBase {
 		}
 	}
 	base.mistakes.mistakesAt = newMistakes
-
-	return base
 }
 
 func dropUntilWsIdx(input []rune, wsIdx int) []rune {
@@ -680,7 +674,7 @@ func dropUntilWsIdx(input []rune, wsIdx int) []rune {
 	}
 }
 
-func (base TestBase) handleRunes(msg tea.KeyMsg) TestBase {
+func handleRunes(msg tea.KeyMsg, base *TestBase) {
 	base.inputBuffer = append(base.inputBuffer, msg.Runes...)
 	base.rawInputCnt += len(msg.Runes)
 
@@ -697,58 +691,26 @@ func (base TestBase) handleRunes(msg tea.KeyMsg) TestBase {
 
 	//Set cursor
 	base.cursor = inputLen
-
-	return base
 }
 
-func (base TestBase) handleSpace() TestBase {
-	if len(base.inputBuffer) > 0 && base.wordsToEnter[base.cursor-1] != ' ' {
-		nextSpaceIdx := findNextSpaceIndex(base.wordsToEnter, base.cursor)
-		var spacesToAppend []rune
-		if nextSpaceIdx == base.cursor {
-			spacesToAppend = []rune{' '}
-		} else {
-			spacesToEnterCnt := (nextSpaceIdx - base.cursor) + 1
-			spaces := make([]rune, spacesToEnterCnt)
-			for i := range spaces {
-				spaces[i] = ' '
-			}
-			spacesToAppend = spaces
-
-		}
-
-		// Mark mistakes
-		for i := base.cursor; i <= nextSpaceIdx; i++ {
-			if base.wordsToEnter[i] != ' ' {
-				base.mistakes.mistakesAt[i] = true
-				base.mistakes.rawMistakesCnt = base.mistakes.rawMistakesCnt + 1
-			}
-		}
-
-		base.inputBuffer = append(base.inputBuffer, spacesToAppend...)
+func handleSpace(base *TestBase) {
+	if len(base.inputBuffer) > 0 {
+		base.inputBuffer = append(base.inputBuffer, ' ')
 		base.cursor = len(base.inputBuffer)
 		base.rawInputCnt += 1
-	}
 
-	return base
-}
+		letterToInput := base.wordsToEnter[base.cursor-1]
+		inputLetter := base.inputBuffer[base.cursor-1]
 
-func findNextSpaceIndex(wordsToInput []rune, cursorAt int) int {
-	trimmedWordsToInput := wordsToInput[cursorAt:]
-	words := trimmedWordsToInput
-
-	var wsIdx int = 0
-	for idx, value := range words {
-		if value == ' ' {
-			wsIdx = idx
-			break
+		if letterToInput != inputLetter {
+			base.mistakes.mistakesAt[base.cursor-1] = true
+			base.mistakes.rawMistakesCnt += 1
 		}
-	}
 
-	return wsIdx + cursorAt
+	}
 }
 
-func (base TestBase) findLatestWsIndex() int {
+func (base *TestBase) findLatestWsIndex() int {
 	var wsIdx int = 0
 	for idx, value := range base.wordsToEnter {
 		if idx+1 >= base.cursor {

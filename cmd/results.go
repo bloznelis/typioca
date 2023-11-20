@@ -18,15 +18,15 @@ func (m TimerBasedTest) calculateResults() Results {
 	deltaWpm := calculateAverageWpmDeltaPercentage(wpm, ReadResults(identifier))
 
 	return Results{
-		identifier: identifier,
-		wpm:        int(wpm),
-		accuracy:   m.base.calculateAccuracy(),
-		deltaWpm:   deltaWpm,
-		rawWpm:     int(m.base.calculateRawWpm(elapsedMinutes)),
-		cpm:        m.base.calculateCpm(elapsedMinutes),
-		time:       m.timer.duration,
-		wordList:   wordlist,
-    wpmEachSecond: m.base.wpmEachSecond,
+		identifier:    identifier,
+		wpm:           int(wpm),
+		accuracy:      m.base.calculateAccuracy(),
+		deltaWpm:      deltaWpm,
+		rawWpm:        int(m.base.calculateRawWpm(elapsedMinutes)),
+		cpm:           m.base.calculateCpm(elapsedMinutes),
+		time:          m.timer.duration,
+		wordList:      wordlist,
+		wpmEachSecond: m.base.wpmEachSecond,
 	}
 }
 
@@ -45,15 +45,15 @@ func (m WordCountBasedTest) calculateResults() Results {
 	deltaWpm := calculateAverageWpmDeltaPercentage(wpm, ReadResults(identifier))
 
 	return Results{
-		identifier: identifier,
-		wpm:        int(wpm),
-		accuracy:   m.base.calculateAccuracy(),
-		deltaWpm:   deltaWpm,
-		rawWpm:     int(m.base.calculateRawWpm(elapsedMinutes)),
-		cpm:        m.base.calculateCpm(elapsedMinutes),
-		time:       m.stopwatch.stopwatch.Elapsed(),
-		wordList:   wordlist,
-    wpmEachSecond: m.base.wpmEachSecond,
+		identifier:    identifier,
+		wpm:           int(wpm),
+		accuracy:      m.base.calculateAccuracy(),
+		deltaWpm:      deltaWpm,
+		rawWpm:        int(m.base.calculateRawWpm(elapsedMinutes)),
+		cpm:           m.base.calculateCpm(elapsedMinutes),
+		time:          m.stopwatch.stopwatch.Elapsed(),
+		wordList:      wordlist,
+		wpmEachSecond: m.base.wpmEachSecond,
 	}
 }
 
@@ -72,15 +72,15 @@ func (m SentenceCountBasedTest) calculateResults() Results {
 	deltaWpm := calculateAverageWpmDeltaPercentage(wpm, ReadResults(identifier))
 
 	return Results{
-		identifier: identifier,
-		wpm:        int(wpm),
-		accuracy:   m.base.calculateAccuracy(),
-		deltaWpm:   deltaWpm,
-		rawWpm:     int(m.base.calculateRawWpm(elapsedMinutes)),
-		cpm:        m.base.calculateCpm(elapsedMinutes),
-		time:       m.stopwatch.stopwatch.Elapsed(),
-		wordList:   wordlist,
-    wpmEachSecond: m.base.wpmEachSecond,
+		identifier:    identifier,
+		wpm:           int(wpm),
+		accuracy:      m.base.calculateAccuracy(),
+		deltaWpm:      deltaWpm,
+		rawWpm:        int(m.base.calculateRawWpm(elapsedMinutes)),
+		cpm:           m.base.calculateCpm(elapsedMinutes),
+		time:          m.stopwatch.stopwatch.Elapsed(),
+		wordList:      wordlist,
+		wpmEachSecond: m.base.wpmEachSecond,
 	}
 }
 
@@ -91,9 +91,9 @@ func calculateAverageWpmDeltaPercentage(wpm float64, previousResults []Persisten
 }
 
 func calcPreviousResultsAvgWpm(previousResults []PersistentResultsNode) float64 {
-  if len(previousResults) == 0 {
-    return 0
-  }
+	if len(previousResults) == 0 {
+		return 0
+	}
 	var sum int
 	for _, v := range previousResults {
 		sum += v.Wpm

@@ -149,7 +149,7 @@ func (m model) View() string {
 	case TimerBasedTestResults:
 		rawWpmShow := "raw: " + style(strconv.Itoa(state.results.rawWpm), m.styles.greener)
 		wpm := "wpm: " + style(strconv.Itoa(state.results.wpm), m.styles.runningTimer)
-    deltaWpm := "Δavg: " + style(fmt.Sprintf("%s%.2f%%", plusIfPositive(state.results.deltaWpm), math.Min(state.results.deltaWpm, 100.0)), m.styles.greener)
+		deltaWpm := "Δavg: " + style(fmt.Sprintf("%s%.2f%%", plusIfPositive(state.results.deltaWpm), math.Min(state.results.deltaWpm, 100.0)), m.styles.greener)
 		givenTime := "time: " + style(state.results.time.String(), m.styles.greener)
 		accuracy := "accuracy: " + style(fmt.Sprintf("%.1f", state.results.accuracy), m.styles.greener)
 		words := "words: " + style(state.results.wordList, m.styles.greener)
@@ -166,9 +166,8 @@ func (m model) View() string {
 
 	case WordCountTestResults:
 		rawWpmShow := "raw: " + style(strconv.Itoa(state.results.rawWpm), m.styles.greener)
-		//cpm := "cpm: " + style(strconv.Itoa(state.results.cpm), m.styles.greener)
 		wpm := "wpm: " + style(strconv.Itoa(state.results.wpm), m.styles.runningTimer)
-    deltaWpm := "Δavg: " + style(fmt.Sprintf("%s%.2f%%", plusIfPositive(state.results.deltaWpm), math.Min(state.results.deltaWpm, 100.0)), m.styles.greener)
+		deltaWpm := "Δavg: " + style(fmt.Sprintf("%s%.2f%%", plusIfPositive(state.results.deltaWpm), math.Min(state.results.deltaWpm, 100.0)), m.styles.greener)
 		givenTime := "time: " + style(state.results.time.String(), m.styles.greener)
 		wordCnt := "cnt: " + style(strconv.Itoa(state.wordCnt), m.styles.greener)
 		accuracy := "accuracy: " + style(fmt.Sprintf("%.1f", state.results.accuracy), m.styles.greener)
@@ -187,9 +186,8 @@ func (m model) View() string {
 
 	case SentenceCountTestResults:
 		rawWpmShow := "raw: " + style(strconv.Itoa(state.results.rawWpm), m.styles.greener)
-		//cpm := "cpm: " + style(strconv.Itoa(state.results.cpm), m.styles.greener)
 		wpm := "wpm: " + style(strconv.Itoa(state.results.wpm), m.styles.runningTimer)
-    deltaWpm := "Δavg: " + style(fmt.Sprintf("%s%.2f%%", plusIfPositive(state.results.deltaWpm), math.Min(state.results.deltaWpm, 100.0)), m.styles.greener)
+		deltaWpm := "Δavg: " + style(fmt.Sprintf("%s%.2f%%", plusIfPositive(state.results.deltaWpm), math.Min(state.results.deltaWpm, 100.0)), m.styles.greener)
 		givenTime := "time: " + style(state.results.time.String(), m.styles.greener)
 		sentenceCnt := "cnt: " + style(strconv.Itoa(state.sentenceCnt), m.styles.greener)
 		accuracy := "accuracy: " + style(fmt.Sprintf("%.1f", state.results.accuracy), m.styles.greener)
@@ -286,11 +284,11 @@ func (m model) View() string {
 }
 
 func plusIfPositive(f float64) string {
-  if f > 0.0 {
-    return "+"
-  } else {
-    return ""
-  }
+	if f > 0.0 {
+		return "+"
+	} else {
+		return ""
+	}
 }
 
 func positionVerticaly(termHeight int) string {
@@ -414,7 +412,7 @@ func (m model) indent(block string, indentBy uint) string {
 	return indentedBlock
 }
 
-func (base TestBase) paragraphView(lineLimit int, styles Styles) string {
+func (base *TestBase) paragraphView(lineLimit int, styles Styles) string {
 	paragraph := base.colorInput(styles)
 	paragraph += base.colorCursor(styles)
 	paragraph += base.colorWordsToEnter(styles)
@@ -424,7 +422,7 @@ func (base TestBase) paragraphView(lineLimit int, styles Styles) string {
 	return wrapped
 }
 
-func (base TestBase) colorInput(styles Styles) string {
+func (base *TestBase) colorInput(styles Styles) string {
 	mistakes := toKeysSlice(base.mistakes.mistakesAt)
 	sort.Ints(mistakes)
 
@@ -455,13 +453,13 @@ func (base TestBase) colorInput(styles Styles) string {
 	return coloredInput.String()
 }
 
-func (base TestBase) colorCursor(styles Styles) string {
+func (base *TestBase) colorCursor(styles Styles) string {
 	cursorLetter := base.wordsToEnter[len(base.inputBuffer) : len(base.inputBuffer)+1]
 
 	return style(string(cursorLetter), styles.cursor)
 }
 
-func (base TestBase) colorWordsToEnter(styles Styles) string {
+func (base *TestBase) colorWordsToEnter(styles Styles) string {
 	wordsToEnter := base.wordsToEnter[len(base.inputBuffer)+1:] // without cursor
 
 	return style(string(wordsToEnter), styles.toEnter)

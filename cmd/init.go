@@ -169,9 +169,9 @@ func initTestSettingCursors() TestSettingCursors {
 }
 
 func (cursors *TestSettingCursors) resetWordlistCursors() {
-    cursors.TimerWordlistCursor = 0
-    cursors.WordCountWordlistCursor = 0
-    cursors.SentenceCountWordlistCursor = 0
+	cursors.TimerWordlistCursor = 0
+	cursors.WordCountWordlistCursor = 0
+	cursors.SentenceCountWordlistCursor = 0
 }
 
 func initTimerBasedTestSettings(config Config, words []WordsSelection) TimerBasedTestSettings {

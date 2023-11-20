@@ -48,34 +48,34 @@ type model struct {
 }
 
 type Results struct {
-  identifier ResultsIdentifier
-	wpm      int
-	accuracy float64
-  deltaWpm float64
-	rawWpm   int
-	cpm      int
-	time     time.Duration
-	wordList string
+	identifier    ResultsIdentifier
+	wpm           int
+	accuracy      float64
+	deltaWpm      float64
+	rawWpm        int
+	cpm           int
+	time          time.Duration
+	wordList      string
 	wpmEachSecond []float64
 }
 
 type PersistentResults struct {
-  Results AllPersistedResults
-  Version int
+	Results AllPersistedResults
+	Version int
 }
 
 type ResultsIdentifier struct {
-  testType TestType
-  numeric NumericSetting
-  words WordListName
+	testType TestType
+	numeric  NumericSetting
+	words    WordListName
 }
 
 type PersistentResultsNode struct {
-	Wpm      int
-	Accuracy float64
-  DeltaWpm float64
-	RawWpm   int
-	Cpm      int
+	Wpm           int
+	Accuracy      float64
+	DeltaWpm      float64
+	RawWpm        int
+	Cpm           int
 	WpmEachSecond []float64
 }
 
@@ -209,7 +209,7 @@ type ConfigView struct {
 }
 
 type TestSettingCursors struct {
-	TimerTimeCursor int
+	TimerTimeCursor     int
 	TimerWordlistCursor int
 
 	WordCountCursor         int

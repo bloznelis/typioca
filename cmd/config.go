@@ -184,7 +184,7 @@ func defaultConfig() Config {
 
 	return Config{
 		TestSettingCursors: initTestSettingCursors(),
-		Version: currentConfigVersion,
+		Version:            currentConfigVersion,
 		EmbededWordLists: []EmbededWordList{
 			{"Common words", false, true},
 			{"Frankenstein sentences", true, true},

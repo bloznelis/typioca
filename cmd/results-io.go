@@ -13,52 +13,52 @@ type NumericSetting = int
 type WordListName = string
 type AllPersistedResults = map[TestType]map[NumericSetting]map[WordListName][]PersistentResultsNode
 
-func PersistResults(results Results) PersistentResults{
-  var resultsFile = getResultsPath()
-  var persistentResults PersistentResults
+func PersistResults(results Results) PersistentResults {
+	var resultsFile = getResultsPath()
+	var persistentResults PersistentResults
 
 	//File does not exist?
 	if _, err := os.Stat(resultsFile); os.IsNotExist(err) {
-    persistentResults = defaultPersistentResults()
+		persistentResults = defaultPersistentResults()
 	} else {
-    readResults(&persistentResults)
-    // XXX: Once needed, version check should happen here
+		readResults(&persistentResults)
+		// XXX: Once needed, version check should happen here
 	}
 
-  persistentResults.addResults(results)
+	persistentResults.addResults(results)
 
-  writeResults(persistentResults)
+	writeResults(persistentResults)
 
-  return persistentResults
+	return persistentResults
 }
 
 func defaultPersistentResults() PersistentResults {
-  return PersistentResults {
-    Results: AllPersistedResults{},
-    Version: 1,
-  }
+	return PersistentResults{
+		Results: AllPersistedResults{},
+		Version: 1,
+	}
 }
 
 func ReadResults(i ResultsIdentifier) []PersistentResultsNode {
-  var resultsFile = getResultsPath()
-  var persistentResults PersistentResults
+	var resultsFile = getResultsPath()
+	var persistentResults PersistentResults
 
 	//File does not exist?
 	if _, err := os.Stat(resultsFile); os.IsNotExist(err) {
-    persistentResults = defaultPersistentResults()
+		persistentResults = defaultPersistentResults()
 	} else {
-    readResults(&persistentResults)
-    // XXX: Once needed, version check should happen here
+		readResults(&persistentResults)
+		// XXX: Once needed, version check should happen here
 	}
-  var res = persistentResults.Results[i.testType][i.numeric][i.words]
-  if res == nil {
-    return make([]PersistentResultsNode, 0)
-  }
-  return res
+	var res = persistentResults.Results[i.testType][i.numeric][i.words]
+	if res == nil {
+		return make([]PersistentResultsNode, 0)
+	}
+	return res
 }
 
 func readResults(results *PersistentResults) {
-  var resultsFilePath = getResultsPath()
+	var resultsFilePath = getResultsPath()
 	fh, err := os.Open(resultsFilePath)
 	if err != nil {
 		panic(err)
@@ -70,37 +70,37 @@ func readResults(results *PersistentResults) {
 }
 
 func (p *PersistentResults) addResults(results Results) {
-  var limit = 25 // XXX: Should be configurable eventually
+	var limit = 25 // XXX: Should be configurable eventually
 
-  var node = PersistentResultsNode {
-    Wpm: results.wpm,
-    Accuracy: results.accuracy,
-    DeltaWpm: results.deltaWpm,
-    RawWpm: results.rawWpm,
-    Cpm: results.cpm,
-    WpmEachSecond: results.wpmEachSecond,
-  }
-  var i = results.identifier
+	var node = PersistentResultsNode{
+		Wpm:           results.wpm,
+		Accuracy:      results.accuracy,
+		DeltaWpm:      results.deltaWpm,
+		RawWpm:        results.rawWpm,
+		Cpm:           results.cpm,
+		WpmEachSecond: results.wpmEachSecond,
+	}
+	var i = results.identifier
 
-  if p.Results[i.testType] == nil {
-    p.Results[i.testType] = map[NumericSetting]map[WordListName][]PersistentResultsNode{}
-  }
+	if p.Results[i.testType] == nil {
+		p.Results[i.testType] = map[NumericSetting]map[WordListName][]PersistentResultsNode{}
+	}
 
-  if p.Results[i.testType][i.numeric] == nil {
-    p.Results[i.testType][i.numeric] = map[WordListName][]PersistentResultsNode{}
-  }
+	if p.Results[i.testType][i.numeric] == nil {
+		p.Results[i.testType][i.numeric] = map[WordListName][]PersistentResultsNode{}
+	}
 
-  var nodes = append(p.Results[i.testType][i.numeric][i.words], node)
+	var nodes = append(p.Results[i.testType][i.numeric][i.words], node)
 
-  if len(nodes) > limit {
-    nodes = nodes[len(nodes)-limit:]
-  }
+	if len(nodes) > limit {
+		nodes = nodes[len(nodes)-limit:]
+	}
 
-  p.Results[i.testType][i.numeric][i.words] = nodes
+	p.Results[i.testType][i.numeric][i.words] = nodes
 }
 
 func writeResults(results PersistentResults) {
-  var resultsFilePath = getResultsPath()
+	var resultsFilePath = getResultsPath()
 	words.EnsureDir(resultsFilePath)
 	fh, err := os.Create(resultsFilePath)
 	if err != nil {
@@ -108,13 +108,13 @@ func writeResults(results PersistentResults) {
 	}
 	defer fh.Close()
 
-  encoder := json.NewEncoder(fh)
-  encoder.SetIndent("", "\t")
-  encoder.Encode(results)
+	encoder := json.NewEncoder(fh)
+	encoder.SetIndent("", "\t")
+	encoder.Encode(results)
 }
 
 func getResultsPath() string {
-  var cachePath = getCachePath()
-  var resultsFilePath = filepath.Join(cachePath, "results.json")
-  return resultsFilePath
+	var cachePath = getCachePath()
+	var resultsFilePath = filepath.Join(cachePath, "results.json")
+	return resultsFilePath
 }
