@@ -42,6 +42,12 @@ brew tap bloznelis/tap
 brew install typioca
 ```
 
+### Nix
+
+```
+nix-shell -p typioca
+```
+
 ### Scoop
 
 ```
