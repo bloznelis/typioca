@@ -8,7 +8,7 @@ require (
 	github.com/charmbracelet/bubbletea v0.25.0
 	github.com/charmbracelet/lipgloss v0.10.0
 	github.com/charmbracelet/ssh v0.0.0-20240202115812-f4ab1009799a
-	github.com/charmbracelet/wish v1.3.1
+	github.com/charmbracelet/wish v1.3.2
 	github.com/guptarohit/asciigraph v0.5.6
 	github.com/kirsle/configdir v0.0.0-20170128060238-e45d2f54772f
 	github.com/muesli/reflow v0.3.0
@@ -36,7 +36,7 @@ require (
 	github.com/muesli/cancelreader v0.2.2 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
-	golang.org/x/crypto v0.18.0 // indirect
+	golang.org/x/crypto v0.21.0 // indirect
 	golang.org/x/exp v0.0.0-20231006140011-7918f672742d // indirect
 	golang.org/x/sync v0.6.0 // indirect
 	golang.org/x/sys v0.18.0 // indirect
