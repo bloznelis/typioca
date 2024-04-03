@@ -1,6 +1,6 @@
 # Maintainer: Energi <bloznelis05@gmail.com>
 pkgname=typioca-git
-name=typioca
+typioca=typioca
 pkgver=${PKGVER}
 pkgrel=1
 pkgdesc="Minimal, terminal based typing speed tester"
@@ -10,19 +10,19 @@ license=(MIT)
 groups=()
 depends=()
 makedepends=(git make go)
-provides=("$name")
-conflicts=("$name")
+provides=("$typioca")
+conflicts=("$typioca")
 source=("git+$url#tag=$pkgver")
 sha256sums=('SKIP')
 
 build() {
-  cd "$srcdir/$name"
+  cd "$srcdir/$typioca"
   make VERSION=$pkgver build
 }
 
 package() {
-  cd "$srcdir/$name"
+  cd "$srcdir/$typioca"
 
-  install -Dm755 execs/$name "$pkgdir/usr/bin/$name"
-  install -Dm644 LICENSE -t "$pkgdir/usr/share/licenses/$name/"
+  install -Dm755 execs/$typioca "$pkgdir/usr/bin/$typioca"
+  install -Dm644 LICENSE -t "$pkgdir/usr/share/licenses/$typioca/"
 }
