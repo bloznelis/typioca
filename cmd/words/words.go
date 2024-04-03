@@ -122,13 +122,13 @@ func NewGenerator(paths []string) (g WordsGenerator) {
 }
 
 func (this WordsGenerator) Generate(listName string) []rune {
-	pool := this.poolsJson[listName]
-	acc := []string{}
-	poolLength := pool.Metadata.Size
-	for i := 0; i < this.Count; i++ {
-		word := pool.Words[rand.Int()%poolLength]
-		acc = append(acc, word)
-	}
+	pool := this.poolsJson[listName].Words
 
-	return []rune(strings.Join(acc, " "))
+	rand.Seed(time.Now().UnixNano())
+	rand.Shuffle(len(pool), func(i, j int) { pool[i], pool[j] = pool[j], pool[i] })
+
+	takeAmount := min(this.Count, len(pool))
+	words := pool[0:takeAmount]
+
+	return []rune(strings.Join(words, " "))
 }
