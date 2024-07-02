@@ -48,6 +48,12 @@ brew install typioca
 nix-shell -p typioca
 ```
 
+### openSUSE Tumbleweed
+
+```
+zypper install typioca
+```
+
 ### Scoop
 
 ```
