@@ -105,6 +105,7 @@ func initTimerBasedTest(settings TimerBasedTestSettings, mainMenu MainMenu) Time
 				rawMistakesCnt: 0,
 			},
 			cursor: 0,
+			config: mainMenu.config,
 		},
 		completed: false,
 		mainMenu:  mainMenu,
@@ -128,6 +129,7 @@ func initWordCountBasedTest(settings WordCountBasedTestSettings, mainMenu MainMe
 				rawMistakesCnt: 0,
 			},
 			cursor: 0,
+			config: mainMenu.config,
 		},
 		completed: false,
 		mainMenu:  mainMenu,
@@ -151,6 +153,7 @@ func initSentenceCountBasedTest(settings SentenceCountBasedTestSettings, mainMen
 				rawMistakesCnt: 0,
 			},
 			cursor: 0,
+			config: mainMenu.config,
 		},
 		completed: false,
 		mainMenu:  mainMenu,
@@ -196,6 +199,14 @@ func initWordCountBasedTestSettings(config Config, words []WordsSelection) WordC
 	}
 }
 
+func initConfigSettings() ConfigSettings {
+	return ConfigSettings{
+		configSelections: []string{"Words", "Settings"},
+		configCursor:     0,
+    horizontalCursor: 0,
+	}
+}
+
 func initSentenceCountBasedTestSettings(config Config, words []WordsSelection) SentenceCountBasedTestSettings {
 	return SentenceCountBasedTestSettings{
 		sentenceCountSelections: []int{30, 15, 5, 1},
@@ -208,15 +219,33 @@ func initSentenceCountBasedTestSettings(config Config, words []WordsSelection) S
 }
 
 func initConfigView(config Config, mainMenu MainMenu) ConfigView {
-	configView := ConfigView{
+	return ConfigView{
 		config:   config,
 		mainMenu: mainMenu,
+		cursor:   0,
+	}
+}
+
+func initWordsConfigView(config Config, mainMenu MainMenu) WordsConfigView {
+	configView := WordsConfigView{
+		config:   config,
+		mainMenu: mainMenu,
+    cursor: 0,
+	}
+	return configView
+}
+
+func initSettingsConfigView(config Config, mainMenu MainMenu) SettingsConfigView {
+	configView := SettingsConfigView{
+		config:   config,
+		mainMenu: mainMenu,
+    cursor: 0,
 	}
 	return configView
 }
 
 func initConfigViewSelection() ConfigViewSelection {
-	return ConfigViewSelection{}
+	return ConfigViewSelection{settings: initConfigSettings()}
 }
 
 func initMainMenu() MainMenu {

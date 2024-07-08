@@ -41,7 +41,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		WriteConfig(state.config)
 		return m.quitOn(msg, "ctrl+q")
 
-	case ConfigView:
+	case WordsConfigView:
 		m.state = state.handleInput(msg, state)
 		return m, nil
 
@@ -100,8 +100,16 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.state = initTimerBasedTest(state.settings, state.mainMenu)
 				return m, nil
 
-			case "backspace", "ctrl+h":
+			case "backspace":
 				handleBackspace(&state.base)
+				m.state = state
+
+			case "ctrl+h":
+				if state.base.config.CtrlBackspaceEnabled {
+					handleCtrlW(&state.base)
+				} else {
+					handleBackspace(&state.base)
+				}
 				m.state = state
 
 			case "ctrl+w":
@@ -436,23 +444,58 @@ func (settings WordCountBasedTestSettings) handleInput(msg tea.Msg, menu MainMen
 }
 
 func (selection ConfigViewSelection) handleInput(msg tea.Msg, menu MainMenu) State {
+	cursorToSave := menu.cursor
+
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "enter":
-			return initConfigView(menu.config, menu)
+			if selection.settings.configCursor == 0 {
+				return initWordsConfigView(menu.config, menu)
+			} else if selection.settings.configCursor == 1 {
+				return initSettingsConfigView(menu.config, menu)
+			}
 		case "up", "k":
-			if menu.cursor > 0 {
-				menu.cursor--
+			switch selection.settings.horizontalCursor {
+			case 0:
+				if menu.cursor > 0 {
+					menu.cursor--
+				}
+			case 1:
+				if selection.settings.configCursor > 0 {
+					selection.settings.configCursor--
+				} else {
+					selection.settings.configCursor = len(selection.settings.configSelections) - 1
+				}
 			}
 		case "down", "j":
-			if menu.cursor < len(menu.selections)-1 {
-				menu.cursor++
-			} else {
-				menu.cursor = 0
+			switch selection.settings.horizontalCursor {
+			case 0:
+				if menu.cursor < len(menu.selections)-1 {
+					menu.cursor++
+				} else {
+					menu.cursor = 0
+				}
+			case 1:
+				if selection.settings.configCursor < len(selection.settings.configSelections)-1 {
+					selection.settings.configCursor++
+				} else {
+					selection.settings.configCursor = 0
+				}
 			}
-
+		case "left", "h":
+			if selection.settings.horizontalCursor > 0 {
+				selection.settings.horizontalCursor--
+			}
+		case "right", "l", "tab":
+			if selection.settings.horizontalCursor < 1 {
+				selection.settings.horizontalCursor++
+			} else {
+				selection.settings.horizontalCursor = 0
+			}
 		}
+
+		menu.selections[cursorToSave] = selection
 	}
 
 	return menu
@@ -526,7 +569,7 @@ func (settings SentenceCountBasedTestSettings) handleInput(msg tea.Msg, menu Mai
 	return menu
 }
 
-func (configView ConfigView) handleInput(msg tea.Msg, state State) State {
+func (configView WordsConfigView) handleInput(msg tea.Msg, state State) State {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.String() {

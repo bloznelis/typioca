@@ -183,6 +183,7 @@ func defaultConfig() Config {
 	cachePath := getCachePath()
 
 	return Config{
+    CtrlBackspaceEnabled: false,
 		TestSettingCursors: initTestSettingCursors(),
 		Version:            currentConfigVersion,
 		EmbededWordLists: []EmbededWordList{

@@ -114,6 +114,12 @@ type WordCountBasedTestSettings struct {
 	enabled             bool
 }
 
+type ConfigSettings struct {
+	configSelections []string
+	configCursor     int
+  horizontalCursor int
+}
+
 func (s WordCountBasedTestSettings) Enabled() bool {
 	return s.enabled
 }
@@ -131,9 +137,15 @@ func (s SentenceCountBasedTestSettings) Enabled() bool {
 	return s.enabled
 }
 
-type ConfigViewSelection struct{}
+type ConfigViewSelection struct {
+	settings ConfigSettings
+}
 
 func (s ConfigViewSelection) Enabled() bool {
+	return true
+}
+
+func (s ConfigSettings) Enabled() bool {
 	return true
 }
 
@@ -153,6 +165,7 @@ type TestBase struct {
 	rawInputCnt   int // Should not be reduced
 	mistakes      mistakes
 	cursor        int
+	config        Config
 }
 
 type TimerBasedTest struct {
@@ -208,6 +221,18 @@ type ConfigView struct {
 	cursor   int
 }
 
+type WordsConfigView struct {
+	mainMenu MainMenu
+	config   Config
+	cursor   int
+}
+
+type SettingsConfigView struct {
+	mainMenu MainMenu
+	config   Config
+	cursor   int
+}
+
 type TestSettingCursors struct {
 	TimerTimeCursor     int
 	TimerWordlistCursor int
@@ -247,10 +272,11 @@ func (embeded *EmbededWordList) toggleEnabled() {
 }
 
 type Config struct {
-	TestSettingCursors TestSettingCursors
-	EmbededWordLists   []EmbededWordList
-	WordLists          []WordList
-	Version            int
+	CtrlBackspaceEnabled bool
+	TestSettingCursors   TestSettingCursors
+	EmbededWordLists     []EmbededWordList
+	WordLists            []WordList
+	Version              int
 }
 
 type LocalConfig struct {

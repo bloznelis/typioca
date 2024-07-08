@@ -66,7 +66,7 @@ func (m model) View() string {
 
 		return lipgloss.Place(termWidth, termHeight, lipgloss.Center, lipgloss.Center, s)
 
-	case ConfigView:
+	case WordsConfigView:
 		absolutePad := longestStringLen(names(state.config.WordLists)) + 2
 		var view string
 		header := fmt.Sprintf("%s%*s%s/%s\n\n", "  wordlist", absolutePad-11, " ", "synced", "enabled")
@@ -368,7 +368,10 @@ func (selection SentenceCountBasedTestSettings) show(styles Styles) string {
 }
 
 func (selection ConfigViewSelection) show(styles Styles) string {
-	return "Config "
+  selections := make([]string, 1)
+  selections[0] = selection.settings.configSelections[selection.settings.configCursor]
+	selectionsStr := showSelections(selections, selection.settings.horizontalCursor, styles)
+	return fmt.Sprintf("%s %s", "Config", selectionsStr)
 }
 
 func showSelections(selections []string, cursor int, styles Styles) string {
