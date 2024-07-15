@@ -219,6 +219,18 @@ type TestSettingCursors struct {
 	SentenceCountWordlistCursor int
 }
 
+type LayoutFile struct {
+	Name      string
+	Path      string
+	RemoteURI string
+	synced    bool
+}
+
+type Layout struct {
+	Name     string        `json:"name"`
+	Mappings map[rune]rune `json:"mappings"`
+}
+
 type WordList struct {
 	Sentences bool
 	Name      string
@@ -250,6 +262,8 @@ type Config struct {
 	TestSettingCursors TestSettingCursors
 	EmbededWordLists   []EmbededWordList
 	WordLists          []WordList
+	LayoutFiles        []LayoutFile
+	Layout             Layout
 	Version            int
 }
 
@@ -257,8 +271,8 @@ type LocalConfig struct {
 	Words []WordList
 }
 
-func (cfg Config) wordListsCount() int {
-	return len(cfg.WordLists) + len(cfg.EmbededWordLists)
+func (cfg Config) configTotalSelectionsCount() int {
+	return len(cfg.WordLists) + len(cfg.EmbededWordLists) + len(cfg.LayoutFiles)
 }
 
 type Toggleable interface {

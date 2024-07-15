@@ -119,7 +119,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 						commands = append(commands, state.timer.timer.Init())
 						state.timer.isRunning = true
 					}
-					handleRunes(msg, &state.base)
+					handleRunes(msg, &state.base, state.mainMenu.config.Layout.Mappings)
 					m.state = state
 				}
 			}
@@ -179,7 +179,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 						commands = append(commands, state.stopwatch.stopwatch.Init())
 						state.stopwatch.isRunning = true
 					}
-					handleRunes(msg, &state.base)
+					handleRunes(msg, &state.base, state.mainMenu.config.Layout.Mappings)
 					m.state = state
 
 				}
@@ -256,7 +256,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 						commands = append(commands, state.stopwatch.stopwatch.Init())
 						state.stopwatch.isRunning = true
 					}
-					handleRunes(msg, &state.base)
+					handleRunes(msg, &state.base, state.mainMenu.config.Layout.Mappings)
 					m.state = state
 				}
 			}
@@ -558,12 +558,12 @@ func (configView ConfigView) handleInput(msg tea.Msg, state State) State {
 			if configView.cursor > 0 {
 				configView.cursor--
 			} else {
-				configView.cursor = configView.config.wordListsCount() - 1
+				configView.cursor = configView.config.configTotalSelectionsCount() - 1
 			}
 
 			state = configView
 		case "down", "j":
-			if configView.cursor < configView.config.wordListsCount()-1 {
+			if configView.cursor < configView.config.configTotalSelectionsCount()-1 {
 				configView.cursor++
 			} else {
 				configView.cursor = 0
@@ -674,23 +674,28 @@ func dropUntilWsIdx(input []rune, wsIdx int) []rune {
 	}
 }
 
-func handleRunes(msg tea.KeyMsg, base *TestBase) {
-	base.inputBuffer = append(base.inputBuffer, msg.Runes...)
-	base.rawInputCnt += len(msg.Runes)
+func handleRunes(msg tea.KeyMsg, base *TestBase, remappedInput map[rune]rune) {
+	inputLetter := msg.Runes[len(msg.Runes)-1]
 
-	inputLen := len(base.inputBuffer)
-	inputLenDec := inputLen - 1
-
+	inputLenDec := len(base.inputBuffer)
 	letterToInput := base.wordsToEnter[inputLenDec]
-	inputLetter := base.inputBuffer[inputLenDec]
+
+	if r, ok := remappedInput[inputLetter]; ok {
+		inputLetter = r
+	}
+
+	base.inputBuffer = append(base.inputBuffer, inputLetter)
+	base.rawInputCnt += 1
 
 	if letterToInput != inputLetter {
 		base.mistakes.mistakesAt[inputLenDec] = true
 		base.mistakes.rawMistakesCnt = base.mistakes.rawMistakesCnt + 1
 	}
 
-	//Set cursor
-	base.cursor = inputLen
+	lenAfterAppend := len(base.inputBuffer)
+
+	// Set cursor
+	base.cursor = lenAfterAppend
 }
 
 func handleSpace(base *TestBase) {

@@ -69,9 +69,14 @@ func (m model) View() string {
 	case ConfigView:
 		absolutePad := longestStringLen(names(state.config.WordLists)) + 2
 		var view string
-		header := fmt.Sprintf("%s%*s%s/%s\n\n", "  wordlist", absolutePad-11, " ", "synced", "enabled")
-		view += header
+		sectionMaxAmountToShow := m.height / 7
 
+		header := "Config\n\n"
+		wordlistHeader := fmt.Sprintf("%s%*s%s/%s\n\n", "  wordlist", absolutePad-11, " ", "synced", "enabled")
+		view += header
+		view += wordlistHeader
+
+		accumulatedLength := len(state.config.EmbededWordLists)
 		for idx, elem := range state.config.EmbededWordLists {
 			var enabled string
 			if elem.Enabled {
@@ -89,14 +94,13 @@ func (m model) View() string {
 		}
 		view += "\n"
 
-		maxAmmountToShow := m.height / 7
+		wordListCursorPos := state.cursor - accumulatedLength
 		total := len(state.config.WordLists)
-		curs := state.cursor - len(state.config.EmbededWordLists) + 1
-		lower := floor(curs - maxAmmountToShow)
-		upper := int(math.Min(math.Max(float64(curs), float64(maxAmmountToShow)), float64(total)))
+		upperInc := int(math.Min(math.Max(float64(sectionMaxAmountToShow), float64(wordListCursorPos)), float64(total-1)))
+		lowerInc := int(math.Max(float64(upperInc-sectionMaxAmountToShow), float64(0)))
 
-		wordListsToShow := state.config.WordLists[lower:upper]
-		cursorWidget := fmt.Sprintf("  [%d-%d:%d]", lower+1, upper, total)
+		wordListsToShow := state.config.WordLists[lowerInc : upperInc+1]
+		cursorWidget := fmt.Sprintf("  [%d-%d:%d]", lowerInc+1, upperInc+1, total)
 
 		view += style(cursorWidget, m.styles.toEnter)
 		view += "\n"
@@ -133,9 +137,45 @@ func (m model) View() string {
 				line = style(dropAnsiCodes(line), m.styles.mistakes)
 			}
 
-			view += wrapWithCursor(int(lower)+idx+len(defaultConfig().EmbededWordLists) == state.cursor, line, m.styles.runningTimer)
+			view += wrapWithCursor(idx+lowerInc+accumulatedLength == state.cursor, line, m.styles.runningTimer)
 			view += "\n"
 		}
+		view += "\n"
+		accumulatedLength += total
+
+		layoutCurPos := state.cursor - accumulatedLength
+		layoutTotal := len(state.config.LayoutFiles)
+		layoutUpperInc := int(math.Min(math.Max(float64(sectionMaxAmountToShow), float64(layoutCurPos)), float64(layoutTotal-1)))
+		layoutLowerInc := int(math.Max(float64(layoutUpperInc-sectionMaxAmountToShow), float64(0)))
+		layoutsToShow := state.config.LayoutFiles[layoutLowerInc : layoutUpperInc+1]
+		selectedLayout := state.config.Layout.Name
+
+		layoutCursorWidget := fmt.Sprintf("  [%d-%d:%d]", layoutLowerInc+1, layoutUpperInc+1, total)
+
+		view += style(layoutCursorWidget, m.styles.toEnter)
+		view += "\n"
+		for idx, elem := range layoutsToShow {
+			var synced string
+			if elem.synced {
+				synced = "x"
+			} else {
+				synced = " "
+			}
+
+			var enabled string
+			if elem.Name == selectedLayout {
+				enabled = "x"
+			} else {
+				enabled = " "
+			}
+
+			toPad := absolutePad - len(elem.Name)
+			line := fmt.Sprintf("%s%*s[%s]  [%s] ", style(elem.Name, m.styles.greener), toPad, "", synced, enabled)
+
+			view += wrapWithCursor(idx+layoutLowerInc+accumulatedLength == state.cursor, line, m.styles.runningTimer)
+			view += "\n"
+		}
+		accumulatedLength += layoutTotal
 
 		help := style("s sync/delete, e enable/disable, ctrl+q to menu", m.styles.toEnter)
 		cursorWidget = lipgloss.NewStyle().Align(lipgloss.Left).Render(cursorWidget)
