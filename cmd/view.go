@@ -193,6 +193,10 @@ func (m model) View() string {
 				toPad := absolutePad - len(elem.Name)
 				line := fmt.Sprintf("%s%*s[%s]  [%s] ", style(elem.Name, m.styles.greener), toPad, "", synced, enabled)
 
+				if elem.Name == "Qwerty" {
+					line = fmt.Sprintf("%s%*s     [%s] ", style(elem.Name, m.styles.greener), toPad, "", enabled)
+				}
+
 				lineContent := wrapWithCursor(isCursorOnLine, line, m.styles.runningTimer)
 				lineContent += "\n"
 				return lineContent

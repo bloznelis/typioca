@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"errors"
 	"time"
 
 	"github.com/bloznelis/typioca/cmd/words"
@@ -224,6 +225,15 @@ type LayoutFile struct {
 	Path      string
 	RemoteURI string
 	synced    bool
+	syncOk    bool
+}
+
+func (layoutFile *LayoutFile) getLayout() (Layout, error) {
+	if !layoutFile.synced {
+		return Layout{}, errors.New("LayoutFile not synced")
+	}
+
+	return retrieveLayout(*layoutFile), nil
 }
 
 type Layout struct {

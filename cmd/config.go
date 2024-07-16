@@ -46,10 +46,6 @@ func mergeConfigs(config Config) Config {
 		config.WordLists = append(localConfig.Words, config.WordLists...)
 	}
 
-	cachePath := getCachePath()
-	defaultLayout := defaultLayoutFile(cachePath, "Qwerty", "")
-	config.Layout = retrieveLayout(defaultLayout)
-
 	return config
 }
 
@@ -57,6 +53,11 @@ func checkSync(config *Config) {
 	for idx, elem := range config.WordLists {
 		config.WordLists[idx].synced = fileExists(elem.Path)
 		config.WordLists[idx].syncOK = true
+	}
+
+	for idx, elem := range config.LayoutFiles {
+		config.LayoutFiles[idx].synced = fileExists(elem.Path)
+		config.LayoutFiles[idx].syncOk = true
 	}
 }
 
@@ -278,7 +279,7 @@ func defaultConfig() Config {
 			defaultWordList(cachePath, "Peter Pan sentences", "peter-pan.json", true, true),
 		},
 		LayoutFiles: []LayoutFile{
-			defaultLayoutFile(cachePath, "Qwerty", ""),
+			defaultLayoutFile("", "Qwerty", ""),
 			defaultLayoutFile(cachePath, "Colemak DH", "colemak-dh.json"),
 			defaultLayoutFile(cachePath, "Gallium", "gallium.json"),
 		},
