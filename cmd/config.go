@@ -12,7 +12,7 @@ import (
 	"github.com/kirsle/configdir"
 )
 
-const currentConfigVersion = 3
+const currentConfigVersion = 4
 
 func ReadConfig() Config {
 	var config Config
