@@ -280,6 +280,7 @@ func defaultConfig() Config {
 		},
 		LayoutFiles: []LayoutFile{
 			defaultLayoutFile("", "Qwerty", ""),
+			defaultLayoutFile(cachePath, "Dvorak", "dvorak.json"),
 			defaultLayoutFile(cachePath, "Colemak DH", "colemak-dh.json"),
 			defaultLayoutFile(cachePath, "Gallium", "gallium.json"),
 		},
