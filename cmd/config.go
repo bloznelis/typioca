@@ -3,6 +3,7 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 
@@ -11,7 +12,7 @@ import (
 	"github.com/kirsle/configdir"
 )
 
-const currentConfigVersion = 3
+const currentConfigVersion = 4
 
 func ReadConfig() Config {
 	var config Config
@@ -52,6 +53,11 @@ func checkSync(config *Config) {
 	for idx, elem := range config.WordLists {
 		config.WordLists[idx].synced = fileExists(elem.Path)
 		config.WordLists[idx].syncOK = true
+	}
+
+	for idx, elem := range config.LayoutFiles {
+		config.LayoutFiles[idx].synced = fileExists(elem.Path)
+		config.LayoutFiles[idx].syncOk = true
 	}
 }
 
@@ -157,6 +163,52 @@ func githubSentencesURI(fileName string) string {
 	)
 }
 
+func githubLayoutsURI(fileName string) string {
+	return fmt.Sprintf("%s%s",
+		"https://raw.githubusercontent.com/bloznelis/typioca/master/layouts/",
+		fileName,
+	)
+}
+
+func retrieveLayout(layout LayoutFile) Layout {
+	if layout.Path == "" {
+		return Layout{
+			Name: layout.Name,
+		}
+	}
+
+	f, err := os.Open(layout.Path)
+	if err != nil {
+		log.Println(layout.Path)
+		panic(err)
+	}
+
+	var res Layout
+	dec := json.NewDecoder(f)
+	if err := dec.Decode(&res); err != nil {
+		panic(err)
+	}
+
+	return res
+}
+
+func defaultLayoutFile(cachePath string, name string, localName string) LayoutFile {
+	if localName == "" {
+		return LayoutFile{
+			Name: name,
+		}
+	}
+
+	path := filepath.Join(cachePath, "layouts", localName)
+
+	return LayoutFile{
+		Name:      name,
+		Path:      path,
+		RemoteURI: githubLayoutsURI(localName),
+		synced:    fileExists(path),
+	}
+}
+
 func defaultWordList(cachePath string, name string, localName string, enabled bool, sentences bool) WordList {
 	var subdir string
 	var uri string
@@ -181,6 +233,7 @@ func defaultWordList(cachePath string, name string, localName string, enabled bo
 
 func defaultConfig() Config {
 	cachePath := getCachePath()
+	defaultLayout := defaultLayoutFile(cachePath, "Qwerty", "")
 
 	return Config{
 		TestSettingCursors: initTestSettingCursors(),
@@ -225,5 +278,11 @@ func defaultConfig() Config {
 			defaultWordList(cachePath, "Peter Pan words", "peter-pan.json", true, false),
 			defaultWordList(cachePath, "Peter Pan sentences", "peter-pan.json", true, true),
 		},
+		LayoutFiles: []LayoutFile{
+			defaultLayoutFile("", "Qwerty", ""),
+			defaultLayoutFile(cachePath, "Colemak DH", "colemak-dh.json"),
+			defaultLayoutFile(cachePath, "Gallium", "gallium.json"),
+		},
+		Layout: retrieveLayout(defaultLayout),
 	}
 }

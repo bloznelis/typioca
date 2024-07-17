@@ -35,6 +35,30 @@ func wrapWithCursor(shouldWrap bool, line string, stringStyle StringStyle) strin
 	return fmt.Sprintf("%s %s%s", cursor, line, cursorClose)
 }
 
+func renderSelectionWindow[T any](
+	maxAmtToShow, cursor, prevSelectionAmt int,
+	cursorWidgetStyle StringStyle,
+	selections []T,
+	lineRenderer func(elem T, isCursorOnLine bool) string,
+) string {
+	internalCursorPos := cursor - prevSelectionAmt
+	total := len(selections)
+	upperInc := int(math.Min(math.Max(float64(maxAmtToShow), float64(internalCursorPos)), float64(total-1)))
+	lowerInc := int(math.Max(float64(upperInc-maxAmtToShow), float64(0)))
+	var view string
+
+	cursorWidget := fmt.Sprintf("  [%d-%d:%d]", lowerInc+1, upperInc+1, total)
+	view += style(cursorWidget, cursorWidgetStyle)
+	view += "\n"
+
+	selectionsToShow := selections[lowerInc : upperInc+1]
+	for idx, elem := range selectionsToShow {
+		view += lineRenderer(elem, idx+lowerInc+prevSelectionAmt == cursor)
+	}
+
+	return view
+}
+
 func (m model) View() string {
 	var s string
 
@@ -69,9 +93,15 @@ func (m model) View() string {
 	case ConfigView:
 		absolutePad := longestStringLen(names(state.config.WordLists)) + 2
 		var view string
-		header := fmt.Sprintf("%s%*s%s/%s\n\n", "  wordlist", absolutePad-11, " ", "synced", "enabled")
+		sectionMaxAmountToShow := m.height / 7
+
+		header := "Config\n\n"
 		view += header
 
+		wordlistHeader := fmt.Sprintf("%s%*s%s/%s\n\n", "  wordlist", absolutePad-11, " ", "synced", "enabled")
+		view += wordlistHeader
+
+		accumulatedLength := len(state.config.EmbededWordLists)
 		for idx, elem := range state.config.EmbededWordLists {
 			var enabled string
 			if elem.Enabled {
@@ -89,56 +119,93 @@ func (m model) View() string {
 		}
 		view += "\n"
 
-		maxAmmountToShow := m.height / 7
-		total := len(state.config.WordLists)
-		curs := state.cursor - len(state.config.EmbededWordLists) + 1
-		lower := floor(curs - maxAmmountToShow)
-		upper := int(math.Min(math.Max(float64(curs), float64(maxAmmountToShow)), float64(total)))
+		view += renderSelectionWindow(
+			sectionMaxAmountToShow,
+			state.cursor,
+			accumulatedLength,
+			m.styles.toEnter,
+			state.config.WordLists,
+			func(elem WordList, isCursorOnLine bool) string {
+				var synced string
+				if elem.synced {
+					synced = "x"
+				} else {
+					synced = " "
+				}
+				if !elem.isLocal {
+					synced = style(synced, m.styles.greener)
+				} else {
+					synced = style(synced, m.styles.toEnter)
+				}
 
-		wordListsToShow := state.config.WordLists[lower:upper]
-		cursorWidget := fmt.Sprintf("  [%d-%d:%d]", lower+1, upper, total)
+				var enabled string
+				if elem.Enabled {
+					enabled = "x"
+				} else {
+					enabled = " "
+				}
 
-		view += style(cursorWidget, m.styles.toEnter)
+				if !elem.isLocal {
+					enabled = style(enabled, m.styles.greener)
+				} else {
+					enabled = style(enabled, m.styles.toEnter)
+				}
+
+				toPad := absolutePad - len(elem.Name)
+				line := fmt.Sprintf("%s%*s[%s]  [%s] ", style(elem.Name, m.styles.greener), toPad, "", synced, enabled)
+				if !elem.syncOK {
+					line = style(dropAnsiCodes(line), m.styles.mistakes)
+				}
+
+				lineContents := wrapWithCursor(isCursorOnLine, line, m.styles.runningTimer)
+				lineContents += "\n"
+
+				return lineContents
+			},
+		)
 		view += "\n"
+		accumulatedLength += len(state.config.WordLists)
 
-		for idx, elem := range wordListsToShow {
-			var synced string
-			if elem.synced {
-				synced = "x"
-			} else {
-				synced = " "
-			}
-			if !elem.isLocal {
-				synced = style(synced, m.styles.greener)
-			} else {
-				synced = style(synced, m.styles.toEnter)
-			}
+		view += "\n"
+		layoutListHeader := fmt.Sprintf("%s%*s%s/%s\n\n", "  layouts", absolutePad-11, " ", "synced", "enabled")
+		view += layoutListHeader
+		view += renderSelectionWindow(
+			sectionMaxAmountToShow,
+			state.cursor,
+			accumulatedLength,
+			m.styles.toEnter,
+			state.config.LayoutFiles,
+			func(elem LayoutFile, isCursorOnLine bool) string {
+				var synced string
+				if elem.synced {
+					synced = "x"
+				} else {
+					synced = " "
+				}
 
-			var enabled string
-			if elem.Enabled {
-				enabled = "x"
-			} else {
-				enabled = " "
-			}
+				var enabled string
+				if elem.Name == state.config.Layout.Name {
+					enabled = "x"
+				} else {
+					enabled = " "
+				}
 
-			if !elem.isLocal {
-				enabled = style(enabled, m.styles.greener)
-			} else {
-				enabled = style(enabled, m.styles.toEnter)
-			}
+				toPad := absolutePad - len(elem.Name)
+				line := fmt.Sprintf("%s%*s[%s]  [%s] ", style(elem.Name, m.styles.greener), toPad, "", synced, enabled)
 
-			toPad := absolutePad - len(elem.Name)
-			line := fmt.Sprintf("%s%*s[%s]  [%s] ", style(elem.Name, m.styles.greener), toPad, "", synced, enabled)
-			if !elem.syncOK {
-				line = style(dropAnsiCodes(line), m.styles.mistakes)
-			}
+				if elem.Name == "Qwerty" {
+					line = fmt.Sprintf("%s%*s     [%s] ", style(elem.Name, m.styles.greener), toPad, "", enabled)
+				}
 
-			view += wrapWithCursor(int(lower)+idx+len(defaultConfig().EmbededWordLists) == state.cursor, line, m.styles.runningTimer)
-			view += "\n"
-		}
+				lineContent := wrapWithCursor(isCursorOnLine, line, m.styles.runningTimer)
+				lineContent += "\n"
+				return lineContent
+			},
+		)
+		view += "\n"
+		accumulatedLength += len(state.config.LayoutFiles)
 
 		help := style("s sync/delete, e enable/disable, ctrl+q to menu", m.styles.toEnter)
-		cursorWidget = lipgloss.NewStyle().Align(lipgloss.Left).Render(cursorWidget)
 		help = lipgloss.NewStyle().Align(lipgloss.Center).Padding(1).Render(help)
 		view = lipgloss.NewStyle().Align(lipgloss.Left).Render(view)
 
