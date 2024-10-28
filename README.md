@@ -19,6 +19,8 @@
   * Custom word lists
   * Linux/Mac/Win support
 
+[![Packaging status](https://repology.org/badge/vertical-allrepos/typioca.svg)](https://repology.org/project/typioca/versions)
+
 ## Installation
 
 ### AUR
