@@ -40,7 +40,6 @@ go install github.com/bloznelis/typioca@latest
 ### Homebrew
 
 ```
-brew tap bloznelis/tap
 brew install typioca
 ```
 
