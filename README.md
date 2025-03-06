@@ -3,7 +3,7 @@
 <p align=center> Minimal, terminal based typing speed tester. </p>
 <p align=center> <img alt="GitHub release (latest SemVer)" src="https://img.shields.io/github/v/release/bloznelis/typioca"> <img alt="GitHub Workflow Status" src="https://img.shields.io/github/actions/workflow/status/bloznelis/typioca/ci.yml"> </p>
 
-> **Tapioca** (/ˌtæpiˈoʊkə/) is a starch extracted from the storage roots of the cassava plant. Pearl tapioca is a common ingredient in Asian desserts...and sweet drinks such as **bubble tea**.
+> **Tapioca** (/ˌtæpiˈoʊkə/) is a starch extracted from the storage roots of the cassava plant, which is native to South America. The name "tapioca" comes from the Tupi-Guarani language, spoken by Indigenous Brazilian peoples who originally developed the method of extracting and using cassava starch. Pearl tapioca is a common ingredient in Asian desserts and sweet drinks such as **bubble tea**.
 
 ![](https://github.com/bloznelis/typioca/blob/master/img/typioca.gif)
 
