@@ -9,7 +9,7 @@ require (
 	github.com/charmbracelet/lipgloss v0.13.0
 	github.com/charmbracelet/ssh v0.0.0-20240725163421-eb71b85b27aa
 	github.com/charmbracelet/wish v1.4.3
-	github.com/guptarohit/asciigraph v0.7.1
+	github.com/guptarohit/asciigraph v0.7.3
 	github.com/kirsle/configdir v0.0.0-20170128060238-e45d2f54772f
 	github.com/muesli/reflow v0.3.0
 	github.com/muesli/termenv v0.15.3-0.20240509142007-81b8f94111d5
