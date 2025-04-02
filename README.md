@@ -74,6 +74,12 @@ xbps-install typioca
 winget install bloznelis.typioca
 ```
 
+### X-CMD
+
+```
+x install typioca
+```
+
 ### Building from source
   1. Checkout the code
   2. `make build`
