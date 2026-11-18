@@ -31,6 +31,32 @@ make build
 `make build` и `--version` выполнены. Интерактивный запуск требует настоящего TTY;
 проверка на другой машине пока не проводилась.
 
+## Команды
+
+```bash
+./execs/typioca                 # локальный TUI
+./execs/typioca --version       # версия без запуска TUI
+./execs/typioca serve           # SSH-сервер на :2229
+./execs/typioca completion bash # скрипт автодополнения в stdout
+./execs/typioca help serve      # справка по SSH-серверу
+```
+
+`serve` принимает `--bind`, `--port` и `--key`; при отсутствии файла ключа
+создаётся Ed25519-ключ. Клиенту нужен PTY (`ssh -t`). Встроенной
+аутентификации нет, поэтому сервер нельзя публиковать в интернете без
+дополнительной защиты. Подробности, флаги и типичные ошибки — в
+[`docs/02-cli.md`](docs/02-cli.md).
+
+`completion` печатает скрипт в stdout и ничего не записывает на диск:
+
+```bash
+./execs/typioca completion bash > ~/.local/share/bash-completion/completions/typioca
+source <(./execs/typioca completion zsh)
+```
+
+Контракт команды `completion` описан в
+[`docs/interface-contract.md`](docs/interface-contract.md).
+
 ## Статус требований
 
 Полная версия — в [`docs/01-requirements.md`](docs/01-requirements.md).
@@ -46,6 +72,7 @@ make build
 | FR-7 | Управление наборами и раскладками | обязательно | уже есть |
 | FR-8 | Тест через SSH | желательно | уже есть |
 | FR-9 | История результатов | желательно | нужно сделать |
+| FR-10 | Автодополнение командной строки | желательно | уже есть |
 
 ## Синхронизация с upstream
 
@@ -63,6 +90,8 @@ git push origin master
 
 - [`docs/00-project.md`](docs/00-project.md) — паспорт проекта.
 - [`docs/01-requirements.md`](docs/01-requirements.md) — требования и модели.
+- [`docs/02-cli.md`](docs/02-cli.md) — команды `typioca`, `serve`, `completion`, `help`.
+- [`docs/interface-contract.md`](docs/interface-contract.md) — контракт `typioca completion`.
 - [`docs/diagrams/`](docs/diagrams/) — исходники и PNG диаграмм.
 - [`docs/diagrams/code-map.png`](docs/diagrams/code-map.png) — карта кода для разработчика.
 - [`docs/demo-1min.md`](docs/demo-1min.md) — сценарий демо на одну минуту.
