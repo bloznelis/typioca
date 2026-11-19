@@ -44,18 +44,11 @@ make build
 `serve` принимает `--bind`, `--port` и `--key`; при отсутствии файла ключа
 создаётся Ed25519-ключ. Клиенту нужен PTY (`ssh -t`). Встроенной
 аутентификации нет, поэтому сервер нельзя публиковать в интернете без
-дополнительной защиты. Подробности, флаги и типичные ошибки — в
-[`docs/02-cli.md`](docs/02-cli.md).
-
-`completion` печатает скрипт в stdout и ничего не записывает на диск:
-
-```bash
-./execs/typioca completion bash > ~/.local/share/bash-completion/completions/typioca
-source <(./execs/typioca completion zsh)
-```
-
-Контракт команды `completion` описан в
+дополнительной защиты. Контракт команды — в
 [`docs/interface-contract.md`](docs/interface-contract.md).
+
+`help` и `completion` — стандартные команды Cobra; `completion` печатает скрипт
+автодополнения в stdout и ничего не записывает на диск.
 
 ## Статус требований
 
@@ -72,7 +65,7 @@ source <(./execs/typioca completion zsh)
 | FR-7 | Управление наборами и раскладками | обязательно | уже есть |
 | FR-8 | Тест через SSH | желательно | уже есть |
 | FR-9 | История результатов | желательно | нужно сделать |
-| FR-10 | Автодополнение командной строки | желательно | уже есть |
+| FR-10 | Добавление своего набора слов | обязательно | уже есть |
 
 ## Синхронизация с upstream
 
@@ -90,8 +83,7 @@ git push origin master
 
 - [`docs/00-project.md`](docs/00-project.md) — паспорт проекта.
 - [`docs/01-requirements.md`](docs/01-requirements.md) — требования и модели.
-- [`docs/02-cli.md`](docs/02-cli.md) — команды `typioca`, `serve`, `completion`, `help`.
-- [`docs/interface-contract.md`](docs/interface-contract.md) — контракт `typioca completion`.
+- [`docs/interface-contract.md`](docs/interface-contract.md) — контракт `typioca serve`.
 - [`docs/diagrams/`](docs/diagrams/) — исходники и PNG диаграмм.
 - [`docs/diagrams/code-map.png`](docs/diagrams/code-map.png) — карта кода для разработчика.
 - [`docs/demo-1min.md`](docs/demo-1min.md) — сценарий демо на одну минуту.

@@ -17,7 +17,7 @@ rectangle "typioca" {
   usecase "FR-6\nПросмотреть результаты теста" as uc6
   usecase "FR-7\nУправлять наборами и раскладками" as uc7
   usecase "FR-8\nПройти тест через SSH" as uc8
-  usecase "FR-7\nДобавить набор слов" as uc9
+  usecase "FR-10\nДобавить набор слов" as uc9
 }
 
 user --> uc1
