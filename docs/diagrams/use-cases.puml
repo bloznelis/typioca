@@ -17,7 +17,8 @@ rectangle "typioca" {
   usecase "FR-6\nПросмотреть результаты теста" as uc6
   usecase "FR-7\nУправлять наборами и раскладками" as uc7
   usecase "FR-8\nПройти тест через SSH" as uc8
-  usecase "FR-10\nДобавить набор слов" as uc9
+  usecase "FR-9\nПрактиковать код" as uc9
+  usecase "FR-10\nДобавить набор слов" as uc10
 }
 
 user --> uc1
@@ -28,10 +29,11 @@ user --> uc5
 user --> uc6
 user --> uc7
 user --> uc8
+user --> uc9
 author --> uc7
-author --> uc9
 admin --> uc8
-admin --> uc9
+author --> uc10
+admin --> uc10
 
 uc1 ..> uc5 : <<include>>
 uc2 ..> uc5 : <<include>>
