@@ -55,7 +55,7 @@
 | SSH-сервер | Wish v1.4.3, charmbracelet/ssh |
 | Конфигурация и данные | BurntSushi/toml v1.4.0, kirsle/configdir, JSON |
 | Графики | asciigraph v0.7.1 |
-| Сборка и CI | GNU Make, GitHub Actions (`make build-all`) |
+| Сборка и CI | GNU Make; GitHub Actions — в lab-4 |
 | Хранение | Файлы JSON/TOML в пользовательских каталогах ОС; СУБД нет |
 | Внешние сервисы | GitHub Raw для загрузки наборов слов и раскладок |
 
